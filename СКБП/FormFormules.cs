@@ -116,16 +116,16 @@ namespace СКБП
                             "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
                         if (result == DialogResult.OK)
                         {
-                            //if (YearAgo0.Checked == true)
+                            if (YearAgo0.Checked == true)
                                 sw.WriteLine($"Коэффициент оборота по приему\nСЧР равен: -" +
                                      $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
                                      $"Рассматриваемая должность: -\nКоличество: -\n" +
                         $"Результат равен: -\n" + "================\n");
-                           /* else
+                            else
                                 sw.WriteLine($"Коэффициент оборота по приему\nСЧР равен: {SChRText0.Text}" +
                                  $"\nНачало периода подсчёта: {dateTimePicker0.Value.ToLongDateString()}\nКонец периода подсчёта: {dt}\n" +
                                  $"Рассматриваемая должность: {LevelComboBox0.Text}\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");*/
+                    $"Результат равен: -\n" + "================\n");
                         }
                     }
                     else
@@ -150,16 +150,16 @@ namespace СКБП
                             "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
                         if (result == DialogResult.OK)
                         {
-                            //if (YearAgo1.Checked == true)
+                            if (YearAgo1.Checked == true)
                                 sw.WriteLine($"Коэффициент оборота по выбытию\nСЧР равен: -" +
                                      $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
                                      $"Рассматриваемая должность: -\nКоличество: -\n" +
                         $"Результат равен: -\n" + "================\n");
-                            /*else
+                            else
                                 sw.WriteLine($"Коэффициент оборота по выбытию\nСЧР равен: {SChRText1.Text}" +
                                  $"\nНачало периода подсчёта: {dateTimePicker1.Value.ToLongDateString()}\nКонец периода подсчёта: {dt}\n" +
                                  $"Рассматриваемая должность: {LevelComboBox1.Text}\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");*/
+                    $"Результат равен: -\n" + "================\n");
                         }
                     }
                     else
@@ -184,16 +184,16 @@ namespace СКБП
                             "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
                         if (result == DialogResult.OK)
                         {
-                            //if (YearAgo2.Checked == true)
+                            if (YearAgo2.Checked == true)
                                 sw.WriteLine($"Коэффициент текучести кадров\nСЧР равен: -" +
                                      $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
                                      $"Рассматриваемая должность: -\nКоличество: -\n" +
                         $"Результат равен: -\n" + "================\n");
-                            /*else
+                            else
                                 sw.WriteLine($"Коэффициент текучести кадров\nСЧР равен: {SChRText2.Text}" +
                                  $"\nНачало периода подсчёта: {dateTimePicker2.Value.ToLongDateString()}\nКонец периода подсчёта: {dt}\n" +
                                  $"Рассматриваемая должность: {LevelComboBox2.Text}\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");*/
+                    $"Результат равен: -\n" + "================\n");
                         }
                     }
                     else
@@ -218,16 +218,16 @@ namespace СКБП
                             "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
                         if (result == DialogResult.OK)
                         {
-                            //if (YearAgo3.Checked == true)
+                            if (YearAgo3.Checked == true)
                                 sw.WriteLine($"Коэффициент постоянства состава персонала предприятия\nСЧР равен: -" +
                                      $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
                                      $"Рассматриваемая должность: -\nКоличество: -\n" +
                         $"Результат равен: -\n" + "================\n");
-                            /*else
+                            else
                                 sw.WriteLine($"Коэффициент постоянства состава персонала предприятия\nСЧР равен: {SChRText3.Text}" +
                                  $"\nНачало периода подсчёта: {dateTimePicker3.Value.ToLongDateString()}\nКонец периода подсчёта: {dt}\n" +
                                  $"Рассматриваемая должность: {LevelComboBox3.Text}\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");*/
+                    $"Результат равен: -\n" + "================\n");
                         }
                     }
                     else
