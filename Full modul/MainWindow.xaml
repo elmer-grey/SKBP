@@ -1,0 +1,257 @@
+﻿<Window x:Class="Full_modul.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Full_modul"
+        mc:Ignorable="d"
+        Title="Главное меню" Height="450" Width="800"
+        WindowStyle="ThreeDBorderWindow"
+        ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300*"/>
+            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="300*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="300*"/>
+            <RowDefinition Height="65*"/>
+            <RowDefinition Height="300*"/>
+            <RowDefinition Height="60*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.ColumnSpan="3">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="65"/>
+                <ColumnDefinition Width="515"/>
+                <ColumnDefinition Width="63*"/>
+                <ColumnDefinition Width="47*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Иванов Иван Иванович"
+                       Foreground="Black"
+                       Grid.Column="1"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"
+                       FontFamily="Fonts/#Dosis"
+                       FontWeight="Medium" Height="16"
+                       />
+
+            <StackPanel Grid.Column="0">
+                <Image Width="60" Height="70"
+                       Source="Images/Image.png"
+                       HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <StackPanel>
+                    <Image Width="50" Height="50"
+                           Source="Images/User.png"
+                           />
+                    <TextBlock Text="Личный кабинет"
+                               FontSize="15"
+                               FontWeight="Medium"
+                               FontFamily="Fonts/#Dosis"/>
+
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3">
+                <StackPanel>
+                    <Image Width="50" Height="50"
+                           Source="Images/Reports.png"
+                           />
+                    <TextBlock Text="Отчёты"
+                               FontSize="15"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontFamily="Fonts/#Dosis"/>
+                </StackPanel>
+            </StackPanel>
+
+        </Grid>
+        <StackPanel Grid.Row="1" Grid.Column="0" 
+                    VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="125" Width="200">
+            <Button Content="HR-Калькулятор"
+                    Foreground="White"
+                    FontSize="14"
+                    FontWeight="Medium">
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                        <Setter Property="Background" Value="#7dc5ea"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#9ed2ed"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Width="200" Height="125"
+                                CornerRadius="8"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                        </Border>
+
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="2" 
+                    VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="125" Width="200">
+            <Button Content="Кнопка"
+                    Foreground="White"
+                    FontSize="14"
+                    FontWeight="Medium">
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                        <Setter Property="Background" Value="#6665cb"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#7c7bc8"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Width="200" Height="125"
+                                CornerRadius="8"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                        </Border>
+
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Grid.Column="0" 
+                    VerticalAlignment="Top" HorizontalAlignment="Right" Height="125" Width="200">
+            <Button Content="Организационные условия"
+                    Foreground="White"
+                    FontSize="14"
+                    FontWeight="Medium">
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                        <Setter Property="Background" Value="#6665cb"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#7c7bc8"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Width="200" Height="125"
+                                CornerRadius="8"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                        </Border>
+
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Grid.Column="2" 
+                    VerticalAlignment="Top" HorizontalAlignment="Left" Height="125" Width="200">
+            <Button Content="Правовые условия"
+                    Foreground="White"
+                    FontSize="14"
+                    FontWeight="Medium">
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                        <Setter Property="Background" Value="#7dc5ea"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#9ed2ed"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Width="200" Height="125"
+                                CornerRadius="8"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                        </Border>
+
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+
+
+            <Button Click="Button_Click" Background="Transparent" BorderThickness="0">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="Images/help.png" Width="25" Height="25" />
+                    <TextBlock Text="Справка" Margin="10,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                        <Setter Property="Background" Value="#FE6584"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#FF4C70"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+
+    </Grid>
+</Window>
