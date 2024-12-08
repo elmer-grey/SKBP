@@ -9,10 +9,95 @@
         ResizeMode="NoResize"
         Icon="Images\HR1.ico"
         WindowStartupLocation="CenterScreen"
-        >
+        AllowsTransparency="False"
+        WindowStyle="None" Background="White">
 
-    <Grid>       
-        <Grid.ColumnDefinitions>
+    <Window.Resources>
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2B2B2B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MinimizeButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2B2B2B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Border Background="Black" Height="30"
+                MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">            
+            <Grid>                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       MouseRightButtonDown="Image_MouseRightButtonDown">
+                    <Image.ContextMenu>
+                        <ContextMenu>                                                        
+                            <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
+                            <MenuItem Header="Закрыть" Click="CloseButton_Click"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
+                <TextBlock Text="Главное меню" Grid.Column="1" Foreground="White" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Margin="25,0,0,0" FontSize="14"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
+                        <TextBlock Text="🗕"/>
+                    </Button>
+                    <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click">
+                        <TextBlock Text="X"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Margin="0,30,0,0">
+            <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300*"/>
             <ColumnDefinition Width="60*"/>
             <ColumnDefinition Width="300*"/>
@@ -25,236 +110,288 @@
             <RowDefinition Height="60*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.ColumnSpan="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition Width="15*"/>
-                <ColumnDefinition Width="10*"/>
-            </Grid.ColumnDefinitions>
+            <Grid Grid.ColumnSpan="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="15*"/>
+                    <ColumnDefinition Width="10*"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Иванов Иван Иванович"
-                       Foreground="Black"
-                       Grid.Column="1"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       FontFamily="Fonts/#Dosis"
-                       FontWeight="Medium"
-                       FontSize="15"
-                       />
-
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="46" Width="46">
-                <Grid>
-                    <Ellipse Width="45" Height="45" Fill="DarkGray"/>
-                    <Image Width="46" Height="46"
-                           Source="Images/Image.png"/>
-                </Grid>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2">
-                <Image Width="40" Height="40"
-                       Source="Images/User.png"/>
-                <TextBlock Text="Личный кабинет"
-                           FontSize="15"
-                           FontWeight="Medium"
+                <TextBlock Text="Иванов Иван Иванович"
+                           Foreground="Black"
+                           Grid.Column="1"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
                            FontFamily="Fonts/#Dosis"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
+                           FontWeight="Medium"
+                           FontSize="15"/>
 
-            <StackPanel Grid.Column="3" >
-                <StackPanel>
-                    <Image Width="40" Height="40"
-       Source="Images/Reports.png"/>
-                    <TextBlock Text="Отчёты"
-               FontSize="15"
-               FontWeight="Medium"
-               VerticalAlignment="Center"
-               HorizontalAlignment="Center"
-               FontFamily="Fonts/#Dosis"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="46" Width="46">
+                    <Grid>
+                        <Ellipse Width="45" Height="45" Fill="DarkGray"/>
+                        <Image Width="46" Height="46"
+                               Source="Images/Image.png"/>
+                    </Grid>
                 </StackPanel>
 
+                <StackPanel Grid.Column="2">
+                    <Button Click="Button_User_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Vertical">
+                            <Image Source="Images/User.png" Width="40" Height="40" />
+                            <TextBlock Text="Личный кабинет" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{x:Null}">
+                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                <Setter Property="Background" Value="White"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                        <Setter Property="Background"
+Value="#EBEBEB"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" >
+                    <Button Click="Button_Reports_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Vertical">
+                            <Image Source="Images/Reports.png" Width="40" Height="40" />
+                            <TextBlock Text="Отчёты" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{x:Null}">
+                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                <Setter Property="Background" Value="White"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                        <Setter Property="Background"
+Value="#EBEBEB"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>                    
+                </StackPanel>
+            </Grid>        
+        
+            <StackPanel Grid.Row="1" Grid.Column="0" 
+                        VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="125" Width="200">
+                <Button Content="HR-Калькулятор"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Medium">
+
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="TextElement.FontFamily"
+     Value="Fonts/#Dosis"/>
+                            <Setter Property="Background" Value="#7dc5ea"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+    Value="True">
+                                    <Setter Property="Background"
+    Value="#9ed2ed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Width="200" Height="125"
+                                    CornerRadius="8"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center"/>
+
+                            </Border>
+
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="2" 
+                        VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="125" Width="200">
+                <Button Content="Кнопка"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Medium">
+
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="TextElement.FontFamily"
+     Value="Fonts/#Dosis"/>
+                            <Setter Property="Background" Value="#6665cb"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+    Value="True">
+                                    <Setter Property="Background"
+    Value="#7c7bc8"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Width="200" Height="125"
+                                    CornerRadius="8"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center"/>
+
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Grid.Column="0" 
+                        VerticalAlignment="Top" HorizontalAlignment="Right" Height="125" Width="200">
+                <Button Content="Организационные условия"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Medium">
+
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="TextElement.FontFamily"
+     Value="Fonts/#Dosis"/>
+                            <Setter Property="Background" Value="#6665cb"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+    Value="True">
+                                    <Setter Property="Background"
+    Value="#7c7bc8"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Width="200" Height="125"
+                                    CornerRadius="8"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center"/>
+
+                            </Border>
+
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Grid.Column="2" 
+                        VerticalAlignment="Top" HorizontalAlignment="Left" Height="125" Width="200">
+                <Button Content="Правовые условия"
+                        Foreground="White"
+                        FontSize="14"
+                        FontWeight="Medium">
+
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="TextElement.FontFamily"
+     Value="Fonts/#Dosis"/>
+                            <Setter Property="Background" Value="#7dc5ea"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+    Value="True">
+                                    <Setter Property="Background"
+    Value="#9ed2ed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Width="200" Height="125"
+                                    CornerRadius="8"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center"/>
+
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal"
+                        VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                <Button Click="Button_Click"  BorderThickness="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Images/help.png" Width="25" Height="25" />
+                        <TextBlock Text="Справка" Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{x:Null}">
+                            <Setter Property="TextElement.FontFamily"
+     Value="Fonts/#Dosis"/>
+
+                            <Setter Property="Background" Value="White"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+    Value="True">
+                                    <Setter Property="Background"
+    Value="#EBEBEB"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </StackPanel>
         </Grid>
-
-        <StackPanel Grid.Row="1" Grid.Column="0" 
-                    VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="125" Width="200">
-            <Button Content="HR-Калькулятор"
-                    Foreground="White"
-                    FontSize="14"
-                    FontWeight="Medium">
-
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
-                        <Setter Property="Background" Value="#7dc5ea"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-Value="True">
-                                <Setter Property="Background"
-Value="#9ed2ed"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Width="200" Height="125"
-                                CornerRadius="8"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-
-                        </Border>
-
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Grid.Column="2" 
-                    VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="125" Width="200">
-            <Button Content="Кнопка"
-                    Foreground="White"
-                    FontSize="14"
-                    FontWeight="Medium">
-
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
-                        <Setter Property="Background" Value="#6665cb"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-Value="True">
-                                <Setter Property="Background"
-Value="#7c7bc8"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Width="200" Height="125"
-                                CornerRadius="8"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-
-                        </Border>
-
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" Grid.Column="0" 
-                    VerticalAlignment="Top" HorizontalAlignment="Right" Height="125" Width="200">
-            <Button Content="Организационные условия"
-                    Foreground="White"
-                    FontSize="14"
-                    FontWeight="Medium">
-
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
-                        <Setter Property="Background" Value="#6665cb"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-Value="True">
-                                <Setter Property="Background"
-Value="#7c7bc8"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Width="200" Height="125"
-                                CornerRadius="8"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-
-                        </Border>
-
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" Grid.Column="2" 
-                    VerticalAlignment="Top" HorizontalAlignment="Left" Height="125" Width="200">
-            <Button Content="Правовые условия"
-                    Foreground="White"
-                    FontSize="14"
-                    FontWeight="Medium">
-
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
-                        <Setter Property="Background" Value="#7dc5ea"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-Value="True">
-                                <Setter Property="Background"
-Value="#9ed2ed"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Width="200" Height="125"
-                                CornerRadius="8"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-
-                        </Border>
-
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal"
-                    VerticalAlignment="Center" HorizontalAlignment="Center">
-
-
-            <Button Click="Button_Click" Background="Transparent" BorderThickness="0">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="Images/help.png" Width="25" Height="25" />
-                    <TextBlock Text="Справка" Margin="10,0,0,0" VerticalAlignment="Center" />
-                </StackPanel>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
-                        <Setter Property="Background" Value="#FE6584"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver"
-Value="True">
-                                <Setter Property="Background"
-Value="#FF4C70"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </StackPanel>
-
     </Grid>
 </Window>

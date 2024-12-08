@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -6,35 +10,22 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Full_modul
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Логика взаимодействия для SaveFile.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SaveFile : Window
     {
-        public MainWindow()
+        public SaveFile()
         {
-
             InitializeComponent();
-            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
         }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Картинка и текст были нажаты!");
-        }
-
-        private void Button_Reports_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Здесь Вы будете перенаправлены в папку с отчётами!");
-        }
-        private void Button_User_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Здесь Вы будете перенаправлены в Личный кабинет!");
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
