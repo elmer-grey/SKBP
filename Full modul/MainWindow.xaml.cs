@@ -18,12 +18,32 @@ namespace Full_modul
     {
         public MainWindow()
         {
+
             InitializeComponent();
             this.Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Images/HR1.ico"));
-        }
+        }        
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Картинка и текст были нажаты!");
+        }
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Позволяет перетаскивать окно
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized; // Свернуть окно
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close(); // Закрыть окно
         }
     }
 }

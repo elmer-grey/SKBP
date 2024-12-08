@@ -6,11 +6,12 @@
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
         Title="Главное меню" Height="450" Width="800"
-        WindowStyle="ThreeDBorderWindow"
         ResizeMode="NoResize"
-        Icon="Images\HR1.ico">
+        Icon="Images\HR1.ico"
+        WindowStartupLocation="CenterScreen"
+        >
 
-    <Grid>
+    <Grid>       
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300*"/>
             <ColumnDefinition Width="60*"/>
