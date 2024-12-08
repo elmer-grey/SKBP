@@ -19,6 +19,7 @@ namespace Full_modul
         public MainWindow()
         {
             InitializeComponent();
+            this.Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Images/HR1.ico"));
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {

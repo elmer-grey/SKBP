@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Главное меню" Height="450" Width="800"
         WindowStyle="ThreeDBorderWindow"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        Icon="Images\HR1.ico">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -22,13 +23,13 @@
             <RowDefinition Height="300*"/>
             <RowDefinition Height="60*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.ColumnSpan="3">
 
+        <Grid Grid.ColumnSpan="4">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="65"/>
-                <ColumnDefinition Width="515"/>
-                <ColumnDefinition Width="63*"/>
-                <ColumnDefinition Width="47*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50*"/>
+                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="10*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="Иванов Иван Иванович"
@@ -37,43 +38,44 @@
                        VerticalAlignment="Center"
                        HorizontalAlignment="Left"
                        FontFamily="Fonts/#Dosis"
-                       FontWeight="Medium" Height="16"
+                       FontWeight="Medium"
+                       FontSize="15"
                        />
 
-            <StackPanel Grid.Column="0">
-                <Image Width="60" Height="70"
-                       Source="Images/Image.png"
-                       HorizontalAlignment="Center"/>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="46" Width="46">
+                <Grid>
+                    <Ellipse Width="45" Height="45" Fill="DarkGray"/>
+                    <Image Width="46" Height="46"
+                           Source="Images/Image.png"/>
+                </Grid>
             </StackPanel>
 
             <StackPanel Grid.Column="2">
-                <StackPanel>
-                    <Image Width="50" Height="50"
-                           Source="Images/User.png"
-                           />
-                    <TextBlock Text="Личный кабинет"
-                               FontSize="15"
-                               FontWeight="Medium"
-                               FontFamily="Fonts/#Dosis"/>
-
-                </StackPanel>
+                <Image Width="40" Height="40"
+                       Source="Images/User.png"/>
+                <TextBlock Text="Личный кабинет"
+                           FontSize="15"
+                           FontWeight="Medium"
+                           FontFamily="Fonts/#Dosis"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="3">
+            <StackPanel Grid.Column="3" >
                 <StackPanel>
-                    <Image Width="50" Height="50"
-                           Source="Images/Reports.png"
-                           />
+                    <Image Width="40" Height="40"
+       Source="Images/Reports.png"/>
                     <TextBlock Text="Отчёты"
-                               FontSize="15"
-                               FontWeight="Medium"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Center"
-                               FontFamily="Fonts/#Dosis"/>
+               FontSize="15"
+               FontWeight="Medium"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"
+               FontFamily="Fonts/#Dosis"/>
                 </StackPanel>
-            </StackPanel>
 
+            </StackPanel>
         </Grid>
+
         <StackPanel Grid.Row="1" Grid.Column="0" 
                     VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="125" Width="200">
             <Button Content="HR-Калькулятор"
