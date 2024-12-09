@@ -74,7 +74,15 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
+       MouseRightButtonDown="Image_MouseRightButtonDown">
+                    <Image.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
+                            <MenuItem Header="Закрыть" Click="CloseButton_Click"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
 
                 <TextBlock Text="Окно авторизации" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -149,20 +157,19 @@
                 </TextBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Grid x:Name="PasswordContainer" Margin="0,5,0,0">
-                        
-
                         <PasswordBox x:Name="PasswordBox" 
-                             Width="210" 
-                             Height="32" 
-                             Margin="0,0,5,0"
-                             FontSize="14"
-                             VerticalAlignment="Center" 
-                             Background="#E2E2E2" 
-                             BorderThickness="0"
-                             Padding="5,7"
-                             GotFocus="PasswordBox_GotFocus"
-                             LostFocus="PasswordBox_LostFocus">
-                        <PasswordBox.Style>
+                                     Width="210" 
+                                     Height="32" 
+                                     Margin="0,0,5,0"
+                                     FontSize="14"
+                                     VerticalAlignment="Center" 
+                                     Background="#E2E2E2" 
+                                     BorderThickness="0"
+                                     Padding="5,7"
+                                     KeyDown="TextBox_KeyDown"
+                                     GotFocus="PasswordBox_GotFocus"
+                                     LostFocus="PasswordBox_LostFocus">     
+                            <PasswordBox.Style>
                             <Style TargetType="PasswordBox">
                                 <Setter Property="Template">
                                     <Setter.Value>
@@ -180,17 +187,20 @@
                         </PasswordBox.Style>
                     </PasswordBox>
                         
-                        <TextBlock x:Name="TextBlock_ShowName" 
-Margin="0,0,5,0"
-FontFamily="Fonts/#Dosis" 
-FontSize="14"
-VerticalAlignment="Center" 
-HorizontalAlignment="Center" 
-Foreground="Black" 
-Background="#E2E2E2" 
-Padding="5,9"
-   Visibility="Visible"
-           Text="Введите пароль"/>
+                            <TextBlock x:Name="TextBlock_ShowName" 
+                                       Margin="2,0,0,0"
+                                        FontFamily="Fonts/#Dosis" 
+                                        FontSize="14"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Left"                                        
+                                        Foreground="Black" 
+                                        Background="Transparent"
+                                        Padding="5,9"
+                                       Visibility="Visible"
+                                       Text="Введите пароль"
+                                       IsHitTestVisible="False"
+                                       Height="32" 
+                                       Width="150"/>
                         
                     <TextBox x:Name="TextBox_ShowPassword" 
              Width="210" 

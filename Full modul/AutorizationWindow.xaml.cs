@@ -58,15 +58,6 @@ namespace Full_modul
                 TextBox_Login.IsReadOnly = false;
             }
         }
-        /*private void TextBox_Pass_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (TextBox_Pass.Text == "Введите пароль")
-            {
-                TextBox_Pass.Text = "";
-                TextBox_Pass.Foreground = new SolidColorBrush(Colors.Black);
-                TextBox_Pass.IsReadOnly = false;
-            }
-        }*/
 
         private void TextBox_Login_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -77,20 +68,12 @@ namespace Full_modul
                 TextBox_Login.IsReadOnly = true;
             }
         }
-        /*private void TextBox_Pass_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(TextBox_Pass.Text))
-            {
-                TextBox_Pass.Text = "Введите пароль";
-                TextBox_Pass.Foreground = new SolidColorBrush(Color.FromArgb(192, 10, 10, 10));
-                TextBox_Pass.IsReadOnly = true;
-            }
-        }*/
+
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                if (TextBox_Login.Text != "" && TextBox_Login.Text != "")
+                if (TextBox_Login.Text != "" && PasswordBox.Password != "")
                 {
                     MessageBox.Show("Вы нажали Enter!");
                     e.Handled = true;
@@ -102,18 +85,36 @@ namespace Full_modul
                 }
             } 
         }
-
+        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                var image = sender as Image;
+                if (image != null)
+                {
+                    ContextMenu contextMenu = image.ContextMenu;
+                    contextMenu.IsOpen = true;
+                }
+                e.Handled = true;
+            }
+        }
 
         private void PasswordBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            TextBox_ShowPassword.Visibility = Visibility.Collapsed; // Скрываем текстовый бокс для отображения пароля
+            if (string.IsNullOrEmpty(PasswordBox.Password))
+            {
+                TextBlock_ShowName.Visibility = Visibility.Collapsed;
+            }
+            TextBox_ShowPassword.Visibility = Visibility.Collapsed;
         }
 
         private void PasswordBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(PasswordBox.Password))
             {
-                PasswordBox.Password = ""; // Можно добавить плейсхолдер, если нужно
+                TextBlock_ShowName.Visibility = Visibility.Visible;
+                TextBlock_ShowName.Foreground = new SolidColorBrush(Color.FromArgb(192, 10, 10, 10));
+                PasswordBox.Password = "";
             }
         }
 
@@ -121,19 +122,17 @@ namespace Full_modul
         {
             if (TextBox_ShowPassword.Visibility == Visibility.Visible)
             {
-                // Скрываем текстовый бокс и показываем PasswordBox
                 PasswordBox.Password = TextBox_ShowPassword.Text;
                 TextBox_ShowPassword.Visibility = Visibility.Collapsed;
                 PasswordBox.Visibility = Visibility.Visible;
-                ShowPasswordButton.Content = "👁"; // Меняем иконку обратно
+                ShowPasswordButton.Content = "👁";
             }
             else
             {
-                // Показываем текстовый бокс и скрываем PasswordBox
                 TextBox_ShowPassword.Visibility = Visibility.Visible;
                 PasswordBox.Visibility = Visibility.Collapsed;
-                TextBox_ShowPassword.Text = PasswordBox.Password; // Копируем пароль в текстовый бокс
-                ShowPasswordButton.Content = "🙈"; // Меняем иконку на закрытый глаз
+                TextBox_ShowPassword.Text = PasswordBox.Password;
+                ShowPasswordButton.Content = "🙈";
             }
         }
     }
