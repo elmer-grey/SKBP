@@ -132,7 +132,7 @@
                          Foreground="Black" 
                          Background="#E2E2E2" 
                          BorderThickness="0"
-                         Padding="5,9"
+                         Padding="5,8"
                          IsReadOnly="True" 
                          GotFocus="TextBox_Login_GotFocus"
                          LostFocus="TextBox_Login_LostFocus"
@@ -168,26 +168,26 @@
                                      Padding="5,7"
                                      KeyDown="TextBox_KeyDown"
                                      GotFocus="PasswordBox_GotFocus"
-                                     LostFocus="PasswordBox_LostFocus">     
+                                     LostFocus="PasswordBox_LostFocus">
                             <PasswordBox.Style>
-                            <Style TargetType="PasswordBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="PasswordBox">
-                                            <Border Background="{TemplateBinding Background}" 
+                                <Style TargetType="PasswordBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="PasswordBox">
+                                                <Border Background="{TemplateBinding Background}" 
             BorderBrush="{TemplateBinding BorderBrush}" 
             BorderThickness="{TemplateBinding BorderThickness}" 
             CornerRadius="15">
-                                                <ScrollViewer x:Name="PART_ContentHost"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </PasswordBox.Style>
-                    </PasswordBox>
-                        
-                            <TextBlock x:Name="TextBlock_ShowName" 
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </PasswordBox.Style>
+                        </PasswordBox>
+
+                        <TextBlock x:Name="TextBlock_ShowName" 
                                        Margin="2,0,0,0"
                                         FontFamily="Fonts/#Dosis" 
                                         FontSize="14"
@@ -201,8 +201,8 @@
                                        IsHitTestVisible="False"
                                        Height="32" 
                                        Width="150"/>
-                        
-                    <TextBox x:Name="TextBox_ShowPassword" 
+
+                        <TextBox x:Name="TextBox_ShowPassword" 
              Width="210" 
             Height="32" 
             Margin="0,0,5,0"
@@ -212,25 +212,25 @@
             BorderThickness="0"
             Padding="5,7"
             Visibility="Collapsed">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Border Background="{TemplateBinding Background}" 
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Border Background="{TemplateBinding Background}" 
 BorderBrush="{TemplateBinding BorderBrush}" 
 BorderThickness="{TemplateBinding BorderThickness}" 
 CornerRadius="15">
-                                                <ScrollViewer x:Name="PART_ContentHost"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
                     </Grid>
-                    
+
                     <Button x:Name="ShowPasswordButton" 
                         Content="👁" 
                         Width="30" 
@@ -240,9 +240,6 @@ CornerRadius="15">
                         BorderThickness="0"
                         Click="ShowPasswordButton_Click"/>
                 </StackPanel>
-                    
-
-                
             </StackPanel>
             
             <Grid Grid.Row="2">

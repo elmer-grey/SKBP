@@ -23,10 +23,6 @@ namespace Full_modul
         {
             InitializeComponent();
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Картинка и текст были нажаты!");
-        }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -37,28 +33,9 @@ namespace Full_modul
             }
         }
 
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized; // Свернуть окно
-        }
-
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close(); // Закрыть окно
-        }
-
-        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Right)
-            {
-                var image = sender as Image;
-                if (image != null)
-                {
-                    ContextMenu contextMenu = image.ContextMenu;
-                    contextMenu.IsOpen = true; // Открыть контекстное меню
-                }
-                e.Handled = true; // Отметить событие как обработанное
-            }
         }
     }
 }

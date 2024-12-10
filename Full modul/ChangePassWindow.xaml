@@ -4,9 +4,312 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
-        mc:Ignorable="d"
-        Title="ChangePassWindow" Height="450" Width="800">
+        mc:Ignorable="d"        
+        Height="400" Width="480"
+        ResizeMode="NoResize"
+        Icon="Images\HR1.ico"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="False"
+        WindowStyle="None" Background="White">
+
     <Grid>
-        
+        <Border Background="Black" Height="30"
+                MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                <TextBlock Text="Изменение пароля" Grid.Column="1" Foreground="White" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Margin="0,0,35,0"/>
+            </Grid>
+        </Border>
+
+        <Grid Margin="0,30,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60*"/>
+                <RowDefinition Height="100*"/>
+                <RowDefinition Height="100*"/>
+                <RowDefinition Height="70*"/>
+                <RowDefinition Height="50*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="20,0,0,0">
+                <TextBlock Text="Для входа был использован стандартный пароль." 
+               FontFamily="Fonts/#Dosis" 
+               FontWeight="Medium" 
+               FontSize="18" 
+               VerticalAlignment="Center"
+                           Margin="0,5,0,0"
+                           TextWrapping="Wrap" 
+HorizontalAlignment="Left" 
+MaxWidth="460" />
+                <TextBlock Text="Пожалуйста, смените пароль." 
+               FontFamily="Fonts/#Dosis" 
+               FontWeight="Medium" 
+               FontSize="18" 
+               VerticalAlignment="Center"
+                           Margin="0,5,0,0"
+                           TextWrapping="Wrap" 
+HorizontalAlignment="Left" 
+MaxWidth="320" />
+            </StackPanel>
+
+            <StackPanel  Grid.Row="1" 
+ VerticalAlignment="Center" 
+ HorizontalAlignment="Left" >
+                <TextBlock Text="Новый пароль" 
+FontFamily="Fonts/#Dosis" 
+FontWeight="Bold" 
+FontSize="18" 
+VerticalAlignment="Center"
+            Margin="27,0,0,10"/>
+                <StackPanel
+                        Orientation="Horizontal"
+ Width="auto">
+                    <Grid x:Name="PasswordContainer1" Margin="20,0,0,0">
+                        <PasswordBox x:Name="PasswordBox1" 
+                                     Width="390" 
+                                     Height="40" 
+                                     Margin="0,0,5,0"
+                                     FontSize="14"
+                                     VerticalAlignment="Center" 
+                                     Background="#E2E2E2" 
+                                     BorderThickness="0"
+                                     Padding="5,9.5"
+                                     KeyDown="TextBox_KeyDown"
+                                     GotFocus="PasswordBox_GotFocus1"
+                                     LostFocus="PasswordBox_LostFocus1">
+                            <PasswordBox.Style>
+                                <Style TargetType="PasswordBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="PasswordBox">
+                                                <Border Background="{TemplateBinding Background}" 
+            BorderBrush="{TemplateBinding BorderBrush}" 
+            BorderThickness="{TemplateBinding BorderThickness}" 
+            CornerRadius="15">
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </PasswordBox.Style>
+                        </PasswordBox>
+
+                        <TextBlock x:Name="TextBlock_ShowName1" 
+                                       Margin="2,0,0,0"
+                                        FontFamily="Fonts/#Dosis" 
+                                        FontSize="14"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Left"                                        
+                                        Foreground="#C00A0A0A" 
+                                        Background="Transparent"
+                                        Padding="5,9"
+                                       Visibility="Visible"
+                                       Text="Введите пароль"
+                                       IsHitTestVisible="False"
+                                       Height="32" 
+                                       Width="150"/>
+
+                        <TextBox x:Name="TextBox_ShowPassword1" 
+             Width="390" 
+            Height="40" 
+            Margin="0,0,5,0"
+            FontSize="14"
+            VerticalAlignment="Center" 
+            Background="#E2E2E2" 
+            BorderThickness="0"
+            Padding="5,9"
+            Visibility="Collapsed">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Border Background="{TemplateBinding Background}" 
+BorderBrush="{TemplateBinding BorderBrush}" 
+BorderThickness="{TemplateBinding BorderThickness}" 
+CornerRadius="15">
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+
+                    <Button x:Name="ShowPasswordButton1" 
+                        Content="👁" 
+                        Width="30" 
+                        Height="32"  
+                            VerticalAlignment="Center" 
+                        Background="Transparent" 
+                        BorderThickness="0"
+                        Click="ShowPasswordButton_Click1"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel  Grid.Row="2" 
+ VerticalAlignment="Center" 
+ HorizontalAlignment="Left" >
+                <TextBlock Text="Повторите пароль" 
+FontFamily="Fonts/#Dosis" 
+FontWeight="Bold" 
+FontSize="18" 
+VerticalAlignment="Center"
+            Margin="27,0,0,10"/>
+                <StackPanel
+                        Orientation="Horizontal"
+ Width="auto">
+                    <Grid x:Name="PasswordContainer2" Margin="20,0,0,0">
+                        <PasswordBox x:Name="PasswordBox2" 
+                                     Width="390" 
+                                     Height="40" 
+                                     Margin="0,0,5,0"
+                                     FontSize="14"
+                                     VerticalAlignment="Center" 
+                                     Background="#E2E2E2" 
+                                     BorderThickness="0"
+                                     Padding="5,7"
+                                     KeyDown="TextBox_KeyDown"
+                                     GotFocus="PasswordBox_GotFocus2"
+                                     LostFocus="PasswordBox_LostFocus2">
+                            <PasswordBox.Style>
+                                <Style TargetType="PasswordBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="PasswordBox">
+                                                <Border Background="{TemplateBinding Background}" 
+            BorderBrush="{TemplateBinding BorderBrush}" 
+            BorderThickness="{TemplateBinding BorderThickness}" 
+            CornerRadius="15">
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </PasswordBox.Style>
+                        </PasswordBox>
+
+                        <TextBlock x:Name="TextBlock_ShowName2" 
+                                       Margin="2,0,0,0"
+                                        FontFamily="Fonts/#Dosis" 
+                                        FontSize="14"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Left"                                        
+                                        Foreground="#C00A0A0A" 
+                                        Background="Transparent"
+                                        Padding="5,9"
+                                       Visibility="Visible"
+                                       Text="Введите пароль"
+                                       IsHitTestVisible="False"
+                                       Height="32" 
+                                       Width="150"/>
+
+                        <TextBox x:Name="TextBox_ShowPassword2" 
+                                Width="390" 
+                                Height="40" 
+                                Margin="0,0,5,0"
+                                FontSize="14"
+                                VerticalAlignment="Center" 
+                                Background="#E2E2E2" 
+                                BorderThickness="0"
+                                Padding="5,7"
+                                Visibility="Collapsed"> 
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Border Background="{TemplateBinding Background}" 
+BorderBrush="{TemplateBinding BorderBrush}" 
+BorderThickness="{TemplateBinding BorderThickness}" 
+CornerRadius="15">
+                                                    <ScrollViewer x:Name="PART_ContentHost"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+
+                    <Button x:Name="ShowPasswordButton2" 
+                        Content="👁" 
+                        Width="30" 
+                        Height="32"  
+                            VerticalAlignment="Center" 
+                        Background="Transparent" 
+                        BorderThickness="0"
+                        Click="ShowPasswordButton_Click2"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3"
+ VerticalAlignment="Center" 
+ HorizontalAlignment="Left" 
+ Width="auto">
+                <TextBlock Text="Пароли должен содержать не менее 8 символов,
+прописные и строчные буквы, цифры, а также
+специальные символы." 
+               FontFamily="Fonts/#Dosis" 
+               FontWeight="Medium" 
+               FontSize="18" 
+               VerticalAlignment="Center"
+                           Margin="20,5,0,0"
+                           TextWrapping="Wrap" 
+HorizontalAlignment="Left" 
+MaxWidth="460" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        Orientation="Horizontal">
+                <Button Click="MinimizeButton_Click"
+                        Content="Ввод"
+                        Foreground="White"
+                        FontSize="15"
+                        FontWeight="Medium">
+
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                            <Setter Property="Background" Value="#7dc5ea"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+Value="True">
+                                    <Setter Property="Background"
+Value="#9ed2ed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Width="120" Height="35"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
+

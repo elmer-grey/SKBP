@@ -22,8 +22,6 @@ namespace Full_modul
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR1.ico"));
             TextBox_Login.GotFocus += TextBox_Login_GotFocus;
             TextBox_Login.LostFocus += TextBox_Login_LostFocus;
-            //TextBox_Pass.GotFocus += TextBox_Pass_GotFocus;
-            //TextBox_Pass.LostFocus += TextBox_Pass_LostFocus;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -85,6 +83,7 @@ namespace Full_modul
                 }
             } 
         }
+
         private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Right)

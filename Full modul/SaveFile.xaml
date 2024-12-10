@@ -288,7 +288,7 @@
 
             <StackPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" 
                         Orientation="Horizontal">
-                <Button Click="MinimizeButton_Click"
+                <Button Click="CloseButton_Click"
                         Content="Сохранить"
                         Foreground="White"
                         FontSize="15"
@@ -323,7 +323,7 @@ Value="#7c7bc8"/>
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-                <Button Click="MinimizeButton_Click"
+                <Button Click="CloseButton_Click"
                 Content="Отменить"
                     Foreground="White"
                     FontSize="15"

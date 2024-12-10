@@ -42,22 +42,94 @@ namespace Full_modul
             this.WindowState = WindowState.Minimized;
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            this.Close();
+            if (e.Key == Key.Enter)
+            {
+                if (PasswordBox1.Password != "" && PasswordBox2.Password != "")
+                {
+                    MessageBox.Show("Вы нажали Enter!");
+                    e.Handled = true;
+                }
+                else
+                {
+                    MessageBox.Show("Вы не ввели пароль!");
+                    e.Handled = true;
+                }
+            }
         }
 
-        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void PasswordBox_GotFocus1(object sender, RoutedEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Right)
+            if (string.IsNullOrEmpty(PasswordBox1.Password))
             {
-                var image = sender as Image;
-                if (image != null)
-                {
-                    ContextMenu contextMenu = image.ContextMenu;
-                    contextMenu.IsOpen = true;
-                }
-                e.Handled = true;
+                TextBlock_ShowName1.Visibility = Visibility.Collapsed;
+            }
+            TextBox_ShowPassword1.Visibility = Visibility.Collapsed;
+        }
+
+        private void PasswordBox_LostFocus1(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PasswordBox1.Password))
+            {
+                TextBlock_ShowName1.Visibility = Visibility.Visible;
+                TextBlock_ShowName1.Foreground = new SolidColorBrush(Color.FromArgb(192, 10, 10, 10));
+                PasswordBox1.Password = "";
+            }
+        }
+
+        private void ShowPasswordButton_Click1(object sender, RoutedEventArgs e)
+        {
+            if (TextBox_ShowPassword1.Visibility == Visibility.Visible)
+            {
+                PasswordBox1.Password = TextBox_ShowPassword1.Text;
+                TextBox_ShowPassword1.Visibility = Visibility.Collapsed;
+                PasswordBox1.Visibility = Visibility.Visible;
+                ShowPasswordButton1.Content = "👁";
+            }
+            else
+            {
+                TextBox_ShowPassword1.Visibility = Visibility.Visible;
+                PasswordBox1.Visibility = Visibility.Collapsed;
+                TextBox_ShowPassword1.Text = PasswordBox1.Password;
+                ShowPasswordButton1.Content = "🙈";
+            }
+        }
+
+        private void PasswordBox_GotFocus2(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PasswordBox2.Password))
+            {
+                TextBlock_ShowName2.Visibility = Visibility.Collapsed;
+            }
+            TextBox_ShowPassword2.Visibility = Visibility.Collapsed;
+        }
+
+        private void PasswordBox_LostFocus2(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PasswordBox2.Password))
+            {
+                TextBlock_ShowName2.Visibility = Visibility.Visible;
+                TextBlock_ShowName2.Foreground = new SolidColorBrush(Color.FromArgb(192, 10, 10, 10));
+                PasswordBox2.Password = "";
+            }
+        }
+
+        private void ShowPasswordButton_Click2(object sender, RoutedEventArgs e)
+        {
+            if (TextBox_ShowPassword2.Visibility == Visibility.Visible)
+            {
+                PasswordBox2.Password = TextBox_ShowPassword1.Text;
+                TextBox_ShowPassword2.Visibility = Visibility.Collapsed;
+                PasswordBox2.Visibility = Visibility.Visible;
+                ShowPasswordButton2.Content = "👁";
+            }
+            else
+            {
+                TextBox_ShowPassword2.Visibility = Visibility.Visible;
+                PasswordBox2.Visibility = Visibility.Collapsed;
+                TextBox_ShowPassword2.Text = PasswordBox2.Password;
+                ShowPasswordButton2.Content = "🙈";
             }
         }
     }
