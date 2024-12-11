@@ -463,6 +463,7 @@
             label10.Size = new Size(208, 42);
             label10.TabIndex = 4;
             label10.Text = "Кол-во работников\r\nпроработавших весь год\r\n";
+            label10.Click += label10_Click;
             // 
             // groupBox1
             // 

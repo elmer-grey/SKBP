@@ -7,7 +7,6 @@
         mc:Ignorable="d"
         Title="Главное меню" Height="450" Width="800"
         ResizeMode="NoResize"
-        Icon="Images\HR1.ico"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
         WindowStyle="None" Background="White">
@@ -211,7 +210,8 @@ Value="#EBEBEB"/>
                 <Button Content="HR-Калькулятор"
                         Foreground="White"
                         FontSize="14"
-                        FontWeight="Medium">
+                        FontWeight="Medium"
+                        Click="OpenCalculator_Click">
 
                     <Button.Style>
                         <Style TargetType="Button">

@@ -7,11 +7,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Images\HR.ico</ApplicationIcon>
+    <ApplicationIcon>Images\HR1.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Images\help.png" />
+    <None Remove="Images\HR.ico" />
     <None Remove="Images\HR.png" />
     <None Remove="Images\HR1.ico" />
     <None Remove="Images\Image.png" />
@@ -23,6 +24,9 @@
 
   <ItemGroup>
     <Resource Include="Images\HR.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\HR1.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

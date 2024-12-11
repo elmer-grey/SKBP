@@ -7,8 +7,8 @@
         mc:Ignorable="d"        
         Height="400" Width="480"
         ResizeMode="NoResize"
-        Icon="Images\HR1.ico"
         WindowStartupLocation="CenterScreen"
+        Title="Изменить пароль"
         AllowsTransparency="False"
         WindowStyle="None" Background="White">
 

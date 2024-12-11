@@ -16,6 +16,8 @@ namespace Full_modul
     /// </summary>
     public partial class MainWindow : Window
     {
+        private CalculatorWindow calculatorWindow;
+
         public MainWindow()
         {
 
@@ -39,7 +41,6 @@ namespace Full_modul
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Позволяет перетаскивать окно
             if (e.ButtonState == MouseButtonState.Pressed)
             {
                 this.DragMove();
@@ -53,7 +54,7 @@ namespace Full_modul
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close(); // Закрыть окно
+            this.Close();
         }
 
         private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -67,6 +68,48 @@ namespace Full_modul
                     contextMenu.IsOpen = true; // Открыть контекстное меню
                 }
                 e.Handled = true; // Отметить событие как обработанное
+            }
+        }
+        private void OpenCalculator_Click(object sender, RoutedEventArgs e)
+        {
+            if (calculatorWindow == null || !calculatorWindow.IsVisible)
+            {
+                // Создаем новое окно калькулятора, если его еще нет или оно закрыто
+                calculatorWindow = new CalculatorWindow();
+                calculatorWindow.Closed += CalculatorWindow_Closed; // Подписываемся на событие закрытия
+                calculatorWindow.Show();
+
+                // Сворачиваем основное окно
+                this.WindowState = WindowState.Minimized;
+            }
+            else
+            {
+                if (calculatorWindow.WindowState == WindowState.Minimized)
+                {
+                    // Если калькулятор свернут, восстанавливаем его
+                    calculatorWindow.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    // Если калькулятор открыт, просто активируем его
+                    calculatorWindow.Activate();
+                }
+            }
+        }
+
+        private void CalculatorWindow_Closed(object sender, EventArgs e)
+        {
+            // Активируем главное окно при закрытии калькулятора
+            this.Activate();
+            this.WindowState = WindowState.Normal; // Восстанавливаем состояние окна
+            calculatorWindow = null; // Удаляем ссылку на закрытое окно
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == WindowState.Minimized)
+            {
+                // Здесь можно добавить логику, если нужно что-то сделать при сворачивании
             }
         }
     }

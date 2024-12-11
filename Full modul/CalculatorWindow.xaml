@@ -7,9 +7,9 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Full_modul" 
         mc:Ignorable="d"
-        Height="600" Width="600"
+        Height="550" Width="550"
+        Title="Окно для расчётов"
         ResizeMode="NoResize"
-        Icon="Images\HR1.ico"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
         WindowStyle="None" Background="White">
@@ -63,11 +63,11 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="CustomRoundedComboBoxStyle" TargetType="ComboBox">
+        <Style x:Key="ComboBoxStyleChoise" TargetType="ComboBox">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
-                        <Grid Width="520" Height="35">
+                        <Grid Width="510" Height="35">
                             <Border Name="Border" Background="{TemplateBinding Background}" 
                             BorderBrush="{TemplateBinding BorderBrush}" 
                             BorderThickness="{TemplateBinding BorderThickness}" 
@@ -79,25 +79,28 @@
                                 </Border.Style>
 
                                 <ToggleButton Name="ToggleButton"
-      Focusable="False"
-      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
-      Background="Transparent"
-      BorderThickness="0"  
-      BorderBrush="Transparent">
+                                      Focusable="False"
+                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                      Background="Transparent"
+                                      BorderThickness="0"  
+                                      BorderBrush="Transparent">
                                     <Grid>
-                                    <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" 
-                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"                                                  
-                                              VerticalAlignment="Center" 
-                                              HorizontalAlignment="Left" 
-                                              Margin="0,0,435,0"/>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="432"/>
+                                            <ColumnDefinition Width="62"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentPresenter Grid.Column="1" 
+                                                  Content="{TemplateBinding SelectionBoxItem}" 
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                                  Margin="0,0,0,0"/>
                                         <Path x:Name="Arrow" 
-Data="M 0 0 L 10 0 L 5 10 Z" 
-Fill="Black" 
-HorizontalAlignment="Right" 
-VerticalAlignment="Center" 
-Margin="430,5,0,0" 
-RenderTransformOrigin="0.5,0.5">
-
+                                      Data="M 0 0 L 10 0 L 5 10 Z" 
+                                      Fill="Black" 
+                                      HorizontalAlignment="Center" 
+                                      Margin="0,4,0,4" 
+                                      RenderTransformOrigin="0.5,0.5" 
+                                      Grid.Column="2" Width="10">
                                         </Path>
                                     </Grid>
                                 </ToggleButton>
@@ -106,7 +109,7 @@ RenderTransformOrigin="0.5,0.5">
                            IsOpen="{TemplateBinding IsDropDownOpen}" 
                            PopupAnimation="Slide">
                                 <Border BorderThickness="1" BorderBrush="#888888" CornerRadius="5" 
-                                Background="White" Width="520">
+                                Background="White" Width="510">
                                     <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                         <ItemsPresenter />
                                     </ScrollViewer>
@@ -131,13 +134,79 @@ RenderTransformOrigin="0.5,0.5">
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
 
+
+        <Style x:Key="ComboBoxStyleLevelWorker" TargetType="ComboBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid Width="200" Height="30">
+                            <Border Name="Border" Background="{TemplateBinding Background}" 
+BorderBrush="{TemplateBinding BorderBrush}" 
+BorderThickness="{TemplateBinding BorderThickness}" 
+CornerRadius="15">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                    </Style>
+                                </Border.Style>
+
+                                <ToggleButton Name="ToggleButton"
+      Focusable="False"
+      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+      Background="Transparent"
+      BorderThickness="0"  
+      BorderBrush="Transparent">
+                                    <Grid>
+                                        <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" 
+          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"                                                  
+          VerticalAlignment="Center" 
+          HorizontalAlignment="Left" />
+                                        <Path x:Name="Arrow" 
+Data="M 0 0 L 10 0 L 5 10 Z" 
+Fill="Black" 
+HorizontalAlignment="Right" 
+VerticalAlignment="Center" 
+Margin="170,5,0,0" 
+RenderTransformOrigin="0.5,0.5">
+
+                                        </Path>
+                                    </Grid>
+                                </ToggleButton>
+                            </Border>
+                            <Popup Name="Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False" 
+                           IsOpen="{TemplateBinding IsDropDownOpen}" 
+                           PopupAnimation="Slide">
+                                <Border BorderThickness="1" BorderBrush="#888888" CornerRadius="10" 
+ Background="White" Width="200" Height="auto" HorizontalAlignment="Center">
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Arrow" Property="Data" Value="M 5 0 L 10 10 L 0 10 Z"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Background" Value="#200A0A0A"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
         <DataTemplate x:Key="DateTemplate">
             <TextBlock Text="{Binding StringFormat='{}{0:dd.MM.yyyy}'}" 
                        FontSize="14" 
                        Foreground="Black" 
                        FontFamily="Arial"/>
         </DataTemplate>
-        
+
 
         <Style x:Key="ComboBoxStyleCalendar" TargetType="ComboBox">
             <Setter Property="Template">
@@ -147,7 +216,7 @@ RenderTransformOrigin="0.5,0.5">
                             <Border Name="Border" Background="{TemplateBinding Background}" 
                             BorderBrush="{TemplateBinding BorderBrush}" 
                             BorderThickness="{TemplateBinding BorderThickness}" 
-                            CornerRadius="10">
+                            CornerRadius="15" >
                                 <ToggleButton Name="ToggleButton"
                                       Focusable="False"
                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
@@ -158,7 +227,8 @@ RenderTransformOrigin="0.5,0.5">
                                         <ContentPresenter Content="{TemplateBinding SelectedItem}" 
                                                   ContentTemplate="{StaticResource DateTemplate}"                                                  
                                                   VerticalAlignment="Center" 
-                                                  HorizontalAlignment="Center" />
+                                                  HorizontalAlignment="Center"
+                                                          />
                                         <Path x:Name="Arrow" 
                                       Data="M 0 0 L 10 0 L 5 10 Z" 
                                       Fill="Black" 
@@ -166,7 +236,6 @@ RenderTransformOrigin="0.5,0.5">
                                       VerticalAlignment="Center" 
                                       Margin="170,5,0,0" 
                                       RenderTransformOrigin="0.5,0.5">
-                                            
                                         </Path>
                                     </Grid>
                                 </ToggleButton>
@@ -198,12 +267,31 @@ RenderTransformOrigin="0.5,0.5">
                 </Setter.Value>
             </Setter>
             <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="#300A0A0A"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#200A0A0A"/>
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontFamily" Value="Fonts/#Dosis"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Arrow"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="15">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
         </Style>
     </Window.Resources>
 
@@ -226,7 +314,7 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
                         </ContextMenu>
                     </Image.ContextMenu>
                 </Image>
-                
+
                 <TextBlock Text="Окно для расчётов" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
                            Margin="25,0,0,0"/>
@@ -245,13 +333,13 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="70"/>
-                <RowDefinition Height="60*"/>
-                <RowDefinition Height="50*"/>
-                <RowDefinition Height="300*"/>
-                <RowDefinition Height="40*"/>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+                <RowDefinition Height="28*"/>
+                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.ColumnSpan="4">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="50*"/>
@@ -348,7 +436,7 @@ Value="#EBEBEB"/>
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" Height="36" Width="425">
                 <Border Width="450"
                         Height="35"
                         Background="#7dc5ea"
@@ -369,12 +457,13 @@ Value="#EBEBEB"/>
                     <Grid>
                         <ComboBox x:Name="comboBoxFormules" SelectionChanged="comboBoxFormules_SelectionChanged"
                            
-                          Style="{StaticResource CustomRoundedComboBoxStyle}" IsTabStop="False" IsTextSearchEnabled="False">
-                            
-                            <ComboBoxItem Content="Formula 1" />
-                            <ComboBoxItem Content="Formula 2" />
-                            <ComboBoxItem Content="Formula 3" />
-                            <ComboBoxItem Content="Formula 4" />
+                          Style="{StaticResource ComboBoxStyleChoise}" IsTabStop="False" IsTextSearchEnabled="False"
+                                  HorizontalAlignment="Left">
+
+                            <ComboBoxItem Content="Коэффициент оборота по приему"/>
+                            <ComboBoxItem Content="Коэффициент оборота по выбытию" />
+                            <ComboBoxItem Content="Коэффициент текучести кадров" />
+                            <ComboBoxItem Content="Коэффициент постоянства состава персонала предприятия" />
                         </ComboBox>
                         <TextBlock x:Name="TextBlock_ShowName" 
                             FontFamily="Fonts/#Dosis" 
@@ -383,7 +472,7 @@ Value="#EBEBEB"/>
                             HorizontalAlignment="Left"                                        
                             Foreground="#C00A0A0A" 
                             Background="Transparent"
-                            Padding="15,9"
+                            Padding="20,9"
                             Visibility="Visible"
                             Text="Выберите формулу"
                             IsHitTestVisible="False"
@@ -392,7 +481,7 @@ Value="#EBEBEB"/>
                 </StackPanel>
             </Grid>
 
-            <StackPanel Grid.Row="3" x:Name="GroupContainer" >
+            <StackPanel Grid.Row="3" x:Name="GroupContainer" Width="480" HorizontalAlignment="Center">
                 <StackPanel x:Name="koefgroup0">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -401,12 +490,13 @@ Value="#EBEBEB"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="40,0,0,0" Width="auto">
-                            <Grid>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Начало периода подсчёта"
                    Foreground="Black"
@@ -415,10 +505,9 @@ Value="#EBEBEB"/>
                    HorizontalAlignment="Left"
                    FontFamily="Fonts/#Dosis"
                    FontWeight="Normal"
-                   Margin="10"
                    FontSize="15"/>
 
-                                <Grid Margin="10" Grid.Column="1" HorizontalAlignment="Right">
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
                                     <ComboBox x:Name="dateComboBoxAgo0"
                       Style="{StaticResource ComboBoxStyleCalendar}"
                       HorizontalAlignment="Center"
@@ -434,18 +523,17 @@ Value="#EBEBEB"/>
                      BorderThickness="0"
                      IsHitTestVisible="False"
                      FontSize="16"
-                     Height="20"
                      Foreground="Black"
                      HorizontalAlignment="Center"/>
                                 </Grid>
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="40,0,0,0" Width="auto">
-                            <Grid>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Конец периода подсчёта"
                    Foreground="Black"
@@ -454,10 +542,9 @@ Value="#EBEBEB"/>
                    HorizontalAlignment="Left"
                    FontFamily="Fonts/#Dosis"
                    FontWeight="Normal"
-                   Margin="10"
                    FontSize="15"/>
 
-                                <Grid Margin="10" Grid.Column="1" HorizontalAlignment="Right">
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
                                     <ComboBox x:Name="dateComboBoxLater0"
                       Style="{StaticResource ComboBoxStyleCalendar}"
                       HorizontalAlignment="Center"
@@ -472,17 +559,16 @@ Value="#EBEBEB"/>
                      BorderThickness="0"
                      IsHitTestVisible="False"
                      FontSize="16"
-                     Height="20"
                      Foreground="Black"
                      HorizontalAlignment="Center"/>
                                 </Grid>
                             </Grid>
                         </StackPanel>
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="40,0,0,0" Width="auto">
-                            <Grid>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Рассматриваемая должность"
 Foreground="Black"
@@ -491,25 +577,164 @@ VerticalAlignment="Center"
 HorizontalAlignment="Left"
 FontFamily="Fonts/#Dosis"
 FontWeight="Normal"
-Margin="10"
 FontSize="15"/>
 
-                                <Grid Margin="10" Grid.Column="1" HorizontalAlignment="Right">
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
                                     <ComboBox x:Name="levelworker0"
-   Style="{StaticResource CustomRoundedComboBoxStyle}"
+                                              Width="200"
+   Style="{StaticResource ComboBoxStyleLevelWorker}"
    HorizontalAlignment="Center"
-   IsEditable="True" 
+   IsEditable="False" 
+                                              
+                                              FontFamily="Fonts/#Dosis"
+                      
    IsTextSearchEnabled="False"
-   MouseDown="ComboBox_MouseDown">
+   MouseDown="ComboBox_MouseDown"
+                                              SelectionChanged="ComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Начальник отдела" />
+                                        <ComboBoxItem Content="Менеджер" />
+                                        <ComboBoxItem Content="Бухгалтер" />
                                     </ComboBox>
 
-                                    
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480" Height="50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Кол−во принятого на работу персонала"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="count0"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Среднесписочная численность работников"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="SCHR0"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40*"/>
+                                    <ColumnDefinition Width="130*"/>
+                                    <ColumnDefinition Width="70*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Результат"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Bold"
+FontSize="15" Height="18" Width="70"/>
+
+                                <Grid  Grid.Column="1" HorizontalAlignment="Center" Width="240">
+                                    <TextBox x:Name="result0"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="240"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                                <Grid  Grid.Column="2" HorizontalAlignment="Center" Width="140">
+                                    <Button Click="ExportButton_Click"
+                Content="Сохранить"
+                    Foreground="White"
+                    FontSize="15"
+                    FontWeight="Medium">
+
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                <Setter Property="Background" Value="#6665cb"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                                        <Setter Property="Background"
+Value="#7c7bc8"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Width="140" Height="30"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                    <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <StackPanel x:Name="koefgroup1" Visibility="Collapsed">
+
+                <StackPanel x:Name="koefgroup1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -517,97 +742,752 @@ FontSize="15"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="40,0,0,0" Width="auto">
-                            <Grid>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Начало периода подсчёта"
-   Foreground="Black"
-   Grid.Column="0"
-   VerticalAlignment="Center"
-   HorizontalAlignment="Left"
-   FontFamily="Fonts/#Dosis"
-   FontWeight="Normal"
-   Margin="10"
-   FontSize="15"/>
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
 
-                                <Grid Margin="10" Grid.Column="1" HorizontalAlignment="Right">
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
                                     <ComboBox x:Name="dateComboBoxAgo1"
-      Style="{StaticResource ComboBoxStyleCalendar}"
-      HorizontalAlignment="Center"
-      IsEditable="True" 
-      IsTextSearchEnabled="False"
-      Tag="dateTextBoxAgo1"
-      MouseDown="ComboBox_MouseDown">
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxAgo1"
+                      MouseDown="ComboBox_MouseDown">
                                     </ComboBox>
 
                                     <TextBox x:Name="dateTextBoxAgo1"
-     IsReadOnly="True"
-     Background="Transparent"
-     BorderThickness="0"
-     IsHitTestVisible="False"
-     FontSize="16"
-     Height="20"
-     Foreground="Black"
-     HorizontalAlignment="Center"/>
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
                                 </Grid>
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="40,0,0,0" Width="auto">
-                            <Grid>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Конец периода подсчёта"
-   Foreground="Black"
-   Grid.Column="0"
-   VerticalAlignment="Center"
-   HorizontalAlignment="Left"
-   FontFamily="Fonts/#Dosis"
-   FontWeight="Normal"
-   Margin="10"
-   FontSize="15"/>
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
 
-                                <Grid Margin="10" Grid.Column="1" HorizontalAlignment="Right">
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
                                     <ComboBox x:Name="dateComboBoxLater1"
-      Style="{StaticResource ComboBoxStyleCalendar}"
-      HorizontalAlignment="Center"
-      IsEditable="True" 
-      IsTextSearchEnabled="False"
-      Tag="dateTextBoxLater1"
-      MouseDown="ComboBox_MouseDown">
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxLater1"
+                      MouseDown="ComboBox_MouseDown">
                                     </ComboBox>
                                     <TextBox x:Name="dateTextBoxLater1"
-     IsReadOnly="True"
-     Background="Transparent"
-     BorderThickness="0"
-     IsHitTestVisible="False"
-     FontSize="16"
-     Height="20"
-     Foreground="Black"
-     HorizontalAlignment="Center"/>
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Рассматриваемая должность"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="levelworker1"
+                                              Width="200"
+   Style="{StaticResource ComboBoxStyleLevelWorker}"
+   HorizontalAlignment="Center"
+   IsEditable="False" 
+                                              
+                                              FontFamily="Fonts/#Dosis"
+                      
+   IsTextSearchEnabled="False"
+   MouseDown="ComboBox_MouseDown"
+                                              SelectionChanged="ComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Начальник отдела" />
+                                        <ComboBoxItem Content="Менеджер" />
+                                        <ComboBoxItem Content="Бухгалтер" />
+                                    </ComboBox>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480" Height="50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Кол−во выбывших сотрудников"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="count1"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Среднесписочная численность работников"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="SCHR1"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40*"/>
+                                    <ColumnDefinition Width="130*"/>
+                                    <ColumnDefinition Width="70*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Результат"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Bold"
+FontSize="15" Height="18" Width="70"/>
+
+                                <Grid  Grid.Column="1" HorizontalAlignment="Center" Width="240">
+                                    <TextBox x:Name="result1"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                             Width="240"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                                <Grid  Grid.Column="2" HorizontalAlignment="Center" Width="140">
+                                    <Button Click="ExportButton_Click"
+                Content="Сохранить"
+                    Foreground="White"
+                    FontSize="15"
+                    FontWeight="Medium">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                <Setter Property="Background" Value="#6665cb"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                                        <Setter Property="Background"
+Value="#7c7bc8"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Width="140" Height="30"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                    <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <StackPanel x:Name="koefgroup2" Visibility="Collapsed">
-                    <TextBlock Text="Group 2" />
-                    <!-- Other controls for koefgroup2 -->
+                <StackPanel x:Name="koefgroup2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Начало периода подсчёта"
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="dateComboBoxAgo2"
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxAgo2"
+                      MouseDown="ComboBox_MouseDown">
+                                    </ComboBox>
+
+                                    <TextBox x:Name="dateTextBoxAgo2"
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Конец периода подсчёта"
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="dateComboBoxLater2"
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxLater2"
+                      MouseDown="ComboBox_MouseDown">
+                                    </ComboBox>
+                                    <TextBox x:Name="dateTextBoxLater2"
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Рассматриваемая должность"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="levelworker2"
+                                              Width="200"
+   Style="{StaticResource ComboBoxStyleLevelWorker}"
+   HorizontalAlignment="Center"
+   IsEditable="False" 
+                                              
+                                              FontFamily="Fonts/#Dosis"
+                      
+   IsTextSearchEnabled="False"
+   MouseDown="ComboBox_MouseDown"
+                                              SelectionChanged="ComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Начальник отдела" />
+                                        <ComboBoxItem Content="Менеджер" />
+                                        <ComboBoxItem Content="Бухгалтер" />
+                                    </ComboBox>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480" Height="50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Кол−во уволившихся по собственному желанию и за 
+                                           нарушение трудовой дисциплины"
+                                           TextWrapping="Wrap"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="count2"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Среднесписочная численность работников"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="SCHR2"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40*"/>
+                                    <ColumnDefinition Width="130*"/>
+                                    <ColumnDefinition Width="70*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Результат"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Bold"
+FontSize="15" Height="18" Width="70"/>
+
+                                <Grid  Grid.Column="1" HorizontalAlignment="Center" Width="240">
+                                    <TextBox x:Name="result2"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="240"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                                <Grid  Grid.Column="2" HorizontalAlignment="Center" Width="140">
+                                    <Button Click="ExportButton_Click"
+                Content="Сохранить"
+                    Foreground="White"
+                    FontSize="15"
+                    FontWeight="Medium">
+
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                <Setter Property="Background" Value="#6665cb"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                                        <Setter Property="Background"
+Value="#7c7bc8"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Width="140" Height="30"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                    <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-                <StackPanel x:Name="koefgroup3" Visibility="Collapsed">
-                    <TextBlock Text="Group 3" />
-                    <!-- Other controls for koefgroup3 -->
+
+                <StackPanel x:Name="koefgroup3">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Начало периода подсчёта"
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="dateComboBoxAgo3"
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxAgo3"
+                      MouseDown="ComboBox_MouseDown">
+                                    </ComboBox>
+
+                                    <TextBox x:Name="dateTextBoxAgo3"
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Конец периода подсчёта"
+                   Foreground="Black"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Left"
+                   FontFamily="Fonts/#Dosis"
+                   FontWeight="Normal"
+                   FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="dateComboBoxLater3"
+                      Style="{StaticResource ComboBoxStyleCalendar}"
+                      HorizontalAlignment="Center"
+                      IsEditable="True" 
+                      IsTextSearchEnabled="False"
+                      Tag="dateTextBoxLater3"
+                      MouseDown="ComboBox_MouseDown">
+                                    </ComboBox>
+                                    <TextBox x:Name="dateTextBoxLater3"
+                     IsReadOnly="True"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     IsHitTestVisible="False"
+                     FontSize="16"
+                     Foreground="Black"
+                     HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Рассматриваемая должность"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="levelworker3"
+                                              Width="200"
+   Style="{StaticResource ComboBoxStyleLevelWorker}"
+   HorizontalAlignment="Center"
+   IsEditable="False" 
+                                              
+                                              FontFamily="Fonts/#Dosis"
+   IsTextSearchEnabled="False"
+   MouseDown="ComboBox_MouseDown"
+                                              SelectionChanged="ComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Начальник отдела" />
+                                        <ComboBoxItem Content="Менеджер" />
+                                        <ComboBoxItem Content="Бухгалтер" />
+                                    </ComboBox>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480" Height="50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Кол-во работников
+проработавших весь год"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"
+                                           TextWrapping="Wrap"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="count3"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,15,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32*"/>
+                                    <ColumnDefinition Width="18*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Среднесписочная численность работников"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Normal"
+FontSize="15"/>
+
+                                <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBox x:Name="SCHR3"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="160"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal"  Width="auto" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+                            <Grid Width="480">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40*"/>
+                                    <ColumnDefinition Width="130*"/>
+                                    <ColumnDefinition Width="70*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Результат"
+Foreground="Black"
+Grid.Column="0"
+VerticalAlignment="Center"
+HorizontalAlignment="Left"
+FontFamily="Fonts/#Dosis"
+FontWeight="Bold"
+FontSize="15" Height="18" Width="70"/>
+
+                                <Grid  Grid.Column="1" HorizontalAlignment="Center" Width="240">
+                                    <TextBox x:Name="result3"
+IsReadOnly="True"
+Background="#200A0A0A"
+BorderThickness="0"
+IsHitTestVisible="False"
+FontSize="16"
+Height="30"
+                                           
+                                             Width="240"
+Foreground="Black"
+HorizontalAlignment="Center"/>
+
+
+                                </Grid>
+                                <Grid  Grid.Column="2" HorizontalAlignment="Center" Width="140">
+                                    <Button Click="ExportButton_Click"
+                Content="Сохранить"
+                    Foreground="White"
+                    FontSize="15"
+                    FontWeight="Medium">
+
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                <Setter Property="Background" Value="#6665cb"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                                        <Setter Property="Background"
+Value="#7c7bc8"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Width="140" Height="30"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                    <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
 
             <StackPanel Grid.Row="4" Orientation="Horizontal"
-                        VerticalAlignment="Center" HorizontalAlignment="Center">
+                        VerticalAlignment="Center" HorizontalAlignment="Center" Height="24" Width="84">
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">

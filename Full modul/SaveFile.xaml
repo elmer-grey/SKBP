@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Height="230" Width="350"
         ResizeMode="NoResize"
-        Icon="Images\HR1.ico"
+        Title="Выбор для сохранения"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
         WindowStyle="None" Background="White">
