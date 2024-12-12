@@ -306,7 +306,7 @@ RenderTransformOrigin="0.5,0.5">
                 </Grid.ColumnDefinitions>
 
                 <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
-MouseRightButtonDown="Image_MouseRightButtonDown">
+MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                     <Image.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
@@ -317,11 +317,11 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
 
                 <TextBlock Text="Окно для расчётов" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="25,0,0,0"/>
+                           Margin="33,0,0,0"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
-                        <TextBlock Text="🗕"/>
+                        <TextBlock Text="－"/>
                     </Button>
                     <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click">
                         <TextBlock Text="X"/>
@@ -361,14 +361,14 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
                     <Grid>
                         <Ellipse Width="45" Height="45" Fill="DarkGray"/>
                         <Image Width="46" Height="46"
-                               Source="Images/Image.png"/>
+                               Source="/Images/Image.png"/>
                     </Grid>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
                     <Button Click="Button_User_Click"  BorderThickness="0">
                         <StackPanel Orientation="Vertical">
-                            <Image Source="Images/User.png" Width="40" Height="40" />
+                            <Image Source="/Images/User.png" Width="40" Height="40" />
                             <TextBlock Text="Личный кабинет" VerticalAlignment="Center" />
                         </StackPanel>
                         <Button.Style>
@@ -403,7 +403,7 @@ Value="#EBEBEB"/>
                 <StackPanel Grid.Column="3" >
                     <Button Click="Button_Reports_Click"  BorderThickness="0">
                         <StackPanel Orientation="Vertical">
-                            <Image Source="Images/Reports.png" Width="40" Height="40" />
+                            <Image Source="/Images/Reports.png" Width="40" Height="40" />
                             <TextBlock Text="Отчёты" VerticalAlignment="Center" />
                         </StackPanel>
                         <Button.Style>
@@ -981,6 +981,7 @@ Value="#7c7bc8"/>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
+                
                 <StackPanel x:Name="koefgroup2">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -1491,7 +1492,7 @@ Value="#7c7bc8"/>
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="Images/help.png" Width="25" Height="25"/>
+                        <Image Source="/Images/help.png" Width="25" Height="25"/>
                         <TextBlock Text="Справка" Margin="5,0,0,2" VerticalAlignment="Center" />
                     </StackPanel>
                     <Button.Style>

@@ -31,11 +31,15 @@ namespace Full_modul
         public CalculatorWindow()
         {
             InitializeComponent();
-            InitializeDateTextBoxes();
-            DataContext = new ViewModel();
+            //InitializeDateTextBoxes();
+            //DataContext = new ViewModel();
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
+            koefgroup0.Visibility = Visibility.Collapsed;
+            koefgroup1.Visibility = Visibility.Collapsed;
+            koefgroup2.Visibility = Visibility.Collapsed;
+            koefgroup3.Visibility = Visibility.Collapsed;
         }
-
+    
         private void InitializeDateTextBoxes()
         {
             // Установка текущей даты для всех TextBox
@@ -167,7 +171,6 @@ namespace Full_modul
             }
         }
 
-        // Вспомогательный метод для поиска дочернего элемента
         private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -195,7 +198,6 @@ namespace Full_modul
             Keyboard.ClearFocus();
         }
 
-        // Метод для поиска всех визуальных элементов определенного типа
         private IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -222,7 +224,7 @@ namespace Full_modul
             if (selectedItem != null)
             {
                 // Получаем текст выбранного элемента
-                string selectedValue = selectedItem.Content.ToString();
+                string? selectedValue = selectedItem.Content?.ToString();
 
                 levelworker0.Text = selectedValue;
             }

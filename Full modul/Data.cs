@@ -6,16 +6,21 @@ using System.Threading.Tasks;
 
 namespace Full_modul
 {
+    public static class Constants
+    {
+        public static string ConnectionString = "Data Source=DESKTOP-TBLQV8A\\SQLEXPRESS;Initial Catalog=calculator;Integrated Security=True;TrustServerCertificate=True";
+    }
+
     static class Data
     {
-        public static bool Check0;
-        public static bool Check1;
-        public static bool Check2;
-        public static bool Check3;
+        public static bool Check0 = false;
+        public static bool Check1 = false;
+        public static bool Check2 = false;
+        public static bool Check3 = false;
     }
     static class UserInfo
     {
-        public static string username;
-        public static string password;
+        public static string username = "";
+        public static string password = "";
     }
 }

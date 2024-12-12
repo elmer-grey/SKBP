@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"        
-        Height="400" Width="480"
+        Height="400" Width="460"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Title="Изменить пароль"
+        Title="Изменение пароля"
         AllowsTransparency="False"
         WindowStyle="None" Background="White">
-
+    
     <Grid>
         <Border Background="Black" Height="30"
                 MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
@@ -21,24 +21,24 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Image Source="/Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0,0,0"/>
 
                 <TextBlock Text="Изменение пароля" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="0,0,35,0"/>
+                           Margin="0,0,43,0"/>
             </Grid>
         </Border>
 
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="60*"/>
-                <RowDefinition Height="100*"/>
-                <RowDefinition Height="100*"/>
                 <RowDefinition Height="70*"/>
+                <RowDefinition Height="90*"/>
+                <RowDefinition Height="90*"/>
+                <RowDefinition Height="75*"/>
                 <RowDefinition Height="50*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="20,0,0,0">
+            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="20,10,0,0">
                 <TextBlock Text="Для входа был использован стандартный пароль." 
                FontFamily="Fonts/#Dosis" 
                FontWeight="Medium" 
@@ -67,7 +67,7 @@ FontFamily="Fonts/#Dosis"
 FontWeight="Bold" 
 FontSize="18" 
 VerticalAlignment="Center"
-            Margin="27,0,0,10"/>
+            Margin="27,0,0,5"/>
                 <StackPanel
                         Orientation="Horizontal"
  Width="auto">
@@ -125,8 +125,10 @@ VerticalAlignment="Center"
             VerticalAlignment="Center" 
             Background="#E2E2E2" 
             BorderThickness="0"
-            Padding="5,9"
-            Visibility="Collapsed">
+            Padding="5,9.5"
+            Visibility="Collapsed"
+                                     KeyDown="TextBox_KeyDown"
+                                 TextChanged="TextBox_ShowPassword1_TextChanged">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="Template">
@@ -165,21 +167,21 @@ FontFamily="Fonts/#Dosis"
 FontWeight="Bold" 
 FontSize="18" 
 VerticalAlignment="Center"
-            Margin="27,0,0,10"/>
+            Margin="27,0,0,5"/>
                 <StackPanel
                         Orientation="Horizontal"
  Width="auto">
                     <Grid x:Name="PasswordContainer2" Margin="20,0,0,0">
                         <PasswordBox x:Name="PasswordBox2" 
                                      Width="390" 
-                                     Height="40" 
-                                     Margin="0,0,5,0"
-                                     FontSize="14"
-                                     VerticalAlignment="Center" 
-                                     Background="#E2E2E2" 
-                                     BorderThickness="0"
-                                     Padding="5,7"
-                                     KeyDown="TextBox_KeyDown"
+                                    Height="40" 
+                                    Margin="0,0,5,0"
+                                    FontSize="14"
+                                    VerticalAlignment="Center" 
+                                    Background="#E2E2E2" 
+                                    BorderThickness="0"
+                                    Padding="5,9.5"
+                                    KeyDown="TextBox_KeyDown"
                                      GotFocus="PasswordBox_GotFocus2"
                                      LostFocus="PasswordBox_LostFocus2">
                             <PasswordBox.Style>
@@ -223,8 +225,10 @@ VerticalAlignment="Center"
                                 VerticalAlignment="Center" 
                                 Background="#E2E2E2" 
                                 BorderThickness="0"
-                                Padding="5,7"
-                                Visibility="Collapsed"> 
+                                Padding="5,9.5"
+                                Visibility="Collapsed"
+                                     KeyDown="TextBox_KeyDown"
+                                 TextChanged="TextBox_ShowPassword2_TextChanged"> 
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="Template">
@@ -274,7 +278,7 @@ MaxWidth="460" />
 
             <StackPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" 
                         Orientation="Horizontal">
-                <Button Click="MinimizeButton_Click"
+                <Button Click="Button_Click"
                         Content="Ввод"
                         Foreground="White"
                         FontSize="15"

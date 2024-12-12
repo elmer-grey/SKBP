@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Data.SqlClient;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,14 +20,28 @@ namespace Full_modul
         public AutorizationWindow()
         {
             InitializeComponent();
-            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR1.ico"));
+            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             TextBox_Login.GotFocus += TextBox_Login_GotFocus;
             TextBox_Login.LostFocus += TextBox_Login_LostFocus;
+            LoadSavedCredentials();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void LoadSavedCredentials()
         {
-            MessageBox.Show("Картинка и текст были нажаты!");
+            if (Properties.Settings.Default.RememberMe)
+            {
+                TextBox_Login.Text = Properties.Settings.Default.Username;
+                PasswordBox.Password = Properties.Settings.Default.Password;
+                CheckBox_SaveData.IsChecked = true;
+                if (string.IsNullOrEmpty(PasswordBox.Password))
+                {
+                    TextBlock_ShowName.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    TextBlock_ShowName.Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -67,23 +82,6 @@ namespace Full_modul
             }
         }
 
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                if (TextBox_Login.Text != "" && PasswordBox.Password != "")
-                {
-                    MessageBox.Show("Вы нажали Enter!");
-                    e.Handled = true;
-                }
-                else
-                {
-                    MessageBox.Show("Вы не ввели логин и/или пароль!");
-                    e.Handled = true;
-                }
-            } 
-        }
-
         private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Right)
@@ -121,6 +119,14 @@ namespace Full_modul
         {
             if (TextBox_ShowPassword.Visibility == Visibility.Visible)
             {
+                if (string.IsNullOrEmpty(PasswordBox.Password))
+                {
+                    TextBlock_ShowName.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    TextBlock_ShowName.Visibility = Visibility.Collapsed;
+                }
                 PasswordBox.Password = TextBox_ShowPassword.Text;
                 TextBox_ShowPassword.Visibility = Visibility.Collapsed;
                 PasswordBox.Visibility = Visibility.Visible;
@@ -133,6 +139,128 @@ namespace Full_modul
                 TextBox_ShowPassword.Text = PasswordBox.Password;
                 ShowPasswordButton.Content = "🙈";
             }
+            Keyboard.ClearFocus();
+        }
+
+        private void TextBox_ShowPassword_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            PasswordBox.Password = TextBox_ShowPassword.Text;
+        }
+
+        private void HandleLogin()
+        {
+            if (string.IsNullOrEmpty(TextBox_Login.Text) || string.IsNullOrEmpty(PasswordBox.Password))
+            {
+                MessageBox.Show("Вы не ввели логин или пароль!\nПожалуйста, заполните поля!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", conn);
+                    sqlCommand.Parameters.AddWithValue("@login", TextBox_Login.Text);
+                    sqlCommand.Parameters.AddWithValue("@pass", PasswordBox.Password);
+
+                    SqlDataReader dataReader = sqlCommand.ExecuteReader();
+                    if (dataReader.Read())
+                    {
+                        UserInfo.username = Convert.ToString(dataReader["login_hr"]).TrimEnd();
+                        UserInfo.password = Convert.ToString(dataReader["pass_hr"]).TrimEnd();
+
+                        if (PasswordBox.Password == "KIBEVS1902")
+                        {
+                            ChangePassWindow changePasswordWindow = new ChangePassWindow();
+                            if (changePasswordWindow.ShowDialog() == true)
+                            {
+                                return;
+                            }
+                            else
+                            {
+
+                                MessageBox.Show("Изменение пароля отменено!", "Уведомление",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Вы вошли в систему!");
+
+                            MainWindow mainWindow = new MainWindow();
+                            mainWindow.Show();
+                            this.Close();
+                            if (!(bool)CheckBox_SaveData.IsChecked)
+                            {
+                                TextBox_Login.Text = "";
+                                PasswordBox.Password = "";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
+                        {
+                            MessageBox.Show("Вы вошли в систему!");
+
+                            MainWindow mainWindow = new MainWindow();
+                            mainWindow.Show();
+                            this.Close();
+                            if (!(bool)CheckBox_SaveData.IsChecked)
+                            {
+                                TextBox_Login.Text = "";
+                                PasswordBox.Password = "";
+                            }
+                        }
+                        else
+                            MessageBox.Show("Вы ввели неверный логин или пароль!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Нет подключения");
+                }
+            }        
+        }
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                HandleLogin();
+                e.Handled = true;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            HandleLogin();
+            if ((bool)CheckBox_SaveData.IsChecked)
+            {
+                CheckBox_SaveData_Checked(CheckBox_SaveData, new RoutedEventArgs());
+            }
+            else
+            {
+                CheckBox_SaveData_Unchecked(CheckBox_SaveData, new RoutedEventArgs());
+            }
+        }
+
+        private void CheckBox_SaveData_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Username = TextBox_Login.Text;
+            Properties.Settings.Default.Password = PasswordBox.Password;
+            Properties.Settings.Default.RememberMe = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void CheckBox_SaveData_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Username = string.Empty;
+            Properties.Settings.Default.Password = string.Empty;
+            Properties.Settings.Default.RememberMe = false;
+            Properties.Settings.Default.Save();
         }
     }
 }

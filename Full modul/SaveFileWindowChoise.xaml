@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
-        Title="Сохранить файл" Height="200" Width="300"
-            ResizeMode="NoResize"
-    WindowStartupLocation="CenterScreen"
-    AllowsTransparency="False"
-    WindowStyle="None" Background="White">
+        Title="Сохранить файл" Height="200" Width="350"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="False"
+        WindowStyle="None" Background="White">
 
     <Window.Resources>
         <Style x:Key="CloseButtonStyle" TargetType="Button">
@@ -60,10 +60,10 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+    
     <Grid>
         <Border Background="Black" Height="30"
          MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
-
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -72,7 +72,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
-MouseRightButtonDown="Image_MouseRightButtonDown">
+MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                     <Image.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
@@ -83,7 +83,7 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
 
                 <TextBlock Text="Окно авторизации" Grid.Column="1" Foreground="White" 
                     VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Margin="25,0,0,0"/>
+                    Margin="17,0,0,0"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
@@ -95,8 +95,18 @@ MouseRightButtonDown="Image_MouseRightButtonDown">
                 </StackPanel>
             </Grid>
         </Border>
-        <TextBlock x:Name="MessageTextBlock" Margin="10,10,10,0" TextWrapping="Wrap" />
-        <TextBox x:Name="FileNameTextBox" Margin="10,50,10,0" Height="25" />
-        <Button Content="Сохранить" Margin="10,90,10,0" Height="30" Click="SaveButton_Click" />
+        <Grid Margin="0,30,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="5*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="MessageTextBlock" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
+                       TextWrapping="Wrap" Grid.Row="0" FontSize="14" />
+            <TextBox x:Name="FileNameTextBox" Margin="10,0,10,10" Height="25" Grid.Row="1"
+                     FontSize="14" VerticalAlignment="Center" Padding="1,2" />
+            <Button Content="Сохранить" Margin="10,0,10,15" Click="SaveButton_Click" Grid.Row="2"
+                    FontSize="14" />
+        </Grid>
     </Grid>
 </Window>

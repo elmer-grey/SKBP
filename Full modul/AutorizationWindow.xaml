@@ -68,7 +68,6 @@
                 MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
 
             <Grid>
-
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -76,7 +75,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
-       MouseRightButtonDown="Image_MouseRightButtonDown">
+       MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                     <Image.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
@@ -87,11 +86,11 @@
 
                 <TextBlock Text="Окно авторизации" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="25,0,0,0"/>
+                           Margin="17,0,0,0"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
-                        <TextBlock Text="🗕"/>
+                        <TextBlock Text="－"/>
                     </Button>
                     <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click">
                         <TextBlock Text="X"/>
@@ -102,8 +101,8 @@
 
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="200*"/>
-                <RowDefinition Height="270*"/>
+                <RowDefinition Height="180*"/>
+                <RowDefinition Height="250*"/>
                 <RowDefinition Height="60*"/>
                 <RowDefinition Height="80*"/>
                 <RowDefinition Height="60*"/>
@@ -113,7 +112,7 @@
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
                     <Grid>
                         <Image Height="70" Width="Auto"
-                               Source="Images/Logo.png"/>
+                               Source="/Images/Logo.png"/>
                     </Grid>
                 </StackPanel>
             </Grid>
@@ -189,30 +188,32 @@
                         </PasswordBox>
 
                         <TextBlock x:Name="TextBlock_ShowName" 
-                                       Margin="2,0,0,0"
-                                        FontFamily="Fonts/#Dosis" 
-                                        FontSize="14"
-                                        VerticalAlignment="Center" 
-                                        HorizontalAlignment="Left"                                        
-                                        Foreground="Black" 
-                                        Background="Transparent"
-                                        Padding="5,9"
-                                       Visibility="Visible"
-                                       Text="Введите пароль"
-                                       IsHitTestVisible="False"
-                                       Height="32" 
-                                       Width="150"/>
+                                    Margin="2,0,0,0"
+                                    FontFamily="Fonts/#Dosis" 
+                                    FontSize="14"
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Left"                                        
+                                    Foreground="Black" 
+                                    Background="Transparent"
+                                    Padding="5,9"
+                                    Visibility="Visible"
+                                    Text="Введите пароль"
+                                    IsHitTestVisible="False"
+                                    Height="32" 
+                                    Width="150"/>
 
                         <TextBox x:Name="TextBox_ShowPassword" 
-             Width="210" 
-            Height="32" 
-            Margin="0,0,5,0"
-            FontSize="14"
-            VerticalAlignment="Center" 
-            Background="#E2E2E2" 
-            BorderThickness="0"
-            Padding="5,7"
-            Visibility="Collapsed">
+                                Width="210" 
+                                Height="32" 
+                                Margin="0,0,5,0"
+                                FontSize="14"
+                                VerticalAlignment="Center" 
+                                Background="#E2E2E2" 
+                                BorderThickness="0"
+                                Padding="5,7"
+                                Visibility="Collapsed"
+                                     KeyDown="TextBox_KeyDown"
+                                 TextChanged="TextBox_ShowPassword_TextChanged">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="Template">
@@ -246,11 +247,13 @@ CornerRadius="15">
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="125*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="125*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="120*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <CheckBox Margin="5,0,0,0" FontSize="14" FontFamily="Fonts/#Dosis">
+                    <CheckBox Margin="12,0,0,0" FontSize="14" FontFamily="Fonts/#Dosis" 
+                              x:Name="CheckBox_SaveData" Checked="CheckBox_SaveData_Checked" 
+                              Unchecked="CheckBox_SaveData_Unchecked">
                         Сохранить данные
                     </CheckBox>
                 </StackPanel>
@@ -291,7 +294,7 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="3"
                         VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Button Click="MinimizeButton_Click"
+                <Button Click="Button_Click"
                     Content="Вход"
                         Foreground="White"
                         FontSize="15"
@@ -332,8 +335,8 @@ Value="#EBEBEB"/>
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="Images/help.png" Width="25" Height="25"/>
-                        <TextBlock Text="Справка" Margin="5,0,0,2" VerticalAlignment="Center" />
+                        <Image Source="/Images/help.png" Width="25" Height="25" Margin="0,0,5,0"/>
+                        <TextBlock Text="Справка" Margin="5,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{x:Null}">

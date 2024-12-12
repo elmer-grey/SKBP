@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Data.SqlClient;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,9 +21,62 @@ namespace Full_modul
 
         public MainWindow()
         {
-
             InitializeComponent();
-            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
+            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));            
+            this.Closing += MainWindow_Closing; // Подписываемся на событие Closing
+
+            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+
+            using (SqlConnection connection = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@login", UserInfo.username);
+
+                try
+                {
+                    connection.Open();
+                    object result = command.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        // Преобразуем результат в строку и выводим в TextBox
+                        user.Text = result.ToString().Trim();
+                    }
+                    else
+                    {
+                        user.Text = "0"; // Если не найдено, устанавливаем 0
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка: " + ex.Message);
+                }
+            }
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Отображаем диалоговое сообщение для подтверждения закрытия
+            MessageBoxResult result = MessageBox.Show("Вы завершили работу с программой? Если вы сейчас продолжите, то все несохраненные данные будут удалены!",
+                                                       "Подтверждение выхода",
+                                                       MessageBoxButton.YesNo,
+                                                       MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+            {
+                // Отменяем закрытие окна
+                e.Cancel = true;
+            }
+            else
+            {
+                if (calculatorWindow != null)
+                {
+                    calculatorWindow.Close();
+                }
+                AutorizationWindow AutorizationWindow = new AutorizationWindow();
+                AutorizationWindow.Show();
+
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

@@ -21,11 +21,11 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0,0,0"/>
 
                 <TextBlock Text="Сохранение отчёта" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="0,0,35,0"/>
+                           Margin="0,0,17,0"/>
             </Grid>
         </Border>
 

@@ -25,6 +25,7 @@ namespace Full_modul
 
         public SaveFileWindowChoise(string previousWindow)
         {
+            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             InitializeComponent();
             _previousWindow = previousWindow;
 
@@ -51,7 +52,6 @@ namespace Full_modul
                 ? Path.Combine(Directory.GetCurrentDirectory(), "отчёты")
                 : Path.Combine(Directory.GetCurrentDirectory(), "результаты");
 
-            // Создание папки, если она не существует
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -59,21 +59,14 @@ namespace Full_modul
 
             string filePath = Path.Combine(folderPath, fileName + ".txt");
 
-            // Здесь вы можете добавить код для фактического сохранения данных
             using (StreamWriter sw = new StreamWriter(filePath, true))
             {
-                // Пример записи данных
                 sw.WriteLine("Данные сохранены: " + fileName);
-                // Здесь добавьте вашу логику записи данных
+
             }
 
             MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             this.Close();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Картинка и текст были нажаты!");
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
