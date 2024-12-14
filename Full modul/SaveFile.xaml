@@ -48,7 +48,7 @@
                            FontFamily="Ubuntu" 
                            FontWeight="Medium" 
                            FontSize="18" 
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center" Margin="0,4,0,0"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1"

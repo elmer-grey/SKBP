@@ -43,7 +43,7 @@ namespace Full_modul
             Data.Check1 = CheckBox1.IsChecked == true;
             Data.Check2 = CheckBox2.IsChecked == true;
             Data.Check3 = CheckBox3.IsChecked == true;
-            Close();
+            this.Close();
         }
 
         private void ReturnButton_Click(object sender, EventArgs e)
@@ -52,6 +52,7 @@ namespace Full_modul
             CheckBox1.IsChecked = false;
             CheckBox2.IsChecked = false;
             CheckBox3.IsChecked = false;
+            this.Close();
         }
     }
 }

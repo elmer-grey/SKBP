@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace Full_modul
 {
     /// <summary>
-    /// Логика взаимодействия для Organiz_condit_Window.xaml
+    /// Логика взаимодействия для OrganizAndLegalConditWindow.xaml
     /// </summary>
-    public partial class Organiz_condit_Window : Window
+    public partial class OrganizAndLegalConditWindow : Window
     {
-        public Organiz_condit_Window()
+        public OrganizAndLegalConditWindow()
         {
             InitializeComponent();
         }

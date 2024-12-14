@@ -18,6 +18,7 @@ namespace Full_modul
         public static bool Check2 = false;
         public static bool Check3 = false;
         public static int BoxIndex = -1;
+        public static int SaveFile = 1;
     }
     static class UserInfo
     {

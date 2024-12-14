@@ -104,7 +104,7 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
             <TextBlock x:Name="MessageTextBlock" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
                        TextWrapping="Wrap" Grid.Row="0" FontSize="14" />
             <TextBox x:Name="FileNameTextBox" Margin="10,0,10,10" Height="25" Grid.Row="1"
-                     FontSize="14" VerticalAlignment="Center" Padding="1,2" FontFamily="Ubuntu" />
+                     FontSize="14" VerticalAlignment="Center" Padding="1,2" FontFamily="Ubuntu" KeyDown="TextBox_KeyDown" />
             <Button Content="Сохранить" Margin="10,0,10,15" Click="SaveButton_Click" Grid.Row="2"
                     FontSize="16" FontFamily="Ubuntu" FontWeight="Medium" />
         </Grid>

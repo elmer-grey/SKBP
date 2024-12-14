@@ -64,32 +64,128 @@ namespace Full_modul
 
             using (StreamWriter sw = new StreamWriter(filePath, true))
             {
-                string data = string.Empty;
-                switch (Data.BoxIndex)
-                {
-                    case 0:
-                        data = _calculatorWindow.SaveData(0);
-                        break;
-                    case 1:
-                        data = _calculatorWindow.SaveData(1);
-                        break;
-                    case 2:
-                        data = _calculatorWindow.SaveData(2);
-                        break;
-                    case 3:
-                        data = _calculatorWindow.SaveData(3);
-                        break;
-                    default:
-                        break;
-                }
+                bool hasDataToSave = false;
 
-                sw.WriteLine($"{data}");
+                try
+                {
+                    if (Data.SaveFile == 0)
+                    {
+                        if (Data.Check0 == true)
+                        {
+                            string data = _calculatorWindow.SaveData(0);
+                            if (!string.IsNullOrEmpty(data))
+                            {
+                                hasDataToSave = true;
+                            }
+                        }
+                        if (Data.Check1 == true)
+                        {
+                            string data = _calculatorWindow.SaveData(1);
+                            if (!string.IsNullOrEmpty(data))
+                            {
+                                hasDataToSave = true;
+                            }
+                        }
+                        if (Data.Check2 == true)
+                        {
+                            string data = _calculatorWindow.SaveData(2);
+                            if (!string.IsNullOrEmpty(data))
+                            {
+                                hasDataToSave = true;
+                            }
+                        }
+                        if (Data.Check3 == true)
+                        {
+                            string data = _calculatorWindow.SaveData(3);
+                            if (!string.IsNullOrEmpty(data))
+                            {
+                                hasDataToSave = true;
+                            }
+                        }
+
+                        Data.SaveFile = 1;
+                        hasDataToSave = false;
+
+                        if (!hasDataToSave)
+                        {
+                            MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            this.Close();
+                            return;
+                        }
+
+                        sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
+
+                        if (Data.Check0 == true)
+                        {
+                            sw.WriteLine(_calculatorWindow.SaveData(0));
+                        }
+                        if (Data.Check1 == true)
+                        {
+                            sw.WriteLine(_calculatorWindow.SaveData(1));
+                        }
+                        if (Data.Check2 == true)
+                        {
+                            sw.WriteLine(_calculatorWindow.SaveData(2));
+                        }
+                        if (Data.Check3 == true)
+                        {
+                            sw.WriteLine(_calculatorWindow.SaveData(3));
+                        }
+                    }
+                    else
+                    {
+                        string data = string.Empty;
+                        switch (Data.BoxIndex)
+                        {
+                            case 0:
+                                data = _calculatorWindow.SaveData(0);
+                                break;
+                            case 1:
+                                data = _calculatorWindow.SaveData(1);
+                                break;
+                            case 2:
+                                data = _calculatorWindow.SaveData(2);
+                                break;
+                            case 3:
+                                data = _calculatorWindow.SaveData(3);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (string.IsNullOrEmpty(data))
+                        {
+                            MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            this.Close();
+                            return;
+                        }
+
+                        sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
+                        sw.WriteLine(data);
+                    }
+
+                    MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    this.Close(); // Закрываем форму в любом случае
+                }
             }
 
-            MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
         }
 
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                SaveButton_Click(sender, null);
+                e.Handled = true;
+            }
+        }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

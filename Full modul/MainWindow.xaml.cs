@@ -1,4 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace Full_modul
 {
@@ -18,6 +21,9 @@ namespace Full_modul
     public partial class MainWindow : Window
     {
         private CalculatorWindow calculatorWindow;
+        private OrganizAndLegalConditWindow organizAndLegalConditWindow;
+        private SaveFile saveFile;
+        private SaveFileWindowChoise saveFileWindowChoise;
 
         public MainWindow()
         {
@@ -55,7 +61,6 @@ namespace Full_modul
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            // Отображаем диалоговое сообщение для подтверждения закрытия
             MessageBoxResult result = MessageBox.Show("Вы завершили работу с программой? Если вы сейчас продолжите, то все несохраненные данные будут удалены!",
                                                        "Подтверждение выхода",
                                                        MessageBoxButton.YesNo,
@@ -63,7 +68,6 @@ namespace Full_modul
 
             if (result == MessageBoxResult.No)
             {
-                // Отменяем закрытие окна
                 e.Cancel = true;
             }
             else
@@ -72,20 +76,45 @@ namespace Full_modul
                 {
                     calculatorWindow.Close();
                 }
+                if (organizAndLegalConditWindow != null)
+                {
+                    organizAndLegalConditWindow.Close();
+                }
+                if (saveFile != null)
+                {
+                    saveFile.Close();
+                }
+                if (saveFileWindowChoise != null)
+                {
+                    saveFileWindowChoise.Close();
+                }
                 AutorizationWindow AutorizationWindow = new AutorizationWindow();
                 AutorizationWindow.Show();
-
             }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Картинка и текст были нажаты!");
+            MessageBox.Show("Вывод справки!");
         }
 
         private void Button_Reports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Здесь Вы будете перенаправлены в папку с отчётами!");
+            string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Отчёты");
+
+            if (Directory.Exists(folderPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = folderPath,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            else
+            {
+                MessageBox.Show("Папка не найдена: " + folderPath, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         private void Button_User_Click(object sender, RoutedEventArgs e)
         {

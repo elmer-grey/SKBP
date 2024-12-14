@@ -1,5 +1,6 @@
 ﻿using Full_modul;
 using Microsoft.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,7 +19,6 @@ namespace Full_modul
     /// Логика взаимодействия для CalculatorWindow.xaml
     /// </summary>
     
-
     public partial class CalculatorWindow : Window
     {
         public CalculatorWindow()
@@ -62,12 +62,26 @@ namespace Full_modul
     
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Картинка и текст были нажаты!");
+            MessageBox.Show("Вывод справки!");
         }
 
         private void Button_Reports_Click(object sender, RoutedEventArgs e)
         {
             string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Отчёты", "Калькулятор");
+
+            if (Directory.Exists(folderPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = folderPath,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            else
+            {
+                MessageBox.Show("Папка не найдена: " + folderPath, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Button_User_Click(object sender, RoutedEventArgs e)
@@ -435,12 +449,15 @@ namespace Full_modul
         
         public void ExportData()
         {           
-            var result = MessageBox.Show("Вы запустили процедуру сохранения данных.\nЕсли Вы хотите сохранить только данные вычиления, то нажмите \"Да\"\n" +
+            var result = MessageBox.Show("Вы запустили процедуру сохранения данных.\nЕсли Вы хотите сохранить только данные вычисления, то нажмите \"Да\"\n" +
                 "Если хотите сохранить несколько вычислений, то нажмите \"Нет\"", "Процедура сохранения", MessageBoxButton.YesNo, MessageBoxImage.Question);
             SaveFileWindowChoise saveFileWindow = new SaveFileWindowChoise(this, "CalculatorWindow");
             if (result == MessageBoxResult.No)
             {
                 SaveFile SF = new SaveFile();
+                SF.ShowDialog();
+                Data.SaveFile = 0;
+                saveFileWindow.ShowDialog();
             }
             else if (result == MessageBoxResult.Yes)
             {
@@ -448,143 +465,6 @@ namespace Full_modul
                 saveFileWindow.ShowDialog();
             }
             // или "Условия"
-
-            /*
-            SaveFile sfa = new SaveFile();
-            sfa.ShowDialog();
-
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Текстовый файл|*.txt";
-            saveFileDialog1.Title = "Сохранить данные ...";
-            saveFileDialog1.ShowDialog();
-
-            if (saveFileDialog1.FileName != "")
-            {
-                FileStream fs = (FileStream)saveFileDialog1.OpenFile();
-                fs.Close();
-                DateTime dt = DateTime.Now;
-                StreamWriter sw = new StreamWriter(fs.Name, true, Encoding.UTF8);
-                Thread thread = new Thread(() => Clipboard.SetText(sw.NewLine));
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
-                thread.Join();
-                sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
-                if (Data.Check0 == true)
-                {
-                    if (result0.Text == "")
-                    {
-                        var result = MessageBox.Show("Вы не заполнили формулу ''Коэффициент оборота по приему''! Продолжить?",
-                            "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        if (result == DialogResult.OK)
-                        {
-                            sw.WriteLine($"Коэффициент оборота по приему\nСЧР равен: -" +
-                                 $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                                 $"Рассматриваемая должность: -\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");
-                        }
-                    }
-                    else
-                    {
-                        if (YearAgo0.Checked == true)
-                            sw.WriteLine($"Коэффициент оборота по приему\nСЧР равен: {SChRText0.Text}" +
-                                 $"\nНачало периода подсчёта: {YearAgoText0.Text}\nКонец периода подсчёта: {dateTimePicker0.Value.ToLongDateString()}\n" +
-                                 $"Рассматриваемая должность: {LevelComboBox0.Text}\nКоличество: {amountKoef0.Text}\n" +
-                $"Результат равен: {resultKoef0.Text}\n" + "================\n");
-                        else
-                            sw.WriteLine($"Коэффициент оборота по приему\nСЧР равен: {SChRText0.Text}" +
-                             $"\nНачало периода подсчёта: {dateTimePicker0.Value.ToLongDateString()}\nКонец периода подсчёта: {YearForwardText0.Text}\n" +
-                             $"Рассматриваемая должность: {LevelComboBox0.Text}\nКоличество: {amountKoef0.Text}\n" +
-                $"Результат равен: {resultKoef0.Text}\n" + "================\n");
-                    }
-                }
-                if (Data.Check1 == true)
-                {
-                    if (amountKoef1.Text == "")
-                    {
-                        var result = MessageBox.Show("Вы не заполнили формулу ''Коэффициент оборота по выбытию''! Продолжить?",
-                            "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        if (result == DialogResult.OK)
-                        {
-                            sw.WriteLine($"Коэффициент оборота по выбытию\nСЧР равен: -" +
-                                 $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                                 $"Рассматриваемая должность: -\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");
-                        }
-                    }
-                    else
-                    {
-                        if (YearAgo1.Checked == true)
-                            sw.WriteLine($"Коэффициент оборота по выбытию\nСЧР равен: {SChRText1.Text}" +
-                                 $"\nНачало периода подсчёта: {YearAgoText1.Text}\nКонец периода подсчёта: {dateTimePicker1.Value.ToLongDateString()}\n" +
-                                 $"Рассматриваемая должность: {LevelComboBox1.Text}\nКоличество: {amountKoef1.Text}\n" +
-                $"Результат равен: {resultKoef1.Text}\n" + "================\n");
-                        else
-                            sw.WriteLine($"Коэффициент оборота по выбытию\nСЧР равен: {SChRText1.Text}" +
-                             $"\nНачало периода подсчёта: {dateTimePicker1.Value.ToLongDateString()}\nКонец периода подсчёта: {YearForwardText1.Text}\n" +
-                             $"Рассматриваемая должность: {LevelComboBox1.Text}\nКоличество: {amountKoef1.Text}\n" +
-                $"Результат равен: {resultKoef1.Text}\n" + "================\n");
-                    }
-                }
-                if (Data.Check2 == true)
-                {
-                    if (amountKoef2.Text == "")
-                    {
-                        var result = MessageBox.Show("Вы не заполнили формулу ''Коэффициент текучести кадров''! Продолжить?",
-                            "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        if (result == DialogResult.OK)
-                        {
-                            sw.WriteLine($"Коэффициент текучести кадров\nСЧР равен: -" +
-                                 $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                                 $"Рассматриваемая должность: -\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");
-                        }
-                    }
-                    else
-                    {
-                        if (YearAgo2.Checked == true)
-                            sw.WriteLine($"Коэффициент текучести кадров\nСЧР равен: {SChRText2.Text}" +
-                                 $"\nНачало периода подсчёта: {YearAgoText2.Text}\nКонец периода подсчёта: {dateTimePicker2.Value.ToLongDateString()}\n" +
-                                 $"Рассматриваемая должность: {LevelComboBox2.Text}\nКоличество: {amountKoef2.Text}\n" +
-                $"Результат равен: {resultKoef2.Text}\n" + "================\n");
-                        else
-                            sw.WriteLine($"Коэффициент текучести кадров\nСЧР равен: {SChRText2.Text}" +
-                             $"\nНачало периода подсчёта: {dateTimePicker2.Value.ToLongDateString()}\nКонец периода подсчёта: {YearForwardText2.Text}\n" +
-                             $"Рассматриваемая должность: {LevelComboBox2.Text}\nКоличество: {amountKoef2.Text}\n" +
-                $"Результат равен: {resultKoef2.Text}\n" + "================\n");
-                    }
-                }
-                if (Data.Check3 == true)
-                {
-                    if (amountKoef3.Text == "")
-                    {
-                        var result = MessageBox.Show("Вы не заполнили формулу ''Коэффициент постоянства состава персонала предприятия''! Продолжить?",
-                            "Предупреждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        if (result == DialogResult.OK)
-                        {
-                            sw.WriteLine($"Коэффициент постоянства состава персонала предприятия\nСЧР равен: -" +
-                                 $"\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                                 $"Рассматриваемая должность: -\nКоличество: -\n" +
-                    $"Результат равен: -\n" + "================\n");
-                        }
-                    }
-                    else
-                    {
-                        if (YearAgo3.Checked == true)
-                            sw.WriteLine($"Коэффициент постоянства состава персонала предприятия\nСЧР равен: {SChRText3.Text}" +
-                                 $"\nНачало периода подсчёта: {YearAgoText3.Text}\nКонец периода подсчёта: {dateTimePicker3.Value.ToLongDateString()}\n" +
-                                 $"Рассматриваемая должность: {LevelComboBox3.Text}\nКоличество: {amountKoef3.Text}\n" +
-                $"Результат равен: {resultKoef3.Text}\n" + "================\n");
-                        else
-                            sw.WriteLine($"Коэффициент постоянства состава персонала предприятия\nСЧР равен: {SChRText3.Text}" +
-                             $"\nНачало периода подсчёта: {dateTimePicker3.Value.ToLongDateString()}\nКонец периода подсчёта: {YearForwardText3.Text}\n" +
-                             $"Рассматриваемая должность: {LevelComboBox3.Text}\nКоличество: {amountKoef3.Text}\n" +
-                $"Результат равен: {resultKoef3.Text}\n" + "================\n");
-                    }
-                }
-                sw.Close();
-            }
-            MessageBox.Show("Данные успешно сохранены в указанный файл!", "Уведомление",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);*/
         }
 
         public string SaveData(int selected)
@@ -595,10 +475,25 @@ namespace Full_modul
             string SCHR = GetSCHR(selected);
             string result = GetResultText(selected);
 
-            return $"{formulaName}\nНачало периода: {startDate}\n" +
-                   $"Конец периода: {endDate}\n" +
-                   $"Должность: {levelText}\nКоличество: {countText}\n" +
-                   $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
+            if (string.IsNullOrEmpty(result))
+            {
+                var warningMassage = MessageBox.Show($"Вы не заполнили формулу '{formulaName}'! Продолжить?",
+                    "Предупреждение", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                if (warningMassage == MessageBoxResult.OK)
+                {
+                    return $"{formulaName}\nСЧР равен: -\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
+                                 $"Рассматриваемая должность: -\nКоличество: -\nРезультат равен: -\n================\n";
+                }
+            }
+            else
+            {
+                return $"{formulaName}\nНачало периода: {startDate}\n" +
+                  $"Конец периода: {endDate}\n" +
+                  $"Должность: {levelText}\nКоличество: {countText}\n" +
+                  $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
+            }
+            return string.Empty;
         }
 
         private string GetFormulaName(int selected)
