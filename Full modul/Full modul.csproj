@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fonts\Ubuntu-Bold.ttf" />
+    <None Remove="Fonts\Ubuntu-BoldItalic.ttf" />
+    <None Remove="Fonts\Ubuntu-Italic.ttf" />
+    <None Remove="Fonts\Ubuntu-Light.ttf" />
+    <None Remove="Images\File.png" />
     <None Remove="Images\help.png" />
     <None Remove="Images\HR.ico" />
     <None Remove="Images\HR.png" />
@@ -31,6 +36,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\Ubuntu-Bold.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\Ubuntu-BoldItalic.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\Ubuntu-Italic.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\Ubuntu-Light.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\File.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\help.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>

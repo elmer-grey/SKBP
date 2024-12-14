@@ -82,7 +82,7 @@
                 </Image>
                 <TextBlock Text="Главное меню" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="17,0,0,0" FontSize="14"/>
+                           Margin="17,0,0,0" FontSize="16" FontFamily="Ubuntu" FontWeight="Bold"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
@@ -119,17 +119,18 @@
 
                 <TextBlock x:Name="user"
                            Foreground="Black"
+                           FontFamily="Ubuntu"
                            Grid.Column="1"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Left"
-                           FontFamily="Fonts/#Dosis"
-                           FontWeight="Medium"
+                           FontWeight="Normal"
+                           Margin="10"
                            FontSize="15"/>
 
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="46" Width="46">
                     <Grid>
                         <Ellipse Width="45" Height="45" Fill="DarkGray"/>
-                        <Image Width="46" Height="46"
+                        <Image Width="38" Height="38"
                                Source="/Images/Image.png"/>
                     </Grid>
                 </StackPanel>
@@ -138,12 +139,10 @@
                     <Button Click="Button_User_Click"  BorderThickness="0">
                         <StackPanel Orientation="Vertical">
                             <Image Source="/Images/User.png" Width="40" Height="40" />
-                            <TextBlock Text="Личный кабинет" VerticalAlignment="Center" />
+                            <TextBlock Text="Личный кабинет" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Normal" />
                         </StackPanel>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{x:Null}">
-                                <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
                                 <Setter Property="Background" Value="White"/>
                                 <Setter Property="FontSize" Value="15"/>
                                 <Setter Property="Cursor" Value="Hand"/>
@@ -173,7 +172,7 @@ Value="#EBEBEB"/>
                     <Button Click="Button_Reports_Click"  BorderThickness="0">
                         <StackPanel Orientation="Vertical">
                             <Image Source="/Images/Reports.png" Width="40" Height="40" />
-                            <TextBlock Text="Отчёты" VerticalAlignment="Center" />
+                            <TextBlock Text="Отчёты" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Normal" />
                         </StackPanel>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{x:Null}">
@@ -209,9 +208,9 @@ Value="#EBEBEB"/>
                         VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="125" Width="200">
                 <Button Content="HR-Калькулятор"
                         Foreground="White"
-                        FontSize="14"
-                        FontWeight="Medium"
-                        Click="OpenCalculator_Click">
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Click="OpenCalculator_Click" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="Button">
@@ -248,13 +247,11 @@ Value="#EBEBEB"/>
                         VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="125" Width="200">
                 <Button Content="Кнопка"
                         Foreground="White"
-                        FontSize="14"
-                        FontWeight="Medium">
+                        FontSize="16"
+                        FontWeight="Bold" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="TextElement.FontFamily"
-     Value="Fonts/#Dosis"/>
                             <Setter Property="Background" Value="#6665cb"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Style.Triggers>
@@ -283,15 +280,14 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="3" Grid.Column="0" 
                         VerticalAlignment="Top" HorizontalAlignment="Right" Height="125" Width="200">
-                <Button Content="Организационные условия"
+                <Button 
                         Foreground="White"
-                        FontSize="14"
-                        FontWeight="Medium">
-
+                        FontSize="16"
+                        FontWeight="Bold" FontFamily="Ubuntu" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Организационно - правовые условия" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                               TextAlignment="Center" />
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="TextElement.FontFamily"
-     Value="Fonts/#Dosis"/>
                             <Setter Property="Background" Value="#6665cb"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Style.Triggers>
@@ -313,7 +309,6 @@ Value="#EBEBEB"/>
                                                   HorizontalAlignment="Center"/>
 
                             </Border>
-
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
@@ -321,15 +316,13 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="3" Grid.Column="2" 
                         VerticalAlignment="Top" HorizontalAlignment="Left" Height="125" Width="200">
-                <Button Content="Правовые условия"
+                <Button Content="Кнопка2"
                         Foreground="White"
-                        FontSize="14"
-                        FontWeight="Medium">
+                        FontSize="16"
+                        FontWeight="Bold" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="TextElement.FontFamily"
-     Value="Fonts/#Dosis"/>
                             <Setter Property="Background" Value="#7dc5ea"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Style.Triggers>
@@ -361,14 +354,11 @@ Value="#EBEBEB"/>
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Images/help.png" Width="25" Height="25" />
-                        <TextBlock Text="Справка" Margin="10,3,0,0" VerticalAlignment="Center" />
+                        <Image Source="/Images/help.png" Width="30" />
+                        <TextBlock Text="Справка" Margin="10,3,0,0" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Light" />
                     </StackPanel>
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{x:Null}">
-                            <Setter Property="TextElement.FontFamily"
-     Value="Fonts/#Dosis"/>
-
                             <Setter Property="Background" Value="White"/>
                             <Setter Property="FontSize" Value="14"/>
                             <Setter Property="Cursor" Value="Hand"/>

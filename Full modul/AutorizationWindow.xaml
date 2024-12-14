@@ -86,7 +86,7 @@
 
                 <TextBlock Text="Окно авторизации" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="17,0,0,0"/>
+                           Margin="17,0,0,0" FontFamily="Ubuntu" FontSize="14" FontWeight="Bold"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
@@ -125,7 +125,7 @@
                          Width="240" 
                          Height="32" 
                          Margin="0,0,0,5"
-                         FontFamily="Fonts/#Dosis" 
+                         FontFamily="Ubuntu Light" 
                          FontSize="14"
                          VerticalAlignment="Center" 
                          HorizontalAlignment="Center" 
@@ -137,7 +137,7 @@
                          GotFocus="TextBox_Login_GotFocus"
                          LostFocus="TextBox_Login_LostFocus"
                          KeyDown="TextBox_KeyDown"
-                         Text="Введите логин">
+                         Text="Введите логин" FontWeight="Light">
                     <TextBox.Style>
                         <Style TargetType="TextBox">
                             <Setter Property="Template">
@@ -189,7 +189,7 @@
 
                         <TextBlock x:Name="TextBlock_ShowName" 
                                     Margin="2,0,0,0"
-                                    FontFamily="Fonts/#Dosis" 
+                                    FontFamily="Ubuntu Light" 
                                     FontSize="14"
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Left"                                        
@@ -200,7 +200,7 @@
                                     Text="Введите пароль"
                                     IsHitTestVisible="False"
                                     Height="32" 
-                                    Width="150"/>
+                                    Width="150" FontWeight="Light"/>
 
                         <TextBox x:Name="TextBox_ShowPassword" 
                                 Width="210" 
@@ -251,17 +251,60 @@ CornerRadius="15">
                     <ColumnDefinition Width="120*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <CheckBox Margin="12,0,0,0" FontSize="14" FontFamily="Fonts/#Dosis" 
+                    <CheckBox Content="Сохранить данные" Margin="12,0,0,0" FontSize="14" FontFamily="Ubuntu" 
                               x:Name="CheckBox_SaveData" Checked="CheckBox_SaveData_Checked" 
-                              Unchecked="CheckBox_SaveData_Unchecked">
-                        Сохранить данные
+                              Unchecked="CheckBox_SaveData_Unchecked" FontWeight="Light" VerticalAlignment="Center" HorizontalAlignment="Center">                        
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border x:Name="CheckBoxBorder"
+                                                    Background="Transparent" 
+                                                    BorderBrush="Gray" 
+                                                    BorderThickness="1" 
+                                                    CornerRadius="5" 
+                                                    Width="20" 
+                                                    Height="20">
+                                                <Path x:Name="CheckMark" 
+                                                      Data="M 2 8 L 8 14 L 17 1" 
+                                                      Stroke="Black" 
+                                                      StrokeThickness="2" 
+                                                      Visibility="Collapsed" 
+                                                      HorizontalAlignment="Center" 
+                                                      VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="{TemplateBinding Content}" 
+                                                       TextWrapping="Wrap" 
+                                                       HorizontalAlignment="Left" 
+                                                       VerticalAlignment="Center"
+                                                       MaxWidth="300" 
+                                                       Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="#3636EB"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="Gray"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </CheckBox.Style>
                     </CheckBox>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Button Click="Button_Click" Background="White" BorderThickness="0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Забыли пароль?"/>
+                            <TextBlock Text="Забыли пароль?" FontWeight="Light" FontFamily="Ubuntu" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </StackPanel>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{x:Null}">
@@ -295,7 +338,7 @@ Value="#EBEBEB"/>
             <StackPanel Grid.Row="3"
                         VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Button Click="Button_Click"
-                    Content="Вход"
+                        Content="Вход"
                         Foreground="White"
                         FontSize="15"
                         FontWeight="Medium">
@@ -335,13 +378,11 @@ Value="#EBEBEB"/>
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Images/help.png" Width="25" Height="25" Margin="0,0,5,0"/>
-                        <TextBlock Text="Справка" Margin="5,0,0,0" VerticalAlignment="Center" />
+                        <Image Source="/Images/help.png" Margin="0,0,6,0" HorizontalAlignment="Left" Width="30"/>
+                        <TextBlock Text="Справка" Margin="4,1,0,0" FontFamily="Ubuntu" FontWeight="Light" VerticalAlignment="Center" />
                     </StackPanel>
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{x:Null}">
-                            <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
                             <Setter Property="Background" Value="White"/>
                             <Setter Property="FontSize" Value="14"/>
                             <Setter Property="Cursor" Value="Hand"/>
@@ -355,10 +396,8 @@ Value="#EBEBEB"/>
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
-                                <Trigger Property="IsMouseOver"
-Value="True">
-                                    <Setter Property="Background"
-Value="#EBEBEB"/>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#EBEBEB"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>

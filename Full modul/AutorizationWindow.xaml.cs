@@ -155,74 +155,75 @@ namespace Full_modul
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            try
             {
-                try
+                using (SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", DatabaseConnection.Instance.Connection))
                 {
-                    conn.Open();
-                    SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", conn);
                     sqlCommand.Parameters.AddWithValue("@login", TextBox_Login.Text);
                     sqlCommand.Parameters.AddWithValue("@pass", PasswordBox.Password);
 
-                    SqlDataReader dataReader = sqlCommand.ExecuteReader();
-                    if (dataReader.Read())
+                    using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
                     {
-                        UserInfo.username = Convert.ToString(dataReader["login_hr"]).TrimEnd();
-                        UserInfo.password = Convert.ToString(dataReader["pass_hr"]).TrimEnd();
-
-                        if (PasswordBox.Password == "KIBEVS1902")
+                        if (dataReader.Read())
                         {
-                            ChangePassWindow changePasswordWindow = new ChangePassWindow();
-                            if (changePasswordWindow.ShowDialog() == true)
+                            UserInfo.username = Convert.ToString(dataReader["login_hr"]).TrimEnd();
+                            UserInfo.password = Convert.ToString(dataReader["pass_hr"]).TrimEnd();
+
+                            if (PasswordBox.Password == "KIBEVS1902")
                             {
-                                return;
+                                ChangePassWindow changePasswordWindow = new ChangePassWindow();
+                                if (changePasswordWindow.ShowDialog() == true)
+                                {
+                                    return;
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Изменение пароля отменено!", "Уведомление",
+                                        MessageBoxButton.OK, MessageBoxImage.Error);
+                                    return;
+                                }
                             }
                             else
                             {
+                                MessageBox.Show("Вы вошли в систему!");
 
-                                MessageBox.Show("Изменение пароля отменено!", "Уведомление",
-                                    MessageBoxButton.OK, MessageBoxImage.Error);
-                                return;
+                                MainWindow mainWindow = new MainWindow();
+                                mainWindow.Show();
+                                this.Close();
+                                if (!(bool)CheckBox_SaveData.IsChecked)
+                                {
+                                    TextBox_Login.Text = "";
+                                    PasswordBox.Password = "";
+                                }
                             }
                         }
                         else
                         {
-                            MessageBox.Show("Вы вошли в систему!");
-
-                            MainWindow mainWindow = new MainWindow();
-                            mainWindow.Show();
-                            this.Close();
-                            if (!(bool)CheckBox_SaveData.IsChecked)
+                            if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
                             {
-                                TextBox_Login.Text = "";
-                                PasswordBox.Password = "";
+                                MessageBox.Show("Вы вошли в систему!");
+
+                                MainWindow mainWindow = new MainWindow();
+                                mainWindow.Show();
+                                this.Close();
+                                if (!(bool)CheckBox_SaveData.IsChecked)
+                                {
+                                    TextBox_Login.Text = "";
+                                    PasswordBox.Password = "";
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("Вы ввели неверный логин или пароль!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
                             }
                         }
                     }
-                    else
-                    {
-                        if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
-                        {
-                            MessageBox.Show("Вы вошли в систему!");
-
-                            MainWindow mainWindow = new MainWindow();
-                            mainWindow.Show();
-                            this.Close();
-                            if (!(bool)CheckBox_SaveData.IsChecked)
-                            {
-                                TextBox_Login.Text = "";
-                                PasswordBox.Password = "";
-                            }
-                        }
-                        else
-                            MessageBox.Show("Вы ввели неверный логин или пароль!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
                 }
-                catch (SqlException ex)
-                {
-                    MessageBox.Show("Нет подключения");
-                }
-            }        
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Нет подключения");
+            }
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs e)

@@ -81,9 +81,9 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                     </Image.ContextMenu>
                 </Image>
 
-                <TextBlock Text="Окно авторизации" Grid.Column="1" Foreground="White" 
+                <TextBlock Text="Сохранить файл" Grid.Column="1" Foreground="White" 
                     VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Margin="17,0,0,0"/>
+                    Margin="17,0,0,0" FontFamily="Ubuntu" FontSize="16" FontWeight="Bold"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
@@ -104,9 +104,9 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
             <TextBlock x:Name="MessageTextBlock" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
                        TextWrapping="Wrap" Grid.Row="0" FontSize="14" />
             <TextBox x:Name="FileNameTextBox" Margin="10,0,10,10" Height="25" Grid.Row="1"
-                     FontSize="14" VerticalAlignment="Center" Padding="1,2" />
+                     FontSize="14" VerticalAlignment="Center" Padding="1,2" FontFamily="Ubuntu" />
             <Button Content="Сохранить" Margin="10,0,10,15" Click="SaveButton_Click" Grid.Row="2"
-                    FontSize="14" />
+                    FontSize="16" FontFamily="Ubuntu" FontWeight="Medium" />
         </Grid>
     </Grid>
 </Window>

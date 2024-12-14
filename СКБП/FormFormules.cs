@@ -860,62 +860,6 @@ OPTION(MAXRECURSION 0);";
             koef0();
         }
 
-        public void YearAgo0_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef0();
-        }
-
-        public void YearForward0_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef0();
-        }
-
-        public void YearAgo1_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef1();
-        }
-
-        public void YearForward1_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef1();
-        }
-
-        public void YearAgo2_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef2();
-        }
-
-        public void YearForward2_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef2();
-        }
-
-        public void YearAgo3_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef3();
-        }
-
-        public void YearForward3_CheckedChanged(object sender, EventArgs e)
-        {
-            DateChange();
-            SChR_calculation();
-            koef3();
-        }
-
         public void LevelComboBox0_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch (LevelComboBox0.SelectedIndex)
@@ -1006,12 +950,7 @@ OPTION(MAXRECURSION 0);";
                 resultKoef0.Text = "0";
             resultKoef0.Text = Math.Round(Convert.ToDouble(resultKoef0.Text), 8).ToString();
         }
-        public double result(int amount, double SCHR)
-        {
-            double res;
-            res = Math.Round(amount / SCHR * 0.8, 8);
-            return res;
-        }
+
         public void resultKoef1_TextChanged(object sender, EventArgs e)
         {
             if (SChRText1.Text == "0" && amountKoef1.Text == "0")

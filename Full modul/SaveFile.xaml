@@ -24,46 +24,99 @@
                 <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0,0,0"/>
 
                 <TextBlock Text="Сохранение отчёта" Grid.Column="1" Foreground="White" 
-                           VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="0,0,17,0"/>
+                           VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,43,0" FontFamily="Ubuntu" FontSize="16" FontWeight="Bold"/>
             </Grid>
         </Border>
 
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="80*"/>
-                <RowDefinition Height="60*"/>
-                <RowDefinition Height="60*"/>
-                <RowDefinition Height="60*"/>
-                <RowDefinition Height="60*"/>
+                <RowDefinition Height="55*"/>
+                <RowDefinition Height="55*"/>
+                <RowDefinition Height="55*"/>
+                <RowDefinition Height="70*"/>
                 <RowDefinition Height="80*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,0,0,0">
-                <Image Source="Images/HR.png" 
-                       Width="30" 
-                       Height="30" 
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5,0,0,0">
+                <Image Source="/Images/File.png" 
+                       Width="36" 
                        Margin="0,0,5,0"
                        VerticalAlignment="Center"/>
                 
                 <TextBlock Text="Сохранить данные" 
-               FontFamily="Fonts/#Dosis" 
-               FontWeight="Bold" 
-               FontSize="18" 
-               VerticalAlignment="Center"
-                           Margin="0,5,0,0"/>
+                           FontFamily="Ubuntu" 
+                           FontWeight="Medium" 
+                           FontSize="18" 
+                           VerticalAlignment="Center"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1"
+                         VerticalAlignment="Center" 
+                         HorizontalAlignment="Left" 
+                         Width="300">
+                <CheckBox x:Name="CheckBox0" 
+   Content="Коэффициент оборота по приёму" 
+   Margin="10,0,0,0" 
+   FontFamily="Ubuntu" 
+   FontSize="14" >
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border x:Name="CheckBoxBorder0"
+                                                     Background="Transparent" 
+                                                     BorderBrush="Gray" 
+                                                     BorderThickness="1" 
+                                                     CornerRadius="5" 
+                                                     Width="20" 
+                                                     Height="20">
+                                                <Path x:Name="CheckMark0" 
+                               Data="M 2 8 L 8 14 L 17 1" 
+                               Stroke="Black" 
+                               StrokeThickness="2" 
+                               Visibility="Collapsed" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <TextBlock Text="{TemplateBinding Content}" 
+                                TextWrapping="Wrap" 
+                                HorizontalAlignment="Left" 
+                                                       VerticalAlignment="Center"
+                                MaxWidth="300" 
+                                Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CheckBoxBorder0" Property="BorderBrush" Value="#3636EB"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter TargetName="CheckBoxBorder0" Property="BorderBrush" Value="Gray"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="CheckMark0" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2"
  VerticalAlignment="Center" 
  HorizontalAlignment="Left" 
  Width="300">
                 <CheckBox x:Name="CheckBox1" 
-   Content="Коэффициент оборота по приёму" 
+   Content="Коэффициент оборота по выбытию" 
    Margin="10,0,0,0" 
-   FontFamily="Fonts/#Dosis" 
-   FontSize="14" 
-   FontWeight="Medium">
+   FontFamily="Ubuntu" 
+   FontSize="14" >
                     <CheckBox.Style>
                         <Style TargetType="CheckBox">
                             <Setter Property="Template">
@@ -77,7 +130,7 @@
                              CornerRadius="5" 
                              Width="20" 
                              Height="20">
-                                                <Path x:Name="CheckMark1" 
+                                                <Path x:Name="CheckMark1"
                                Data="M 2 8 L 8 14 L 17 1" 
                                Stroke="Black" 
                                StrokeThickness="2" 
@@ -112,16 +165,15 @@
                 </CheckBox>
             </StackPanel>
 
-            <StackPanel Grid.Row="2"
- VerticalAlignment="Center" 
- HorizontalAlignment="Left" 
- Width="300">
-                <CheckBox x:Name="CheckBox2" 
-   Content="Коэффициент оборота по выбытию" 
-   Margin="10,0,0,0" 
-   FontFamily="Fonts/#Dosis" 
-   FontSize="14" 
-   FontWeight="Medium">
+            <StackPanel Grid.Row="3"
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Left" 
+            Width="300">
+                <CheckBox x:Name="CheckBox2"
+              Content="Коэффициент текучести кадров" 
+              Margin="10,0,0,0" 
+              FontFamily="Ubuntu" 
+              FontSize="14" >
                     <CheckBox.Style>
                         <Style TargetType="CheckBox">
                             <Setter Property="Template">
@@ -129,28 +181,28 @@
                                     <ControlTemplate TargetType="CheckBox">
                                         <StackPanel Orientation="Horizontal">
                                             <Border x:Name="CheckBoxBorder2"
-                             Background="Transparent" 
-                             BorderBrush="Gray" 
-                             BorderThickness="1" 
-                             CornerRadius="5" 
-                             Width="20" 
-                             Height="20">
-                                                <Path x:Name="CheckMark2" 
-                               Data="M 2 8 L 8 14 L 17 1" 
-                               Stroke="Black" 
-                               StrokeThickness="2" 
-                               Visibility="Collapsed" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"/>
+                                        Background="Transparent" 
+                                        BorderBrush="Gray" 
+                                        BorderThickness="1" 
+                                        CornerRadius="5" 
+                                        Width="20" 
+                                        Height="20">
+                                                <Path x:Name="CheckMark2"
+                                          Data="M 2 8 L 8 14 L 17 1" 
+                                          Stroke="Black" 
+                                          StrokeThickness="2" 
+                                          Visibility="Collapsed" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center"/>
                                             </Border>
 
                                             <TextBlock Text="{TemplateBinding Content}" 
-                                TextWrapping="Wrap" 
-                                HorizontalAlignment="Left" 
+                                           TextWrapping="Wrap" 
+                                           HorizontalAlignment="Left" 
                                                        VerticalAlignment="Center"
-                                MaxWidth="300" 
-                                Margin="5,0,0,0"/>
-                                        </StackPanel>
+                                           MaxWidth="300" 
+                                           Margin="5,0,0,0"/>
+                            </StackPanel>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="CheckBoxBorder2" Property="BorderBrush" Value="#3636EB"/>
@@ -170,16 +222,15 @@
                 </CheckBox>
             </StackPanel>
 
-            <StackPanel Grid.Row="3"
-            VerticalAlignment="Center" 
-            HorizontalAlignment="Left" 
-            Width="300">
-                <CheckBox x:Name="CheckBox3" 
-              Content="Коэффициент текучести кадров" 
-              Margin="10,0,0,0" 
-              FontFamily="Fonts/#Dosis" 
-              FontSize="14" 
-              FontWeight="Medium">
+            <StackPanel Grid.Row="4"
+ VerticalAlignment="Center" 
+ HorizontalAlignment="Left" 
+ Width="300">
+                <CheckBox x:Name="CheckBox3"
+   Content="Коэффициент постоянства состава предприятия" 
+   Margin="10,0,0,0" 
+   FontFamily="Ubuntu" 
+   FontSize="14" >
                     <CheckBox.Style>
                         <Style TargetType="CheckBox">
                             <Setter Property="Template">
@@ -187,28 +238,28 @@
                                     <ControlTemplate TargetType="CheckBox">
                                         <StackPanel Orientation="Horizontal">
                                             <Border x:Name="CheckBoxBorder3"
-                                        Background="Transparent" 
-                                        BorderBrush="Gray" 
-                                        BorderThickness="1" 
-                                        CornerRadius="5" 
-                                        Width="20" 
-                                        Height="20">
+                             Background="Transparent" 
+                             BorderBrush="Gray" 
+                             BorderThickness="1" 
+                             CornerRadius="5" 
+                             Width="20" 
+                             Height="20">
                                                 <Path x:Name="CheckMark3" 
-                                          Data="M 2 8 L 8 14 L 17 1" 
-                                          Stroke="Black" 
-                                          StrokeThickness="2" 
-                                          Visibility="Collapsed" 
-                                          HorizontalAlignment="Center" 
-                                          VerticalAlignment="Center"/>
+                               Data="M 2 8 L 8 14 L 17 1" 
+                               Stroke="Black" 
+                               StrokeThickness="2" 
+                               Visibility="Collapsed" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
                                             </Border>
 
                                             <TextBlock Text="{TemplateBinding Content}" 
-                                           TextWrapping="Wrap" 
-                                           HorizontalAlignment="Left" 
+                                TextWrapping="Wrap" 
+                                HorizontalAlignment="Left" 
                                                        VerticalAlignment="Center"
-                                           MaxWidth="300" 
-                                           Margin="5,0,0,0"/>
-                            </StackPanel>
+                                MaxWidth="300" 
+                                Margin="5,0,0,0"/>
+                                        </StackPanel>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="CheckBoxBorder3" Property="BorderBrush" Value="#3636EB"/>
@@ -228,72 +279,14 @@
                 </CheckBox>
             </StackPanel>
 
-            <StackPanel Grid.Row="4"
- VerticalAlignment="Center" 
- HorizontalAlignment="Left" 
- Width="300">
-                <CheckBox x:Name="CheckBox4" 
-   Content="Коэффициент постоянства состава предприятия" 
-   Margin="10,0,0,0" 
-   FontFamily="Fonts/#Dosis" 
-   FontSize="14" 
-   FontWeight="Medium">
-                    <CheckBox.Style>
-                        <Style TargetType="CheckBox">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="CheckBox">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border x:Name="CheckBoxBorder4"
-                             Background="Transparent" 
-                             BorderBrush="Gray" 
-                             BorderThickness="1" 
-                             CornerRadius="5" 
-                             Width="20" 
-                             Height="20">
-                                                <Path x:Name="CheckMark4" 
-                               Data="M 2 8 L 8 14 L 17 1" 
-                               Stroke="Black" 
-                               StrokeThickness="2" 
-                               Visibility="Collapsed" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"/>
-                                            </Border>
-
-                                            <TextBlock Text="{TemplateBinding Content}" 
-                                TextWrapping="Wrap" 
-                                HorizontalAlignment="Left" 
-                                                       VerticalAlignment="Center"
-                                MaxWidth="300" 
-                                Margin="5,0,0,0"/>
-                                        </StackPanel>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="CheckBoxBorder4" Property="BorderBrush" Value="#3636EB"/>
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="False">
-                                                <Setter TargetName="CheckBoxBorder4" Property="BorderBrush" Value="Gray"/>
-                                            </Trigger>
-                                            <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="CheckMark4" Property="Visibility" Value="Visible"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </CheckBox.Style>
-                </CheckBox>
-            </StackPanel>
-
             <StackPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" 
                         Orientation="Horizontal">
-                <Button Click="CloseButton_Click"
+                <Button Click="AcceptButton_Click"
                         Content="Сохранить"
                         Foreground="White"
-                        FontSize="15"
+                        FontSize="16"
                         FontWeight="Medium"
-                        Margin="0,0,20,0">
+                        Margin="0,0,20,0" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="Button">
@@ -323,24 +316,20 @@ Value="#7c7bc8"/>
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-                <Button Click="CloseButton_Click"
+                <Button Click="ReturnButton_Click"
                 Content="Отменить"
                     Foreground="White"
-                    FontSize="15"
+                    FontSize="16"
                     FontWeight="Medium"
-                        Margin="20,0,0,0">
+                        Margin="20,0,0,0" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="TextElement.FontFamily"
- Value="Fonts/#Dosis"/>
                             <Setter Property="Background" Value="DarkGray"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Style.Triggers>
-                                <Trigger Property="IsMouseOver"
-Value="True">
-                                    <Setter Property="Background"
-Value="#B4B4B4"/>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#B4B4B4"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>

@@ -26,7 +26,6 @@ namespace Full_modul
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Позволяет перетаскивать окно
             if (e.ButtonState == MouseButtonState.Pressed)
             {
                 this.DragMove();
@@ -35,7 +34,24 @@ namespace Full_modul
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close(); // Закрыть окно
+            this.Close();
+        }
+
+        private void AcceptButton_Click(object sender, EventArgs e)
+        {
+            Data.Check0 = CheckBox0.IsChecked == true;
+            Data.Check1 = CheckBox1.IsChecked == true;
+            Data.Check2 = CheckBox2.IsChecked == true;
+            Data.Check3 = CheckBox3.IsChecked == true;
+            Close();
+        }
+
+        private void ReturnButton_Click(object sender, EventArgs e)
+        {
+            CheckBox0.IsChecked = false;
+            CheckBox1.IsChecked = false;
+            CheckBox2.IsChecked = false;
+            CheckBox3.IsChecked = false;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Full_modul
         {
             InitializeComponent();
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));            
-            this.Closing += MainWindow_Closing; // Подписываемся на событие Closing
+            this.Closing += MainWindow_Closing;
 
             string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
@@ -39,12 +39,11 @@ namespace Full_modul
 
                     if (result != null)
                     {
-                        // Преобразуем результат в строку и выводим в TextBox
                         user.Text = result.ToString().Trim();
                     }
                     else
                     {
-                        user.Text = "0"; // Если не найдено, устанавливаем 0
+                        user.Text = "Царь и Бог";
                     }
                 }
                 catch (Exception ex)

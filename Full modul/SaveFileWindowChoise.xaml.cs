@@ -22,18 +22,21 @@ namespace Full_modul
     public partial class SaveFileWindowChoise : Window
     {
         private string _previousWindow;
+        private CalculatorWindow _calculatorWindow;
+        public int SelectedIndex { get; private set; }
 
-        public SaveFileWindowChoise(string previousWindow)
+        public SaveFileWindowChoise(CalculatorWindow calculatorWindow, string previousWindow)
         {
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             InitializeComponent();
             _previousWindow = previousWindow;
+            _calculatorWindow = calculatorWindow;
 
             if (_previousWindow == "CalculatorWindow")
             {
                 MessageTextBlock.Text = "Вы запустили процедуру сохранения отчёта! \nВведите в окно ниже название файла. \nВнимание! Он будет сохранен в соответствующую папку, где находится данное ПО!";
             }
-            else if (_previousWindow == "Условия")
+            else if (_previousWindow == "OrganizAndLegalConditWindow")
             {
                 MessageTextBlock.Text = "Вы запустили процедуру сохранения документа с результатами! \nВведите в окно ниже название файла. \nВнимание! Он будет сохранен в соответствующую папку, где находится данное ПО!";
             }
@@ -49,8 +52,8 @@ namespace Full_modul
             }
 
             string folderPath = _previousWindow == "CalculatorWindow"
-                ? Path.Combine(Directory.GetCurrentDirectory(), "отчёты")
-                : Path.Combine(Directory.GetCurrentDirectory(), "результаты");
+                ? Path.Combine(Directory.GetCurrentDirectory(), "Отчёты", "Калькулятор")
+                : Path.Combine(Directory.GetCurrentDirectory(), "Отчёты", "Условия");
 
             if (!Directory.Exists(folderPath))
             {
@@ -61,13 +64,32 @@ namespace Full_modul
 
             using (StreamWriter sw = new StreamWriter(filePath, true))
             {
-                sw.WriteLine("Данные сохранены: " + fileName);
+                string data = string.Empty;
+                switch (Data.BoxIndex)
+                {
+                    case 0:
+                        data = _calculatorWindow.SaveData(0);
+                        break;
+                    case 1:
+                        data = _calculatorWindow.SaveData(1);
+                        break;
+                    case 2:
+                        data = _calculatorWindow.SaveData(2);
+                        break;
+                    case 3:
+                        data = _calculatorWindow.SaveData(3);
+                        break;
+                    default:
+                        break;
+                }
 
+                sw.WriteLine($"{data}");
             }
 
             MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             this.Close();
         }
+
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

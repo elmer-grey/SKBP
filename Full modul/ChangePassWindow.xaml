@@ -25,7 +25,7 @@
 
                 <TextBlock Text="Изменение пароля" Grid.Column="1" Foreground="White" 
                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Margin="0,0,43,0"/>
+                           Margin="0,0,43,0" FontWeight="Bold" FontFamily="Ubuntu" FontSize="14"/>
             </Grid>
         </Border>
 
@@ -40,8 +40,7 @@
 
             <StackPanel Grid.Row="0" Orientation="Vertical" Margin="20,10,0,0">
                 <TextBlock Text="Для входа был использован стандартный пароль." 
-               FontFamily="Fonts/#Dosis" 
-               FontWeight="Medium" 
+               FontFamily="Ubuntu" 
                FontSize="18" 
                VerticalAlignment="Center"
                            Margin="0,5,0,0"
@@ -49,8 +48,7 @@
 HorizontalAlignment="Left" 
 MaxWidth="460" />
                 <TextBlock Text="Пожалуйста, смените пароль." 
-               FontFamily="Fonts/#Dosis" 
-               FontWeight="Medium" 
+               FontFamily="Ubuntu" 
                FontSize="18" 
                VerticalAlignment="Center"
                            Margin="0,5,0,0"
@@ -63,7 +61,7 @@ MaxWidth="320" />
  VerticalAlignment="Center" 
  HorizontalAlignment="Left" >
                 <TextBlock Text="Новый пароль" 
-FontFamily="Fonts/#Dosis" 
+FontFamily="Ubuntu" 
 FontWeight="Bold" 
 FontSize="18" 
 VerticalAlignment="Center"
@@ -104,7 +102,7 @@ VerticalAlignment="Center"
 
                         <TextBlock x:Name="TextBlock_ShowName1" 
                                        Margin="2,0,0,0"
-                                        FontFamily="Fonts/#Dosis" 
+                                        FontFamily="Ubuntu" 
                                         FontSize="14"
                                         VerticalAlignment="Center" 
                                         HorizontalAlignment="Left"                                        
@@ -163,7 +161,7 @@ CornerRadius="15">
  VerticalAlignment="Center" 
  HorizontalAlignment="Left" >
                 <TextBlock Text="Повторите пароль" 
-FontFamily="Fonts/#Dosis" 
+FontFamily="Ubuntu" 
 FontWeight="Bold" 
 FontSize="18" 
 VerticalAlignment="Center"
@@ -204,7 +202,7 @@ VerticalAlignment="Center"
 
                         <TextBlock x:Name="TextBlock_ShowName2" 
                                        Margin="2,0,0,0"
-                                        FontFamily="Fonts/#Dosis" 
+                                        FontFamily="Ubuntu" 
                                         FontSize="14"
                                         VerticalAlignment="Center" 
                                         HorizontalAlignment="Left"                                        
@@ -266,8 +264,7 @@ CornerRadius="15">
                 <TextBlock Text="Пароли должен содержать не менее 8 символов,
 прописные и строчные буквы, цифры, а также
 специальные символы." 
-               FontFamily="Fonts/#Dosis" 
-               FontWeight="Medium" 
+               FontFamily="Ubuntu" 
                FontSize="18" 
                VerticalAlignment="Center"
                            Margin="20,5,0,0"
@@ -282,7 +279,7 @@ MaxWidth="460" />
                         Content="Ввод"
                         Foreground="White"
                         FontSize="15"
-                        FontWeight="Medium">
+                        FontWeight="Bold" FontFamily="Ubuntu">
 
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
