@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
-        Title="Сохранить файл" Height="200" Width="350"
+        Title="Сохранить файл" Height="220" Width="350"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
@@ -97,16 +97,45 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
         </Border>
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="5*"/>
+                <RowDefinition Height="11*"/>
+                <RowDefinition Height="4*"/>
                 <RowDefinition Height="5*"/>
             </Grid.RowDefinitions>
             <TextBlock x:Name="MessageTextBlock" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
                        TextWrapping="Wrap" Grid.Row="0" FontSize="14" />
-            <TextBox x:Name="FileNameTextBox" Margin="10,0,10,10" Height="25" Grid.Row="1"
+            <TextBox x:Name="FileNameTextBox" Margin="10,0,10,0" Height="25" Grid.Row="1"
                      FontSize="14" VerticalAlignment="Center" Padding="1,2" FontFamily="Ubuntu" KeyDown="TextBox_KeyDown" />
-            <Button Content="Сохранить" Margin="10,0,10,15" Click="SaveButton_Click" Grid.Row="2"
-                    FontSize="16" FontFamily="Ubuntu" FontWeight="Medium" />
+
+            <Button Content="Сохранить" Margin="10,0,10,12" Click="SaveButton_Click" Grid.Row="2"
+                    FontSize="18" FontFamily="Ubuntu" FontWeight="Medium">
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#6665cb"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Foreground" Value="WhiteSmoke"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver"
+Value="True">
+                                <Setter Property="Background"
+Value="#7c7bc8"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Width="250" Height="30"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </Grid>
     </Grid>
 </Window>

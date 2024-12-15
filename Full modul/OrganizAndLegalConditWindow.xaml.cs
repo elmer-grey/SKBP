@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace Full_modul
 {
@@ -22,17 +26,60 @@ namespace Full_modul
         public OrganizAndLegalConditWindow()
         {
             InitializeComponent();
+            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
+
+            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+
+            using (SqlConnection connection = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@login", UserInfo.username);
+
+                try
+                {
+                    connection.Open();
+                    object result = command.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        user.Text = result.ToString().Trim();
+                    }
+                    else
+                    {
+                        user.Text = "Царь и Бог";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка: " + ex.Message);
+                }
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Картинка и текст были нажаты!");
+            MessageBox.Show("Здесь будет справка!");
         }
 
         private void Button_Reports_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Здесь Вы будете перенаправлены в папку с отчётами!");
+            string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Отчёты", "Условия");
+
+            if (Directory.Exists(folderPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = folderPath,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            else
+            {
+                MessageBox.Show("Папка не найдена: " + folderPath, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
         private void Button_User_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Здесь Вы будете перенаправлены в Личный кабинет!");
@@ -40,7 +87,6 @@ namespace Full_modul
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Позволяет перетаскивать окно
             if (e.ButtonState == MouseButtonState.Pressed)
             {
                 this.DragMove();
@@ -49,12 +95,12 @@ namespace Full_modul
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized; // Свернуть окно
+            this.WindowState = WindowState.Minimized;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close(); // Закрыть окно
+            this.Close();
         }
 
         private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -65,10 +111,185 @@ namespace Full_modul
                 if (image != null)
                 {
                     ContextMenu contextMenu = image.ContextMenu;
-                    contextMenu.IsOpen = true; // Открыть контекстное меню
+                    contextMenu.IsOpen = true;
                 }
-                e.Handled = true; // Отметить событие как обработанное
+                e.Handled = true;
             }
+        }
+
+        private void UpdatePlaceholderVisibility(ComboBox comboBox)
+        {
+            var grid = (Grid)comboBox.Parent;
+            var placeholderText = (TextBlock)grid.Children[1];
+
+            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                placeholderText.Visibility = selectedItem.Content.ToString() != "-" ? Visibility.Collapsed : Visibility.Visible;
+            }
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            {
+                UpdatePlaceholderVisibility(comboBox);
+                HandleFirstContainer(comboBox);
+
+                var comboBoxes1 = new[] { Box0, Box1, Box2, Box3, Box4, Box5, Box6 };
+                CalculateAverage(comboBoxes1, result0, ClickableImage2);
+
+                UpdateSecondContainerResults();
+            }
+        }
+
+        private void HandleFirstContainer(ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string selectedValue = selectedItem.Content.ToString();
+
+                if (comboBox == Box1)
+                {
+                    Grid10.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
+                }
+
+                if (comboBox == Box4)
+                {
+                    Grid13.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
+                }
+            }
+        }
+
+        private void UpdateSecondContainerResults()
+        {
+            int sum = 0;
+            int count = 0;
+            int visibleCount = 0;
+            bool isAnyGridVisible = false;
+
+            for (int i = 9; i <= 15; i++)
+            {
+                var comboBox = (ComboBox)this.FindName($"Box{i}");
+                var Grid = (Grid)this.FindName($"Grid{i}");
+
+                if (Grid.Visibility == Visibility.Visible)
+                {
+                    isAnyGridVisible = true;
+                    visibleCount++;
+
+                    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+                    {
+                        if (selectedItem.Content.ToString() == "Да")
+                        {
+                            sum += 1;
+                        }
+                        count++;
+                    }
+                }
+            }
+
+            if (isAnyGridVisible && count == visibleCount)
+            {
+                double average = (double)sum / visibleCount; 
+                result1.Text = average.ToString("0.#####");
+                Save0.IsEnabled = true;
+            }
+            else
+            {
+                result1.Text = string.Empty;
+                Save0.IsEnabled = false;
+            }
+        }
+
+        private void CalculateAverage(ComboBox[] comboBoxes, TextBox resultText, Image clickableImage)
+        {
+            int sum = 0;
+            int count = 0;
+            bool allSelected = true;
+
+            foreach (var comboBox in comboBoxes)
+            {
+                if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    if (selectedItem.Content.ToString() == "Да")
+                    {
+                        sum += 1;
+                    }
+                    count++;
+                }
+                else
+                {
+                    allSelected = false;
+                    break;
+                }
+            }
+
+            if (allSelected && count > 0)
+            {
+                double average = (double)sum / count;
+                resultText.Text = average.ToString("0.#####");
+
+                if (clickableImage != null && resultText.Text != string.Empty)
+                {
+                    clickableImage.Source = new BitmapImage(new Uri("pack://application:,,,/Images/User.png"));
+                }
+            }
+            else
+            {
+                resultText.Text = string.Empty;
+            }
+        }
+
+        private void SwitchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ContainerOrgan.Visibility == Visibility.Visible)
+            {
+                if (result0.Text != string.Empty)
+                {
+                    ContainerOrgan.Visibility = Visibility.Collapsed;
+                    ContainerLegal.Visibility = Visibility.Visible;
+                    UpdateSecondContainerResults();
+                }
+            }
+            else
+            {
+                ContainerOrgan.Visibility = Visibility.Visible;
+                ContainerLegal.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ClickableImage_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(result0.Text))
+            {
+                Mouse.OverrideCursor = Cursors.Hand;
+            }
+        }
+
+        private void ClickableImage_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Mouse.OverrideCursor = null;
+        }
+
+        public void ExportButton_Click(object sender, EventArgs e)
+        {
+            ExportData();
+        }
+
+        public void ExportData()
+        {
+            SaveFileWindowChoise saveFileWindow = new SaveFileWindowChoise(null, this, "OrganizAndLegalConditWindow");
+            saveFileWindow.ShowDialog();
+        }
+
+        public string SaveData()
+        {
+            if (!string.IsNullOrEmpty(result0.Text) && !string.IsNullOrEmpty(result1.Text))
+            {
+                return $"Организационные условия\nПолученный коэффициент: {result0.Text}\n\n" +
+                    $"Правовые условия\nПолученный коэффициент: {result1.Text}\n================\n";
+            }
+            return string.Empty;
         }
     }
 }

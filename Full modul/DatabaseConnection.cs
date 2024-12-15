@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Full_modul.Properties;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,8 @@ namespace Full_modul
 
         private DatabaseConnection()
         {
-            string ConnectionString = @"Data Source=DESKTOP-TBLQV8A\SQLEXPRESS;Initial Catalog=calculator;Integrated Security=True;" +
-                "TrustServerCertificate=True";
-            _connection = new SqlConnection(ConnectionString);
+            string connectionString = Settings.Default.ConnectionString;
+            _connection = new SqlConnection(connectionString);
         }
 
         public static DatabaseConnection Instance

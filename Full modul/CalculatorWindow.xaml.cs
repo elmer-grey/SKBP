@@ -17,8 +17,7 @@ namespace Full_modul
 {
     /// <summary>
     /// Логика взаимодействия для CalculatorWindow.xaml
-    /// </summary>
-    
+    /// </summary>    
     public partial class CalculatorWindow : Window
     {
         public CalculatorWindow()
@@ -199,7 +198,6 @@ namespace Full_modul
         private bool isLevelWorkerSelected = false;
 
         private bool isHandlingComboBoxSelection = false;
-        private bool isHandlingCalendarSelection = false;
 
         private void Calendar_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -451,7 +449,7 @@ namespace Full_modul
         {           
             var result = MessageBox.Show("Вы запустили процедуру сохранения данных.\nЕсли Вы хотите сохранить только данные вычисления, то нажмите \"Да\"\n" +
                 "Если хотите сохранить несколько вычислений, то нажмите \"Нет\"", "Процедура сохранения", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            SaveFileWindowChoise saveFileWindow = new SaveFileWindowChoise(this, "CalculatorWindow");
+            SaveFileWindowChoise saveFileWindow = new SaveFileWindowChoise(this, null, "CalculatorWindow");
             if (result == MessageBoxResult.No)
             {
                 SaveFile SF = new SaveFile();
@@ -464,7 +462,6 @@ namespace Full_modul
                 Data.BoxIndex = comboBoxFormules.SelectedIndex;
                 saveFileWindow.ShowDialog();
             }
-            // или "Условия"
         }
 
         public string SaveData(int selected)

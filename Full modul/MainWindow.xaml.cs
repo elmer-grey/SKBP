@@ -116,6 +116,7 @@ namespace Full_modul
                 MessageBox.Show("Папка не найдена: " + folderPath, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void Button_User_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Здесь Вы будете перенаправлены в Личный кабинет!");
@@ -152,28 +153,25 @@ namespace Full_modul
                 e.Handled = true; // Отметить событие как обработанное
             }
         }
+
         private void OpenCalculator_Click(object sender, RoutedEventArgs e)
         {
             if (calculatorWindow == null || !calculatorWindow.IsVisible)
             {
-                // Создаем новое окно калькулятора, если его еще нет или оно закрыто
                 calculatorWindow = new CalculatorWindow();
-                calculatorWindow.Closed += CalculatorWindow_Closed; // Подписываемся на событие закрытия
+                calculatorWindow.Closed += CalculatorWindow_Closed;
                 calculatorWindow.Show();
 
-                // Сворачиваем основное окно
                 this.WindowState = WindowState.Minimized;
             }
             else
             {
                 if (calculatorWindow.WindowState == WindowState.Minimized)
                 {
-                    // Если калькулятор свернут, восстанавливаем его
                     calculatorWindow.WindowState = WindowState.Normal;
                 }
                 else
                 {
-                    // Если калькулятор открыт, просто активируем его
                     calculatorWindow.Activate();
                 }
             }
@@ -181,18 +179,39 @@ namespace Full_modul
 
         private void CalculatorWindow_Closed(object sender, EventArgs e)
         {
-            // Активируем главное окно при закрытии калькулятора
             this.Activate();
-            this.WindowState = WindowState.Normal; // Восстанавливаем состояние окна
-            calculatorWindow = null; // Удаляем ссылку на закрытое окно
+            this.WindowState = WindowState.Normal;
+            calculatorWindow = null;
         }
 
-        private void Window_StateChanged(object sender, EventArgs e)
+        private void OpenCondit_Click(object sender, RoutedEventArgs e)
         {
-            if (this.WindowState == WindowState.Minimized)
+            if (organizAndLegalConditWindow == null || !organizAndLegalConditWindow.IsVisible)
             {
-                // Здесь можно добавить логику, если нужно что-то сделать при сворачивании
+                organizAndLegalConditWindow = new OrganizAndLegalConditWindow();
+                organizAndLegalConditWindow.Closed += ConditWindow_Closed;
+                organizAndLegalConditWindow.Show();
+
+                this.WindowState = WindowState.Minimized;
             }
+            else
+            {
+                if (organizAndLegalConditWindow.WindowState == WindowState.Minimized)
+                {
+                    organizAndLegalConditWindow.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    organizAndLegalConditWindow.Activate();
+                }
+            }
+        }
+
+        private void ConditWindow_Closed(object sender, EventArgs e)
+        {
+            this.Activate();
+            this.WindowState = WindowState.Normal;
+            organizAndLegalConditWindow = null;
         }
     }
 }

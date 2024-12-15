@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,14 +24,16 @@ namespace Full_modul
     {
         private string _previousWindow;
         private CalculatorWindow _calculatorWindow;
+        private OrganizAndLegalConditWindow _organizAndLegalConditWindow;
         public int SelectedIndex { get; private set; }
 
-        public SaveFileWindowChoise(CalculatorWindow calculatorWindow, string previousWindow)
+        public SaveFileWindowChoise(CalculatorWindow calculatorWindow, OrganizAndLegalConditWindow organizAndLegalConditWindow, string previousWindow)
         {
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             InitializeComponent();
             _previousWindow = previousWindow;
             _calculatorWindow = calculatorWindow;
+            _organizAndLegalConditWindow = organizAndLegalConditWindow;
 
             if (_previousWindow == "CalculatorWindow")
             {
@@ -61,12 +64,11 @@ namespace Full_modul
             }
 
             string filePath = Path.Combine(folderPath, fileName + ".txt");
+            bool hasDataToSave = false;
 
-            using (StreamWriter sw = new StreamWriter(filePath, true))
+            try
             {
-                bool hasDataToSave = false;
-
-                try
+                if (_previousWindow == "CalculatorWindow")
                 {
                     if (Data.SaveFile == 0)
                     {
@@ -112,24 +114,26 @@ namespace Full_modul
                             this.Close();
                             return;
                         }
+                        using (StreamWriter sw = new StreamWriter(filePath, true))
+                        {
+                            sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
 
-                        sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
-
-                        if (Data.Check0 == true)
-                        {
-                            sw.WriteLine(_calculatorWindow.SaveData(0));
-                        }
-                        if (Data.Check1 == true)
-                        {
-                            sw.WriteLine(_calculatorWindow.SaveData(1));
-                        }
-                        if (Data.Check2 == true)
-                        {
-                            sw.WriteLine(_calculatorWindow.SaveData(2));
-                        }
-                        if (Data.Check3 == true)
-                        {
-                            sw.WriteLine(_calculatorWindow.SaveData(3));
+                            if (Data.Check0 == true)
+                            {
+                                sw.WriteLine(_calculatorWindow.SaveData(0));
+                            }
+                            if (Data.Check1 == true)
+                            {
+                                sw.WriteLine(_calculatorWindow.SaveData(1));
+                            }
+                            if (Data.Check2 == true)
+                            {
+                                sw.WriteLine(_calculatorWindow.SaveData(2));
+                            }
+                            if (Data.Check3 == true)
+                            {
+                                sw.WriteLine(_calculatorWindow.SaveData(3));
+                            }
                         }
                     }
                     else
@@ -159,23 +163,31 @@ namespace Full_modul
                             this.Close();
                             return;
                         }
-
+                        using (StreamWriter sw = new StreamWriter(filePath, true))
+                        {
+                            sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
+                            sw.WriteLine(data);
+                        }
+                    }
+                } else
+                {
+                    string data = _organizAndLegalConditWindow.SaveData();
+                    using (StreamWriter sw = new StreamWriter(filePath, true))
+                    {
                         sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
                         sw.WriteLine(data);
                     }
-
-                    MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                finally
-                {
-                    this.Close(); // Закрываем форму в любом случае
-                }
+                MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                this.Close();
+            }
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs e)

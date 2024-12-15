@@ -5,8 +5,768 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
-        Title="OrganizAndLegalConditWindow" Height="450" Width="800">
+        Title="Организационно-правовые условия" Height="450" Width="600"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="False"
+        WindowStyle="None" Background="White">
+
+    <Window.Resources>
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2B2B2B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MinimizeButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2B2B2B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ComboBoxChoise" TargetType="ComboBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid Height="30" Width="100">
+                            <Border Name="Border" Background="{TemplateBinding Background}" 
+                    BorderBrush="{TemplateBinding BorderBrush}" 
+                    BorderThickness="{TemplateBinding BorderThickness}" 
+                    CornerRadius="15">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                    </Style>
+                                </Border.Style>
+
+                                <ToggleButton Name="ToggleButton"
+                              Focusable="False"
+                              IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                              Background="Transparent"
+                              BorderThickness="0"  
+                              BorderBrush="Transparent">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="20"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentPresenter Grid.Column="1" 
+                                          Content="{TemplateBinding SelectionBoxItem}" 
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                          Margin="0,0,0,0"
+                                                          HorizontalAlignment="Center"/>
+                                        <Path x:Name="Arrow" 
+                              Data="M 0 0 L 10 0 L 5 10 Z" 
+                              Fill="Black" 
+                              HorizontalAlignment="Center" 
+                              Margin="0,4,0,4" 
+                              RenderTransformOrigin="0.5,0.5" 
+                              Grid.Column="2" Width="10">
+                                        </Path>
+                                    </Grid>
+                                </ToggleButton>
+                            </Border>
+                            <Popup Name="Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False" 
+                   IsOpen="{TemplateBinding IsDropDownOpen}" 
+                   PopupAnimation="Slide" Width="100">
+                                <Border BorderThickness="1" BorderBrush="#888888" CornerRadius="5" 
+                        Background="White">
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Arrow" Property="Data" Value="M 5 0 L 10 10 L 0 10 Z"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Background" Value="#200A0A0A"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Ubuntu"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        
+        <Border Background="Black" Height="30"
+                MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
+                    <Image.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
+                            <MenuItem Header="Закрыть" Click="CloseButton_Click"/>
+                        </ContextMenu>
+                    </Image.ContextMenu>
+                </Image>
+                <TextBlock Text="Организационно-правовые условия" Grid.Column="1" Foreground="White" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Margin="17,0,0,0" FontSize="16" FontFamily="Ubuntu" FontWeight="Bold"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
+                        <TextBlock Text="－"/>
+                    </Button>
+                    <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click">
+                        <TextBlock Text="X" Margin="0,0,0,2"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Margin="0,30,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65"/>
+                <RowDefinition Height="367*"/>
+                <RowDefinition Height="36"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.ColumnSpan="4" Margin="3,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="18*"/>
+                    <ColumnDefinition Width="10*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="user"
+                           Foreground="Black"
+                           FontFamily="Ubuntu"
+                           Grid.Column="1"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           FontWeight="Normal"
+                           Margin="10"
+                           FontSize="15"/>
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="46" Width="46">
+                    <Grid>
+                        <Ellipse Width="45" Height="45" Fill="DarkGray"/>
+                        <Image Width="38" Height="38"
+                               Source="/Images/Image.png"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Button Click="Button_User_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Vertical">
+                            <Image Source="/Images/User.png" Width="40" Height="40" />
+                            <TextBlock Text="Личный кабинет" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Normal" />
+                        </StackPanel>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{x:Null}">
+                                <Setter Property="Background" Value="White"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                        <Setter Property="Background"
+Value="#EBEBEB"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" >
+                    <Button Click="Button_Reports_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Vertical">
+                            <Image Source="/Images/Reports.png" Width="40" Height="40" />
+                            <TextBlock Text="Отчёты" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Normal" />
+                        </StackPanel>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{x:Null}">
+                                <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                <Setter Property="Background" Value="White"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver"
+Value="True">
+                                        <Setter Property="Background"
+Value="#EBEBEB"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <ContentControl x:Name="MainContent" Margin="8,-2,8,8">
+                    <Grid>
+                        <StackPanel x:Name="ContainerOrgan">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="250"/>
+                                    <RowDefinition Height="50"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0">
+                                    <TextBlock Text="Организационные условия"
+            Foreground="Black"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontFamily="Ubuntu"
+            FontWeight="Bold"
+            FontSize="15"
+            Height="18"/>
+                                </StackPanel>
+                                <ScrollViewer Grid.Row="1">
+                                    <StackPanel>
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 0000Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Текст 645454654 Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6ст 6Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15" TextWrapping="Wrap" MaxWidth="425"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box0" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText1" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 1 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box1" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText2" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 2" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box2" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText3" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 3" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box3" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText4" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 4 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box4" Width="100" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText5" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 5" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box5" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText6" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+                   FontWeight="Normal"
+                   FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box6"
+                                        SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+          Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+           Visibility="Visible" Name="PlaceholderText7" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+                                    </StackPanel>
+                                </ScrollViewer>
+                                <Grid Grid.Row="2" Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70*"/>
+                                        <ColumnDefinition Width="40*"/>
+                                        <ColumnDefinition Width="130*"/>
+                                        <ColumnDefinition Width="70*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Grid.Column="0" HorizontalAlignment="Center">
+                                        <Image x:Name="ClickableImage1" Source="Images/Reports.png" Width="45"/>
+                                    </Grid>
+                                    <Grid Width="100" HorizontalAlignment="Center" Grid.Column="1">
+                                        <TextBlock Text="Результат"
+                Foreground="Black"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                FontFamily="Ubuntu"
+                FontWeight="Medium"
+                FontSize="15"
+                Height="18"
+                Width="auto"/>
+                                    </Grid>
+                                    <Grid Grid.Column="2" HorizontalAlignment="Center" Width="250">
+                                        <TextBox x:Name="result0"
+                 IsReadOnly="True"
+                 Background="#200A0A0A"
+                 BorderThickness="0"
+                 IsHitTestVisible="False"
+                 FontSize="16"
+                 Height="30"                                           
+                 Width="200"
+                 Foreground="Black"
+                 FontFamily="Ubuntu" 
+                 TextAlignment="Center"
+                 Padding="0,7,0,0"/>
+                                    </Grid>
+
+                                    <Grid Grid.Column="3" HorizontalAlignment="Center">
+                                        <Image x:Name="ClickableImage2" Source="Images/Reports.png" Width="45"
+                                               MouseDown="SwitchButton_Click" 
+               MouseEnter="ClickableImage_MouseEnter" 
+               MouseLeave="ClickableImage_MouseLeave"/>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel x:Name="ContainerLegal" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="250"/>
+                                    <RowDefinition Height="50"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0">
+                                    <TextBlock Text="Правовые условия"
+            Foreground="Black"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontFamily="Ubuntu"
+            FontWeight="Bold"
+            FontSize="15"
+            Height="18"
+            Width="auto"/>
+                                </StackPanel>
+                                <ScrollViewer Grid.Row="1">
+                                    <StackPanel>
+                                        <Grid Margin="5" x:Name="Grid9">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 999999Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Тек
+                                       Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6ст 6Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15" TextWrapping="Wrap" MaxWidth="425"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box9" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText9" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 10 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box10" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText10" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid11">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 11" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box11" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText11" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 12" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box12" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText12" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid13">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 13 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box13" Width="100" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText13" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid14">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 14" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box14" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText14" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid Margin="5" x:Name="Grid15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="Текст 15" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
+               FontWeight="Normal"
+               FontSize="15"/>
+                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="Box15"
+                                    SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
+      Style="{StaticResource ComboBoxChoise}">
+                                                    <ComboBoxItem Content="Да" />
+                                                    <ComboBoxItem Content="Нет" />
+                                                </ComboBox>
+                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
+       Visibility="Visible" Name="PlaceholderText15" Margin="0,0,20,0" IsHitTestVisible="False" />
+                                            </Grid>
+                                        </Grid>
+                                    </StackPanel>
+                                </ScrollViewer>
+                                <Grid Grid.Row="2" Margin="0,5,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70*"/>
+                                        <ColumnDefinition Width="40*"/>
+                                        <ColumnDefinition Width="130*"/>
+                                        <ColumnDefinition Width="70*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Grid.Column="0" HorizontalAlignment="Center">
+                                        <Image x:Name="ClickableImage3" Source="Images/User.png" Width="45"
+                                               MouseDown="SwitchButton_Click" 
+                                               MouseEnter="ClickableImage_MouseEnter" 
+                                               MouseLeave="ClickableImage_MouseLeave"/>
+                                    </Grid>
+                                    <Grid Width="100" HorizontalAlignment="Center" Grid.Column="1">
+                                        <TextBlock Text="Результат"
+            Foreground="Black"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontFamily="Ubuntu"
+            FontWeight="Medium"
+            FontSize="15"
+            Height="18"
+            Width="auto"/>
+                                    </Grid>
+                                    
+                                    <Grid Grid.Column="2" HorizontalAlignment="Center" Width="250">
+                                        <TextBox x:Name="result1"
+             IsReadOnly="True"
+             Background="#200A0A0A"
+             BorderThickness="0"
+             IsHitTestVisible="False"
+             FontSize="16"
+             Height="30"                                           
+             Width="200"
+             Foreground="Black"
+             FontFamily="Ubuntu" 
+             TextAlignment="Center"
+             Padding="0,7,0,0"/>
+                                    </Grid>
+
+                                    <Grid Grid.Column="3" HorizontalAlignment="Center">
+                                        <Button IsEnabled="False"
+Content="Сохранить"
+Foreground="White"
+FontSize="16"
+FontWeight="Medium"
+VerticalAlignment="Center" 
+FontFamily="Ubuntu"
+Name="Save0"
+                                                Click="ExportButton_Click">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="LightGray"/>
+                                                    <Setter Property="Cursor" Value="Arrow"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Height="30"
+                                    Width="120"
+                        CornerRadius="15"
+                        Background="{TemplateBinding Background}">
+                                                                    <ContentPresenter VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsEnabled" Value="True">
+                                                            <Setter Property="Background" Value="#6665cb"/>
+                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#7c7bc8"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter Property="Background" Value="LightGray"/>
+                                                            <Setter Property="Cursor" Value="Arrow"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </ContentControl>
+            </Grid>
+
+            <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,8">
+
+                <Button Click="Button_Click"  BorderThickness="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Images/help.png" Width="30" />
+                        <TextBlock Text="Справка" Margin="10,3,0,0" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Light" />
+                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{x:Null}">
+                            <Setter Property="Background" Value="White"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+Value="True">
+                                    <Setter Property="Background"
+Value="#EBEBEB"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

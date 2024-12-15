@@ -24,6 +24,7 @@
     <None Remove="Images\Logo.png" />
     <None Remove="Images\Reports.png" />
     <None Remove="Images\User.png" />
+    <None Remove="Properties\Images\User.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -73,6 +74,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\User.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Properties\Images\User.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

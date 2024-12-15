@@ -280,10 +280,11 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="3" Grid.Column="0" 
                         VerticalAlignment="Top" HorizontalAlignment="Right" Height="125" Width="200">
-                <Button 
+                <Button Click="OpenCondit_Click"
                         Foreground="White"
                         FontSize="16"
-                        FontWeight="Bold" FontFamily="Ubuntu" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        FontWeight="Bold" FontFamily="Ubuntu"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="Организационно - правовые условия" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" 
                                TextAlignment="Center" />
                     <Button.Style>
