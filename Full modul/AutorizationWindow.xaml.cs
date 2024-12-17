@@ -69,6 +69,10 @@ namespace Full_modul
                 TextBox_Login.Text = "";
                 TextBox_Login.Foreground = new SolidColorBrush(Colors.Black);
                 TextBox_Login.IsReadOnly = false;
+            } else if (TextBox_Login.Text == UserInfo.username)
+            {
+                TextBox_Login.Foreground = new SolidColorBrush(Colors.Black);
+                TextBox_Login.IsReadOnly = false;
             }
         }
 
@@ -157,7 +161,8 @@ namespace Full_modul
 
             try
             {
-                using (SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", DatabaseConnection.Instance.Connection))
+                using (SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", 
+                    DatabaseConnection.Instance.Connection))
                 {
                     sqlCommand.Parameters.AddWithValue("@login", TextBox_Login.Text);
                     sqlCommand.Parameters.AddWithValue("@pass", PasswordBox.Password);
@@ -231,11 +236,19 @@ namespace Full_modul
             if (e.Key == Key.Enter)
             {
                 HandleLogin();
+                if ((bool)CheckBox_SaveData.IsChecked)
+                {
+                    CheckBox_SaveData_Checked(CheckBox_SaveData, new RoutedEventArgs());
+                }
+                else
+                {
+                    CheckBox_SaveData_Unchecked(CheckBox_SaveData, new RoutedEventArgs());
+                }
                 e.Handled = true;
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Login_Click(object sender, RoutedEventArgs e)
         {
             HandleLogin();
             if ((bool)CheckBox_SaveData.IsChecked)
@@ -262,6 +275,11 @@ namespace Full_modul
             Properties.Settings.Default.Password = string.Empty;
             Properties.Settings.Default.RememberMe = false;
             Properties.Settings.Default.Save();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Обратитесь к системному администратору для восстановления пароля!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

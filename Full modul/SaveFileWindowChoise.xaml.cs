@@ -64,12 +64,14 @@ namespace Full_modul
             }
 
             string filePath = Path.Combine(folderPath, fileName + ".txt");
-            bool hasDataToSave = false;
 
             try
             {
                 if (_previousWindow == "CalculatorWindow")
                 {
+                    bool hasDataToSave = false;
+                    List<string> dataToSave = new List<string>();
+
                     if (Data.SaveFile == 0)
                     {
                         if (Data.Check0 == true)
@@ -77,6 +79,7 @@ namespace Full_modul
                             string data = _calculatorWindow.SaveData(0);
                             if (!string.IsNullOrEmpty(data))
                             {
+                                dataToSave.Add(data);
                                 hasDataToSave = true;
                             }
                         }
@@ -85,6 +88,7 @@ namespace Full_modul
                             string data = _calculatorWindow.SaveData(1);
                             if (!string.IsNullOrEmpty(data))
                             {
+                                dataToSave.Add(data);
                                 hasDataToSave = true;
                             }
                         }
@@ -93,6 +97,7 @@ namespace Full_modul
                             string data = _calculatorWindow.SaveData(2);
                             if (!string.IsNullOrEmpty(data))
                             {
+                                dataToSave.Add(data);
                                 hasDataToSave = true;
                             }
                         }
@@ -101,12 +106,10 @@ namespace Full_modul
                             string data = _calculatorWindow.SaveData(3);
                             if (!string.IsNullOrEmpty(data))
                             {
+                                dataToSave.Add(data);
                                 hasDataToSave = true;
                             }
                         }
-
-                        Data.SaveFile = 1;
-                        hasDataToSave = false;
 
                         if (!hasDataToSave)
                         {
@@ -114,25 +117,16 @@ namespace Full_modul
                             this.Close();
                             return;
                         }
+
+                        Data.SaveFile = 1;
+
                         using (StreamWriter sw = new StreamWriter(filePath, true))
                         {
                             sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
 
-                            if (Data.Check0 == true)
+                            foreach (var data in dataToSave)
                             {
-                                sw.WriteLine(_calculatorWindow.SaveData(0));
-                            }
-                            if (Data.Check1 == true)
-                            {
-                                sw.WriteLine(_calculatorWindow.SaveData(1));
-                            }
-                            if (Data.Check2 == true)
-                            {
-                                sw.WriteLine(_calculatorWindow.SaveData(2));
-                            }
-                            if (Data.Check3 == true)
-                            {
-                                sw.WriteLine(_calculatorWindow.SaveData(3));
+                                sw.WriteLine(data);
                             }
                         }
                     }

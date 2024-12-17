@@ -169,11 +169,11 @@
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="65"/>
-                <RowDefinition Height="367*"/>
-                <RowDefinition Height="36"/>
+                <RowDefinition/>
+                <RowDefinition Height="32"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.ColumnSpan="4" Margin="3,0,0,0">
+            <Grid Margin="3,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="50*"/>
@@ -271,7 +271,7 @@ Value="#EBEBEB"/>
             <Grid Grid.Row="1">
                 <ContentControl x:Name="MainContent" Margin="8,-2,8,8">
                     <Grid>
-                        <StackPanel x:Name="ContainerOrgan">
+                        <StackPanel x:Name="ContainerLegal">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
@@ -279,7 +279,7 @@ Value="#EBEBEB"/>
                                     <RowDefinition Height="50"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <TextBlock Text="Организационные условия"
+                                    <TextBlock Text="Правовые условия"
             Foreground="Black"
             VerticalAlignment="Center"
             HorizontalAlignment="Center"
@@ -440,8 +440,17 @@ Value="#EBEBEB"/>
                                         <ColumnDefinition Width="70*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Grid Grid.Column="0" HorizontalAlignment="Center">
-                                        <Image x:Name="ClickableImage1" Source="Images/Reports.png" Width="45"/>
+                                    <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image x:Name="ClickableImage1" Source="Images/Arrow_Gray.png" Width="45" Height="auto" RenderTransformOrigin="0.5,0.5">
+                                            <Image.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform/>
+                                                    <SkewTransform/>
+                                                    <RotateTransform Angle="180"/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </Image.RenderTransform>
+                                        </Image>
                                     </Grid>
                                     <Grid Width="100" HorizontalAlignment="Center" Grid.Column="1">
                                         <TextBlock Text="Результат"
@@ -470,16 +479,26 @@ Value="#EBEBEB"/>
                                     </Grid>
 
                                     <Grid Grid.Column="3" HorizontalAlignment="Center">
-                                        <Image x:Name="ClickableImage2" Source="Images/Reports.png" Width="45"
+                                        <Image x:Name="ClickableImage2" Source="Images/Arrow_Gray.png" Width="45"
                                                MouseDown="SwitchButton_Click" 
-               MouseEnter="ClickableImage_MouseEnter" 
-               MouseLeave="ClickableImage_MouseLeave"/>
+                                               MouseEnter="ClickableImage_MouseEnter" 
+                                               MouseLeave="ClickableImage_MouseLeave"
+                                               RenderTransformOrigin="0.5,0.5">
+                                            <Image.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform/>
+                                                    <SkewTransform/>
+                                                    <RotateTransform Angle="0"/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </Image.RenderTransform>
+                                        </Image>
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel x:Name="ContainerLegal" Visibility="Collapsed">
+                        <StackPanel x:Name="ContainerOrgan" Visibility="Collapsed">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
@@ -487,7 +506,7 @@ Value="#EBEBEB"/>
                                     <RowDefinition Height="50"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <TextBlock Text="Правовые условия"
+                                    <TextBlock Text="Организационные условия"
             Foreground="Black"
             VerticalAlignment="Center"
             HorizontalAlignment="Center"
@@ -651,10 +670,16 @@ Value="#EBEBEB"/>
                                     </Grid.ColumnDefinitions>
 
                                     <Grid Grid.Column="0" HorizontalAlignment="Center">
-                                        <Image x:Name="ClickableImage3" Source="Images/User.png" Width="45"
+                                        <Image x:Name="ClickableImage3" Source="Images/Arrow_Blue0.png" Width="45"
                                                MouseDown="SwitchButton_Click" 
                                                MouseEnter="ClickableImage_MouseEnter" 
-                                               MouseLeave="ClickableImage_MouseLeave"/>
+                                               MouseLeave="ClickableImage_MouseLeave" Height="45" RenderTransformOrigin="0.5,0.5">
+                                            <Image.RenderTransform>
+                                                <TransformGroup>
+                                                    <RotateTransform Angle="180"/>
+                                                </TransformGroup>
+                                            </Image.RenderTransform>
+                                        </Image>
                                     </Grid>
                                     <Grid Width="100" HorizontalAlignment="Center" Grid.Column="1">
                                         <TextBlock Text="Результат"
@@ -667,7 +692,7 @@ Value="#EBEBEB"/>
             Height="18"
             Width="auto"/>
                                     </Grid>
-                                    
+
                                     <Grid Grid.Column="2" HorizontalAlignment="Center" Width="250">
                                         <TextBox x:Name="result1"
              IsReadOnly="True"
@@ -685,13 +710,14 @@ Value="#EBEBEB"/>
 
                                     <Grid Grid.Column="3" HorizontalAlignment="Center">
                                         <Button IsEnabled="False"
-Content="Сохранить"
-Foreground="White"
-FontSize="16"
-FontWeight="Medium"
-VerticalAlignment="Center" 
-FontFamily="Ubuntu"
-Name="Save0"
+                                                Content="Сохранить"
+                                                Foreground="White"
+                                                FontSize="16"
+                                                FontWeight="Medium"
+                                                VerticalAlignment="Center" 
+                                                Margin="0,0,10,0"
+                                                FontFamily="Ubuntu"
+                                                Name="Save0"
                                                 Click="ExportButton_Click">
                                             <Button.Style>
                                                 <Style TargetType="Button">
@@ -701,11 +727,11 @@ Name="Save0"
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="Button">
                                                                 <Border Height="30"
-                                    Width="120"
-                        CornerRadius="15"
-                        Background="{TemplateBinding Background}">
+                                                                        Width="120"
+                                                                        CornerRadius="15"
+                                                                        Background="{TemplateBinding Background}">
                                                                     <ContentPresenter VerticalAlignment="Center"
-                                      HorizontalAlignment="Center"/>
+                                                                                      HorizontalAlignment="Center"/>
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Setter.Value>
@@ -734,10 +760,10 @@ Name="Save0"
                 </ContentControl>
             </Grid>
 
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Orientation="Horizontal"
-                    VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,8">
+            <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Height="26" Width="90">
 
-                <Button Click="Button_Click"  BorderThickness="0">
+                <Button Click="Button_Help_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Images/help.png" Width="30" />
                         <TextBlock Text="Справка" Margin="10,3,0,0" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Light" />

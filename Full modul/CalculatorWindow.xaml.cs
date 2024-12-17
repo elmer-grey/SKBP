@@ -49,7 +49,7 @@ namespace Full_modul
                     }
                     else
                     {
-                        user.Text = "Царь и Бог";
+                        user.Text = "Администратор";
                     }
                 }
                 catch (Exception ex)
@@ -59,7 +59,7 @@ namespace Full_modul
             }
         }
     
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Help_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Вывод справки!");
         }
@@ -201,7 +201,7 @@ namespace Full_modul
 
         private void Calendar_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (isHandlingComboBoxSelection) return; // Предотвращаем повторный вызов
+            if (isHandlingComboBoxSelection) return;
             isHandlingComboBoxSelection = true;
 
             Calendar calendar = sender as Calendar;
@@ -321,7 +321,6 @@ namespace Full_modul
 
         private void Calendar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // Убираем фокус с календаря
             Keyboard.ClearFocus();
         }
 
@@ -454,8 +453,14 @@ namespace Full_modul
             {
                 SaveFile SF = new SaveFile();
                 SF.ShowDialog();
-                Data.SaveFile = 0;
-                saveFileWindow.ShowDialog();
+                if (Data.Check0 == false && Data.Check1 == false && Data.Check2 == false && Data.Check3 == false)
+                {
+                    MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                } else
+                {
+                    Data.SaveFile = 0;
+                    saveFileWindow.ShowDialog();
+                }
             }
             else if (result == MessageBoxResult.Yes)
             {
@@ -464,6 +469,8 @@ namespace Full_modul
             }
         }
 
+        public bool[] _warningsShown = new bool[4];
+
         public string SaveData(int selected)
         {
             string formulaName = GetFormulaName(selected);
@@ -471,24 +478,31 @@ namespace Full_modul
             string countText = GetCountText(selected);
             string SCHR = GetSCHR(selected);
             string result = GetResultText(selected);
+            _warningsShown[selected] = false;
 
             if (string.IsNullOrEmpty(result))
             {
-                var warningMassage = MessageBox.Show($"Вы не заполнили формулу '{formulaName}'! Продолжить?",
-                    "Предупреждение", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-
-                if (warningMassage == MessageBoxResult.OK)
+                if (!_warningsShown[selected])
                 {
-                    return $"{formulaName}\nСЧР равен: -\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                                 $"Рассматриваемая должность: -\nКоличество: -\nРезультат равен: -\n================\n";
+                    var warningMessage = MessageBox.Show($"Вы не заполнили формулу '{formulaName}'! Продолжить?",
+                        "Предупреждение", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    _warningsShown[selected] = true;
+
+                    if (warningMessage == MessageBoxResult.Cancel)
+                    {
+                        return string.Empty;
+                    }
+                    return $"{formulaName}\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
+                           $"Рассматриваемая должность: -\nКоличество: -\nСЧР: -\nРезультат: -\n================\n";
                 }
             }
             else
             {
-                return $"{formulaName}\nНачало периода: {startDate}\n" +
-                  $"Конец периода: {endDate}\n" +
-                  $"Должность: {levelText}\nКоличество: {countText}\n" +
-                  $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
+                _warningsShown[selected] = false;
+                return $"{formulaName}\nНачало периода подсчёта: {startDate}\n" +
+                       $"Конец периода подсчёта: {endDate}\n" +
+                       $"Рассматриваемая должность: {levelText}\nКоличество: {countText}\n" +
+                       $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
             }
             return string.Empty;
         }
@@ -805,8 +819,20 @@ OPTION(MAXRECURSION 0);";
                                     SCHR = 0;
                                 }
                                 else
-                                {                                    
-                                    SCHR = Math.Round(Convert.ToDouble(reader["TotalCount"]) / 365, 8);
+                                {
+                                    DateTime startDateTime = DateTime.Parse(startDate);
+                                    DateTime endDateTime = DateTime.Parse(endDate);
+
+                                    int totalDays = (endDateTime - startDateTime).Days;
+
+                                    if (totalDays > 0)
+                                    {
+                                        SCHR = Math.Round(Convert.ToDouble(reader["TotalCount"]) / totalDays, 8);
+                                    }
+                                    else
+                                    {
+                                        SCHR = 0;
+                                    }
                                 }
                             }
                         }
@@ -904,7 +930,7 @@ OPTION(MAXRECURSION 0);";
                     return;
             }
 
-            resultTextBox.Text = (Double.Parse(countTextBox.Text) / SCHR * factor).ToString();
+            resultTextBox.Text = (Double.Parse(countTextBox.Text) / SCHR * 1).ToString();
             resultTextBox.Text = Math.Round(Convert.ToDouble(resultTextBox.Text), 8).ToString();
             UpdateTextBoxButtonStyle(resultTextBox, button);
         }

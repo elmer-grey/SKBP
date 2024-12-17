@@ -46,7 +46,7 @@ namespace Full_modul
                     }
                     else
                     {
-                        user.Text = "Царь и Бог";
+                        user.Text = "Администратор";
                     }
                 }
                 catch (Exception ex)
@@ -56,7 +56,7 @@ namespace Full_modul
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Help_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Здесь будет справка!");
         }
@@ -191,7 +191,7 @@ namespace Full_modul
             if (isAnyGridVisible && count == visibleCount)
             {
                 double average = (double)sum / visibleCount; 
-                result1.Text = average.ToString("0.#####");
+                result1.Text = average.ToString("0.######");
                 Save0.IsEnabled = true;
             }
             else
@@ -231,7 +231,7 @@ namespace Full_modul
 
                 if (clickableImage != null && resultText.Text != string.Empty)
                 {
-                    clickableImage.Source = new BitmapImage(new Uri("pack://application:,,,/Images/User.png"));
+                    clickableImage.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0.png"));
                 }
             }
             else
@@ -242,19 +242,19 @@ namespace Full_modul
 
         private void SwitchButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ContainerOrgan.Visibility == Visibility.Visible)
+            if (ContainerLegal.Visibility == Visibility.Visible)
             {
                 if (result0.Text != string.Empty)
                 {
-                    ContainerOrgan.Visibility = Visibility.Collapsed;
-                    ContainerLegal.Visibility = Visibility.Visible;
+                    ContainerLegal.Visibility = Visibility.Collapsed;
+                    ContainerOrgan.Visibility = Visibility.Visible;
                     UpdateSecondContainerResults();
                 }
             }
             else
             {
-                ContainerOrgan.Visibility = Visibility.Visible;
-                ContainerLegal.Visibility = Visibility.Collapsed;
+                ContainerLegal.Visibility = Visibility.Visible;
+                ContainerOrgan.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -263,12 +263,19 @@ namespace Full_modul
             if (!string.IsNullOrEmpty(result0.Text))
             {
                 Mouse.OverrideCursor = Cursors.Hand;
+                ClickableImage2.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0_Light.png"));
+                ClickableImage3.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0_Light.png"));
             }
         }
 
         private void ClickableImage_MouseLeave(object sender, MouseEventArgs e)
         {
-            Mouse.OverrideCursor = null;
+            if (!string.IsNullOrEmpty(result0.Text))
+            {
+                Mouse.OverrideCursor = null;
+                ClickableImage2.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0.png"));
+                ClickableImage3.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0.png"));
+            }
         }
 
         public void ExportButton_Click(object sender, EventArgs e)
@@ -286,8 +293,8 @@ namespace Full_modul
         {
             if (!string.IsNullOrEmpty(result0.Text) && !string.IsNullOrEmpty(result1.Text))
             {
-                return $"Организационные условия\nПолученный коэффициент: {result0.Text}\n\n" +
-                    $"Правовые условия\nПолученный коэффициент: {result1.Text}\n================\n";
+                return $"Правовые условия\nПолученный коэффициент: {result0.Text}\n\n" +
+                    $"Организационные условия\nПолученный коэффициент: {result1.Text}\n================\n";
             }
             return string.Empty;
         }

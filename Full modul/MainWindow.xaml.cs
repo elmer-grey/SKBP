@@ -31,7 +31,8 @@ namespace Full_modul
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));            
             this.Closing += MainWindow_Closing;
 
-            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') " +
+                "+ ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
             using (SqlConnection connection = new SqlConnection(Constants.ConnectionString))
             {
@@ -49,7 +50,7 @@ namespace Full_modul
                     }
                     else
                     {
-                        user.Text = "Царь и Бог";
+                        user.Text = "Администратор";
                     }
                 }
                 catch (Exception ex)
@@ -94,6 +95,10 @@ namespace Full_modul
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Данный функционал в процессе реализации!");
+        }
+        private void Button_Help_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Вывод справки!");
         }

@@ -237,7 +237,6 @@ Value="#EBEBEB"/>
                                                   HorizontalAlignment="Center"/>
 
                             </Border>
-
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
@@ -245,7 +244,7 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="1" Grid.Column="2" 
                         VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="125" Width="200">
-                <Button Content="Кнопка"
+                <Button Content="Обучение персонала"
                         Foreground="White"
                         FontSize="16"
                         FontWeight="Bold" FontFamily="Ubuntu">
@@ -292,10 +291,8 @@ Value="#EBEBEB"/>
                             <Setter Property="Background" Value="#6665cb"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Style.Triggers>
-                                <Trigger Property="IsMouseOver"
-    Value="True">
-                                    <Setter Property="Background"
-    Value="#7c7bc8"/>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#7c7bc8"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -317,10 +314,10 @@ Value="#EBEBEB"/>
 
             <StackPanel Grid.Row="3" Grid.Column="2" 
                         VerticalAlignment="Top" HorizontalAlignment="Left" Height="125" Width="200">
-                <Button Content="Кнопка2"
+                <Button Content="Развитие персонала"
                         Foreground="White"
                         FontSize="16"
-                        FontWeight="Bold" FontFamily="Ubuntu">
+                        FontWeight="Bold" FontFamily="Ubuntu" Click="Button_Click">
 
                     <Button.Style>
                         <Style TargetType="Button">
@@ -353,7 +350,7 @@ Value="#EBEBEB"/>
             <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal"
                         VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,8">
 
-                <Button Click="Button_Click"  BorderThickness="0">
+                <Button Click="Button_Help_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Images/help.png" Width="30" />
                         <TextBlock Text="Справка" Margin="10,3,0,0" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Light" />
