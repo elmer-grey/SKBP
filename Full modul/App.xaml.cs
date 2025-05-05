@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using System.Windows;
 using Full_modul.Properties;
+using Microsoft.Data.SqlClient;
 
 namespace Full_modul
 {
@@ -17,8 +18,33 @@ namespace Full_modul
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (string.IsNullOrEmpty(Settings.Default.ConnectionString))
+            {
+                string rawConnection = BuildConnectionString(
+                          server: "DESKTOP-TBLQV8A",
+                          database: "calculator",
+                          userId: "sqlserver",
+                          password: "sqlserver");
+
+                Settings.Default.ConnectionString = SecurityHelper.Encrypt(rawConnection);
+                //Settings.Default.ConnectionString = rawConnection;
+                Settings.Default.Save();
+            }
             base.OnStartup(e);
             CreateReportFolders();
+        }
+
+        private string BuildConnectionString(string server, string database, string userId, string password)
+        {
+            var builder = new SqlConnectionStringBuilder
+            {
+                DataSource = server,
+                InitialCatalog = database,
+                UserID = userId,
+                Password = password,
+                TrustServerCertificate = true
+            };
+            return builder.ToString();
         }
 
         protected override void OnExit(ExitEventArgs e)

@@ -12,7 +12,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ConnectionString" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Data Source=DESKTOP-TBLQV8A\SQLEXPRESS;Initial Catalog=calculator;Integrated Security=True;TrustServerCertificate=True</Value>
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

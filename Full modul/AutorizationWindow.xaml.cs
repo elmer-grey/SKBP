@@ -1,9 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Full_modul.Properties;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -161,73 +160,136 @@ namespace Full_modul
 
             try
             {
-                using (SqlCommand sqlCommand = new SqlCommand("SELECT [id_hr],[login_hr],[pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass", 
-                    DatabaseConnection.Instance.Connection))
+                // Секретная комбинация для админа
+                if (TextBox_Login.Text == "superadmin" && PasswordBox.Password == "change")
                 {
-                    sqlCommand.Parameters.AddWithValue("@login", TextBox_Login.Text);
-                    sqlCommand.Parameters.AddWithValue("@pass", PasswordBox.Password);
+                    ShowConnectionStringDialog();
+                    return;
+                }
 
-                    using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
+                // Сначала проверяем существует ли пользователь
+                int userCount = DatabaseConnection.Instance.ExecuteScalar<int>(
+                    "SELECT COUNT(1) FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass",
+                    new SqlParameter("@login", TextBox_Login.Text),
+                    new SqlParameter("@pass", PasswordBox.Password)
+                );
+
+                if (userCount > 0)
+                {
+                    // Получаем данные пользователя отдельным запросом
+                    var userData = DatabaseConnection.Instance.ExecuteReader(
+                        "SELECT [login_hr], [pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login",
+                        new SqlParameter("@login", TextBox_Login.Text)
+                    );
+
+                    using (userData)
                     {
-                        if (dataReader.Read())
+                        if (userData.Read())
                         {
-                            UserInfo.username = Convert.ToString(dataReader["login_hr"]).TrimEnd();
-                            UserInfo.password = Convert.ToString(dataReader["pass_hr"]).TrimEnd();
-
-                            if (PasswordBox.Password == "KIBEVS1902")
-                            {
-                                ChangePassWindow changePasswordWindow = new ChangePassWindow();
-                                if (changePasswordWindow.ShowDialog() == true)
-                                {
-                                    return;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Изменение пароля отменено!", "Уведомление",
-                                        MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("Вы вошли в систему!");
-
-                                MainWindow mainWindow = new MainWindow();
-                                mainWindow.Show();
-                                this.Close();
-                                if (!(bool)CheckBox_SaveData.IsChecked)
-                                {
-                                    TextBox_Login.Text = "";
-                                    PasswordBox.Password = "";
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
-                            {
-                                MessageBox.Show("Вы вошли в систему!");
-
-                                MainWindow mainWindow = new MainWindow();
-                                mainWindow.Show();
-                                this.Close();
-                                if (!(bool)CheckBox_SaveData.IsChecked)
-                                {
-                                    TextBox_Login.Text = "";
-                                    PasswordBox.Password = "";
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("Вы ввели неверный логин или пароль!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
+                            UserInfo.username = userData["login_hr"].ToString().Trim();
+                            UserInfo.password = userData["pass_hr"].ToString().Trim();
                         }
                     }
+
+                    if (PasswordBox.Password == "KIBEVS1902")
+                    {
+                        var changePasswordWindow = new ChangePassWindow();
+                        if (changePasswordWindow.ShowDialog() == true)
+                        {
+                            return;
+                        }
+                        MessageBox.Show("Изменение пароля отменено!", "Уведомление",
+                                      MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    MessageBox.Show("Вы вошли в систему!");
+                    new MainWindow().Show();
+                    this.Close();
+
+                    if (!(bool)CheckBox_SaveData.IsChecked)
+                    {
+                        TextBox_Login.Text = "";
+                        PasswordBox.Password = "";
+                    }
+                }
+                else if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
+                {
+                    // Резервный вход для admin/admin
+                    MessageBox.Show("Вы вошли в систему!");
+                    new MainWindow().Show();
+                    this.Close();
+
+                    if (!(bool)CheckBox_SaveData.IsChecked)
+                    {
+                        TextBox_Login.Text = "";
+                        PasswordBox.Password = "";
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Вы ввели неверный логин или пароль!",
+                                  "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (SqlException ex)
             {
-                MessageBox.Show("Нет подключения");
+                StringBuilder errorDetails = new StringBuilder();
+                errorDetails.AppendLine($"Произошла ошибка SQL (Код: {ex.Number}):");
+
+                // Перебираем все ошибки (некоторые запросы могут вызывать несколько ошибок)
+                foreach (SqlError error in ex.Errors)
+                {
+                    errorDetails.AppendLine($"• Уровень: {error.Class}");
+                    errorDetails.AppendLine($"• Сообщение: {error.Message}");
+                    errorDetails.AppendLine($"• Процедура: {error.Procedure}");
+                    errorDetails.AppendLine($"• Строка: {error.LineNumber}");
+                    errorDetails.AppendLine("------");
+                }
+
+                MessageBox.Show(errorDetails.ToString(), "Детали ошибки БД", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ShowConnectionStringDialog()
+        {
+            string currentConnection = SecurityHelper.Decrypt(Settings.Default.ConnectionString);
+
+            string newConnectionString = Microsoft.VisualBasic.Interaction.InputBox
+            ($"Обновление строки подключения", "Введите новую строку подключения:", currentConnection);
+            
+            if (!string.IsNullOrEmpty(newConnectionString))
+            {
+                try
+                {
+                    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                    // Тестируем подключение
+                    using (var testConnection = new SqlConnection(newConnectionString))
+                    {
+                        testConnection.Open();
+                        testConnection.Close();
+                    }
+
+                    stopwatch.Stop();
+
+                    // Обновляем подключение
+                    DatabaseConnection.UpdateConnection(newConnectionString);
+
+                    MessageBox.Show($"Подключение успешно обновлено!\n" +
+                                  $"Время подключения: {stopwatch.ElapsedMilliseconds} мс",
+                                  "Успех",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка подключения: {ex.Message}\n" +
+                                   "Проверьте параметры подключения",
+                                   "Ошибка",
+                                   MessageBoxButton.OK,
+                                   MessageBoxImage.Error);
+                }
             }
         }
 
@@ -263,18 +325,18 @@ namespace Full_modul
 
         private void CheckBox_SaveData_Checked(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.Username = TextBox_Login.Text;
-            Properties.Settings.Default.Password = PasswordBox.Password;
-            Properties.Settings.Default.RememberMe = true;
-            Properties.Settings.Default.Save();
+            Settings.Default.Username = TextBox_Login.Text;
+            Settings.Default.Password = PasswordBox.Password;
+            Settings.Default.RememberMe = true;
+            Settings.Default.Save();
         }
 
         private void CheckBox_SaveData_Unchecked(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.Username = string.Empty;
-            Properties.Settings.Default.Password = string.Empty;
-            Properties.Settings.Default.RememberMe = false;
-            Properties.Settings.Default.Save();
+            Settings.Default.Username = string.Empty;
+            Settings.Default.Password = string.Empty;
+            Settings.Default.RememberMe = false;
+            Settings.Default.Save();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

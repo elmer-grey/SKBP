@@ -179,6 +179,9 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Игнорировать оригинальный App.config
+App.config
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml

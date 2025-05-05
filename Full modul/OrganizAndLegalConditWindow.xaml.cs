@@ -30,29 +30,21 @@ namespace Full_modul
 
             string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
-            using (SqlConnection connection = new SqlConnection(Constants.ConnectionString))
+            try
             {
-                SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@login", UserInfo.username);
+                string fullName = DatabaseConnection.Instance.ExecuteScalar<string>(
+                    query,
+                    new SqlParameter("@login", UserInfo.username)
+                );
 
-                try
-                {
-                    connection.Open();
-                    object result = command.ExecuteScalar();
-
-                    if (result != null)
-                    {
-                        user.Text = result.ToString().Trim();
-                    }
-                    else
-                    {
-                        user.Text = "Администратор";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Ошибка: " + ex.Message);
-                }
+                user.Text = !string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных пользователя: {ex.Message}",
+                              "Ошибка",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
             }
         }
 

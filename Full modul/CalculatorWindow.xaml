@@ -12,7 +12,8 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
-        WindowStyle="None" Background="White">
+        WindowStyle="None" Background="White"
+        BorderThickness="1" BorderBrush="Black">
 
     <Window.Resources>
         <Style x:Key="CloseButtonStyle" TargetType="Button">
@@ -34,7 +35,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2B2B2B"/>
+                    <Setter Property="Background" Value="DarkRed"/>
                 </Trigger>
             </Style.Triggers>
         </Style>

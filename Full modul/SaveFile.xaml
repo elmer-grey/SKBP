@@ -10,7 +10,8 @@
         Title="Выбор для сохранения"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
-        WindowStyle="None" Background="White">
+        WindowStyle="None" Background="White"
+        BorderThickness="1" BorderBrush="Black">
 
     <Grid>
         <Border Background="Black" Height="30"

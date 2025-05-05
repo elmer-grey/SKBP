@@ -162,46 +162,50 @@ namespace Full_modul
                 return;
             }
 
-            if (PasswordBox1.Password == PasswordBox2.Password)
-            {
-                if (!ValidatePassword(PasswordBox2.Password))
-                {
-                    MessageBox.Show("Пароль не удовлетворяет условиям безопасности!\n - Специальные символы\n - Заглавные буквы\n" +
-                        " - Буквы в нижнем регистре\n - Цифры\n - Минимальная длина 8 символов", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
-                {
-                    conn.Open();
-
-                    string sqlUpdate = "UPDATE [calculator].[dbo].[hr] SET [pass_hr] = @pass_hr WHERE login_hr = @login_hr AND pass_hr = @old_pass_hr";
-                    SqlCommand sqlCom = new SqlCommand(sqlUpdate, conn);
-                    sqlCom.Parameters.AddWithValue("@pass_hr", PasswordBox2.Password);
-                    sqlCom.Parameters.AddWithValue("@login_hr", UserInfo.username);
-                    sqlCom.Parameters.AddWithValue("@old_pass_hr", UserInfo.password);
-
-                    try
-                    {
-                        sqlCom.ExecuteNonQuery();
-                        UserInfo.password = PasswordBox2.Password;
-                        MessageBox.Show("Пароль успешно изменён!\nВход теперь доступен только с новым паролем.", "Уведомление",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-                        this.DialogResult = true;
-                        this.Close();
-                    }
-                    catch (Exception err)
-                    {
-                        MessageBox.Show("Ошибка выполнения запроса:\n" + err.Message,
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-            else
+            if (PasswordBox1.Password != PasswordBox2.Password)
             {
                 MessageBox.Show("Пароли не совпадают", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!ValidatePassword(PasswordBox2.Password))
+            {
+                MessageBox.Show("Пароль не удовлетворяет условиям безопасности!\n - Специальные символы\n - Заглавные буквы\n" +
+                    " - Буквы в нижнем регистре\n - Цифры\n - Минимальная длина 8 символов", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                string sqlUpdate = "UPDATE [calculator].[dbo].[hr] SET [pass_hr] = @pass_hr WHERE login_hr = @login_hr AND pass_hr = @old_pass_hr";
+
+                int affectedRows = DatabaseConnection.Instance.ExecuteNonQuery(
+                    sqlUpdate,
+                    new SqlParameter("@pass_hr", PasswordBox2.Password),
+                    new SqlParameter("@login_hr", UserInfo.username),
+                    new SqlParameter("@old_pass_hr", UserInfo.password)
+                );
+
+                if (affectedRows > 0)
+                {
+                    UserInfo.password = PasswordBox2.Password;
+                    MessageBox.Show("Пароль успешно изменён!\nВход теперь доступен только с новым паролем.", "Уведомление",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    this.DialogResult = true;
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось изменить пароль. Проверьте старый пароль.",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка изменения пароля: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
