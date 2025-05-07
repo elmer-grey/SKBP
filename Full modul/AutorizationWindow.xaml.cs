@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Full_modul
 {
@@ -16,6 +17,9 @@ namespace Full_modul
     /// </summary>
     public partial class AutorizationWindow : Window
     {
+        private bool _isCheckingConnection = false;
+        private DispatcherTimer _connectionCheckTimer;
+
         public AutorizationWindow()
         {
             InitializeComponent();
@@ -23,6 +27,23 @@ namespace Full_modul
             TextBox_Login.GotFocus += TextBox_Login_GotFocus;
             TextBox_Login.LostFocus += TextBox_Login_LostFocus;
             LoadSavedCredentials();
+            _connectionCheckTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5) // Проверка каждые 5 секунд
+            };
+            _connectionCheckTimer.Tick += async (s, e) => await UpdateConnectionStatus();
+
+            Loaded += WindowLoaded;
+        }
+        private async void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            await UpdateConnectionStatus();
+            _connectionCheckTimer.Start();
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            _connectionCheckTimer.Stop();
+            base.OnClosed(e);
         }
 
         private void LoadSavedCredentials()
@@ -41,6 +62,24 @@ namespace Full_modul
                     TextBlock_ShowName.Visibility = Visibility.Collapsed;
                 }
             }
+        }
+
+        private async Task UpdateConnectionStatus()
+        {
+            if (_isCheckingConnection) return;
+
+            _isCheckingConnection = true;
+            ConnectionStatusText.Text = "Проверка подключения...";
+            ConnectionIndicator.Fill = Brushes.Gray;
+
+            bool isConnected = await DatabaseConnection.TestConnectionAsync();
+
+            ConnectionIndicator.Fill = isConnected ? Brushes.Green : Brushes.Red;
+            ConnectionStatusText.Text = isConnected ? "Подключено" : "Нет подключения";
+            ConnectionIndicator.ToolTip = isConnected ?
+            "Подключение к БД активно" :
+            "Нет подключения к базе данных";
+            _isCheckingConnection = false;
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -150,8 +189,14 @@ namespace Full_modul
             PasswordBox.Password = TextBox_ShowPassword.Text;
         }
 
-        private void HandleLogin()
+        private async void HandleLogin()
         {
+            if (_isCheckingConnection)
+            {
+                //MessageBox.Show("Идет проверка подключения, подождите...");
+                //return;
+            }
+
             if (string.IsNullOrEmpty(TextBox_Login.Text) || string.IsNullOrEmpty(PasswordBox.Password))
             {
                 MessageBox.Show("Вы не ввели логин или пароль!\nПожалуйста, заполните поля!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -164,6 +209,24 @@ namespace Full_modul
                 if (TextBox_Login.Text == "superadmin" && PasswordBox.Password == "change")
                 {
                     ShowConnectionStringDialog();
+                    return;
+                }
+
+                // Показать Popup
+                ConnectionCheckPopup.IsOpen = true;
+
+                // Добавляем проверку перед запросом
+                if (!await DatabaseConnection.TestConnectionAsync())
+                {
+                    var result = MessageBox.Show("Нет подключения к БД. Повторить попытку?",
+                                              "Ошибка",
+                                              MessageBoxButton.YesNo);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        await UpdateConnectionStatus();
+                        HandleLogin(); // Рекурсивный вызов
+                    }
                     return;
                 }
 
@@ -248,6 +311,11 @@ namespace Full_modul
                 }
 
                 MessageBox.Show(errorDetails.ToString(), "Детали ошибки БД", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Скрыть Popup
+                ConnectionCheckPopup.IsOpen = false;
             }
         }
 

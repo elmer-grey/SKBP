@@ -21,15 +21,15 @@ namespace Full_modul
             if (string.IsNullOrEmpty(Settings.Default.ConnectionString))
             {
                 string rawConnection = BuildConnectionString(
-                          server: "DESKTOP-TBLQV8A",
-                          database: "calculator",
-                          userId: "sqlserver",
-                          password: "sqlserver");
+                    server: "DESKTOP-TBLQV8A",
+                    database: "calculator",
+                    userId: "sqlserver",
+                    password: "sqlserver");
 
                 Settings.Default.ConnectionString = SecurityHelper.Encrypt(rawConnection);
-                //Settings.Default.ConnectionString = rawConnection;
                 Settings.Default.Save();
             }
+
             base.OnStartup(e);
             CreateReportFolders();
         }

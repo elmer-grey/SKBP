@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
-        Height="300" Width="300"
+        Height="350" Width="350"
         ResizeMode="NoResize"
         Icon="Images\HR1.ico"
         Title="Окно авторизации"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="False"
         WindowStyle="None" Background="White"
-        BorderThickness="2" BorderBrush="Black">
+        BorderThickness="1" BorderBrush="Black">
 
     <Window.Resources>
         <Style x:Key="CloseButtonStyle" TargetType="Button">
@@ -65,7 +65,12 @@
     </Window.Resources>
 
     <Grid>
-        <Border Background="Black" Height="30"
+        <Popup x:Name="ConnectionCheckPopup" StaysOpen="False" Placement="Center" AllowsTransparency="True">
+            <Border Background="#AA000000" CornerRadius="10" Padding="10">
+                <TextBlock Text="Подождите, идет проверка подключения..." Foreground="White" />
+            </Border>
+        </Popup>
+        <Border Background="Black" Height="32"
                 MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
 
             <Grid>
@@ -103,16 +108,17 @@
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="180*"/>
-                <RowDefinition Height="250*"/>
+                <RowDefinition Height="200*"/>
                 <RowDefinition Height="60*"/>
                 <RowDefinition Height="80*"/>
                 <RowDefinition Height="60*"/>
+                <RowDefinition Height="40*"/>
             </Grid.RowDefinitions>
 
             <Grid>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
                     <Grid>
-                        <Image Height="70" Width="Auto"
+                        <Image Height="80" Width="Auto"
                                Source="/Images/Logo.png"/>
                     </Grid>
                 </StackPanel>
@@ -120,19 +126,19 @@
 
             <StackPanel Grid.Row="1"
                         VerticalAlignment="Center" HorizontalAlignment="Center" 
-                        Width="250">
+                        Width="275">
                 <TextBox x:Name="TextBox_Login" 
-                         Width="240" 
-                         Height="32" 
-                         Margin="0,0,0,5"
+                         Width="275" 
+                         Height="35" 
+                         Margin="0,0,0,7"
                          FontFamily="Ubuntu" 
-                         FontSize="14"
+                         FontSize="15"
                          VerticalAlignment="Center" 
                          HorizontalAlignment="Center" 
                          Foreground="Black" 
                          Background="#E2E2E2" 
                          BorderThickness="0"
-                         Padding="5,9"
+                         Padding="5,10"
                          IsReadOnly="True" 
                          GotFocus="TextBox_Login_GotFocus"
                          LostFocus="TextBox_Login_LostFocus"
@@ -144,9 +150,9 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="TextBox">
                                         <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="15">
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                                CornerRadius="15">
                                             <ScrollViewer x:Name="PART_ContentHost"/>
                                         </Border>
                                     </ControlTemplate>
@@ -158,8 +164,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Grid x:Name="PasswordContainer" Margin="0,5,0,0">
                         <PasswordBox x:Name="PasswordBox" 
-                                     Width="210" 
-                                     Height="32" 
+                                     Width="238" 
+                                     Height="35" 
                                      Margin="0,0,5,0"
                                      FontSize="14"
                                      VerticalAlignment="Center" 
@@ -192,7 +198,7 @@
                         <TextBlock x:Name="TextBlock_ShowName" 
                                     Margin="2,0,0,0"
                                     FontFamily="Ubuntu" 
-                                    FontSize="14"
+                                    FontSize="15"
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Left"                                        
                                     Foreground="Black" 
@@ -205,11 +211,12 @@
                                     Width="150" FontWeight="Light"/>
 
                         <TextBox x:Name="TextBox_ShowPassword" 
-                                 Width="210" 
-                                 Height="32" 
+                                 Width="238" 
+                                 Height="35" 
                                  Margin="0,0,5,0"
-                                 FontSize="14"
+                                 FontSize="15"
                                  VerticalAlignment="Center" 
+                                 HorizontalAlignment="Left"
                                  Background="#E2E2E2" 
                                  BorderThickness="0"
                                  Padding="5,9"                                 
@@ -239,9 +246,10 @@ CornerRadius="15">
 
                     <Button x:Name="ShowPasswordButton" 
                         Content="👁" 
-                        Width="30" 
-                        Height="32"  
+                        Width="32" 
+                        Height="34"  
                             VerticalAlignment="Bottom" 
+                            HorizontalAlignment="Center"
                         Background="Transparent" 
                         BorderThickness="0"
                         Click="ShowPasswordButton_Click"/>
@@ -255,7 +263,7 @@ CornerRadius="15">
                     <ColumnDefinition Width="120*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <CheckBox Content="Сохранить данные" Margin="12,0,0,0" FontSize="14" FontFamily="Ubuntu" 
+                    <CheckBox Content="Сохранить данные" Margin="12,0,0,0" FontSize="15" FontFamily="Ubuntu" 
                               x:Name="CheckBox_SaveData" Checked="CheckBox_SaveData_Checked" 
                               Unchecked="CheckBox_SaveData_Unchecked" FontWeight="Light" VerticalAlignment="Center" HorizontalAlignment="Center">                        
                     <CheckBox.Style>
@@ -315,7 +323,7 @@ CornerRadius="15">
                                 <Setter Property="TextElement.FontFamily"
  Value="Fonts/#Dosis"/>
                                 <Setter Property="Background" Value="White"/>
-                                <Setter Property="FontSize" Value="14"/>
+                                <Setter Property="FontSize" Value="15"/>
                                 <Setter Property="Cursor" Value="Hand"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
@@ -344,7 +352,7 @@ Value="#EBEBEB"/>
                 <Button Click="Button_Login_Click"
                         Content="Вход"
                         Foreground="White"
-                        FontSize="15"
+                        FontSize="17"
                         FontWeight="Medium">
 
                     <Button.Style>
@@ -365,7 +373,7 @@ Value="#EBEBEB"/>
 
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="90" Height="27"
+                            <Border Width="100" Height="33"
                                     CornerRadius="15"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter VerticalAlignment="Center"
@@ -378,7 +386,7 @@ Value="#EBEBEB"/>
             </StackPanel>
 
             <StackPanel Grid.Row="4" Orientation="Horizontal"
-                        VerticalAlignment="Center" HorizontalAlignment="Center">
+            VerticalAlignment="Center" HorizontalAlignment="Center">
 
                 <Button Click="Button_Click"  BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
@@ -408,6 +416,57 @@ Value="#EBEBEB"/>
                     </Button.Style>
                 </Button>
             </StackPanel>
+            
+            <Grid Grid.Row="5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse x:Name="ConnectionIndicator" 
+                             Width="12" 
+                             Height="12" 
+                             Fill="Gray" 
+                             VerticalAlignment="Center"
+                             ToolTip="Статус подключения к БД">
+                        <Ellipse.Resources>
+                            <Style TargetType="Ellipse">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Red">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
+                                                                Duration="0:0:0.3">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="DarkRed"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Red"/>
+                                                    </ColorAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Green">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
+                                                                Duration="0:0:0.3">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="LimeGreen"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Green"/>
+                                                    </ColorAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Resources>
+                    </Ellipse>
+
+                    <TextBlock x:Name="ConnectionStatusText" 
+                               Text="" 
+                               Margin="5,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

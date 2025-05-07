@@ -1,6 +1,7 @@
 ﻿using Full_modul.Properties;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -70,14 +71,87 @@ namespace Full_modul
             }
         }
 
+        private const int DefaultTimeout = 5;
+
+        public static bool TestConnection(out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            try
+            {
+                var connectionString = GetDecryptedConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public static async Task<bool> TestConnectionAsync()
+        {
+            try
+            {
+                var connectionString = GetDecryptedConnectionString();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string GetDecryptedConnectionString()
+        {
+            try
+            {
+                return SecurityHelper.Decrypt(Settings.Default.ConnectionString);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        // Обновляем ExecuteReader с таймаутом
         public SqlDataReader ExecuteReader(string query, params SqlParameter[] parameters)
         {
-            string connectionString = SecurityHelper.Decrypt(Settings.Default.ConnectionString);
+            string connectionString = GetDecryptedConnectionString();
             var connection = new SqlConnection(connectionString);
-            var command = new SqlCommand(query, connection);
+            var command = new SqlCommand(query, connection)
+            {
+                CommandTimeout = DefaultTimeout
+            };
             command.Parameters.AddRange(parameters);
             connection.Open();
             return command.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+
+        // Добавляем кэширование
+        private static readonly ConcurrentDictionary<string, object> _cache = new();
+
+        public T ExecuteScalarWithCache<T>(string query, TimeSpan cacheDuration, params SqlParameter[] parameters)
+        {
+            var cacheKey = $"{query}_{string.Join("_", parameters.Select(p => p.Value))}";
+
+            if (_cache.TryGetValue(cacheKey, out var cached) &&
+                cached is Tuple<DateTime, T> cachedValue &&
+                DateTime.Now - cachedValue.Item1 < cacheDuration)
+            {
+                return cachedValue.Item2;
+            }
+
+            var result = ExecuteScalar<T>(query, parameters);
+            _cache[cacheKey] = Tuple.Create(DateTime.Now, result);
+            return result;
         }
 
         public static DatabaseConnection Instance
