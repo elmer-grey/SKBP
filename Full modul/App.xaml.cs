@@ -12,7 +12,7 @@ namespace Full_modul
     /// </summary>
     public partial class App : Application
     {
-        private const string ReportsFolderName = "Отчёты";
+        private const string ReportsFolderName = "Отчёты1";
         private const string CalculatorFolderName = "Калькулятор";
         private const string ConditionsFolderName = "Условия";
 
