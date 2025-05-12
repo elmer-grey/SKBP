@@ -116,7 +116,7 @@ namespace Full_modul
         {
             isDateLaterSelected = false;
             isDateAgoSelected = false;
-            isLevelWorkerSelected = false;
+            //isLevelWorkerSelected = false;
             TextBlock_ShowName.Visibility = Visibility.Collapsed;
             koefgroup0.Visibility = Visibility.Collapsed;
             koefgroup1.Visibility = Visibility.Collapsed;
@@ -133,7 +133,7 @@ namespace Full_modul
                     {
                         isDateLaterSelected = true;
                         isDateAgoSelected = true;
-                        isLevelWorkerSelected = true;
+                        //isLevelWorkerSelected = true;
                     }
                     break;
                 case 1:
@@ -142,7 +142,7 @@ namespace Full_modul
                     {
                         isDateLaterSelected = true;
                         isDateAgoSelected = true;
-                        isLevelWorkerSelected = true;
+                        //isLevelWorkerSelected = true;
                     }
                     break;
                 case 2:
@@ -151,7 +151,7 @@ namespace Full_modul
                     {
                         isDateLaterSelected = true;
                         isDateAgoSelected = true;
-                        isLevelWorkerSelected = true;
+                        //isLevelWorkerSelected = true;
                     }
                     break;
                 case 3:
@@ -160,7 +160,7 @@ namespace Full_modul
                     {
                         isDateLaterSelected = true;
                         isDateAgoSelected = true;
-                        isLevelWorkerSelected = true;
+                        //isLevelWorkerSelected = true;
                     }
                     break;
                 default:
@@ -187,7 +187,7 @@ namespace Full_modul
         private bool isDateLaterSelected = false;
         private bool isDateAgoSelected = false;
 
-        private bool isLevelWorkerSelected = false;
+        //private bool isLevelWorkerSelected = false;
 
         private bool isHandlingComboBoxSelection = false;
 
@@ -253,7 +253,8 @@ namespace Full_modul
                 }
             }
 
-            if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
+            //if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
+            if (isDateLaterSelected && isDateAgoSelected)
             {
                 switch (comboBoxFormules.SelectedIndex)
                 {
@@ -274,7 +275,7 @@ namespace Full_modul
                 }
                 SChR_calculation();
             }
-            ComboBox_SelectionChanged(sender, e);
+            //ComboBox_SelectionChanged(sender, e);
 
             isHandlingComboBoxSelection = false;
         }
@@ -333,86 +334,86 @@ namespace Full_modul
             }
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (isHandlingComboBoxSelection) return; 
-            isHandlingComboBoxSelection = true;
+        //private void combobox_selectionchanged(object sender, selectionchangedeventargs e)
+        //{
+        //    if (ishandlingcomboboxselection) return;
+        //    ishandlingcomboboxselection = true;
 
-            ComboBox levelworker = sender as ComboBox;
-            ComboBoxItem selectedItem = levelworker.SelectedItem as ComboBoxItem;
+        //    combobox levelworker = sender as combobox;
+        //    comboboxitem selecteditem = levelworker.selecteditem as comboboxitem;
 
-            if (selectedItem != null)
-            {
-                string? selectedValue = selectedItem.Content?.ToString();
-                levelworker.Text = selectedValue;
+        //    if (selecteditem != null)
+        //    {
+        //        string? selectedvalue = selecteditem.content?.tostring();
+        //        levelworker.text = selectedvalue;
 
-                isLevelWorkerSelected = true;
-            }
+        //        islevelworkerselected = true;
+        //    }
 
-            int selectedGroupIndex = comboBoxFormules.SelectedIndex;
-            if (AreValuesEnteredInKoefGroup(selectedGroupIndex))
-            {
-                isDateLaterSelected = true;
-                isDateAgoSelected = true;
-            }
+        //    int selectedgroupindex = comboboxformules.selectedindex;
+        //    if (arevaluesenteredinkoefgroup(selectedgroupindex))
+        //    {
+        //        isdatelaterselected = true;
+        //        isdateagoselected = true;
+        //    }
 
-            switch (comboBoxFormules.SelectedIndex)
-            {
-                case 0:
-                    level = levelworker0.SelectedIndex switch
-                    {
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                        _ => 0
-                    };
+        //    switch (comboboxformules.selectedindex)
+        //    {
+        //        case 0:
+        //            level = levelworker0.selectedindex switch
+        //            {
+        //                0 => 1,
+        //                1 => 2,
+        //                2 => 3,
+        //                _ => 0
+        //            };
 
-                    koef0();
-                    SChR_calculation();
-                    break;
-                case 1:
-                    level = levelworker1.SelectedIndex switch
-                    {
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                        _ => 0
-                    };
+        //            koef0();
+        //            schr_calculation();
+        //            break;
+        //        case 1:
+        //            level = levelworker1.selectedindex switch
+        //            {
+        //                0 => 1,
+        //                1 => 2,
+        //                2 => 3,
+        //                _ => 0
+        //            };
 
-                    koef1();
-                    SChR_calculation();
-                    break;
-                case 2:
-                    level = levelworker2.SelectedIndex switch
-                    {
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                        _ => 0
-                    };
+        //            koef1();
+        //            schr_calculation();
+        //            break;
+        //        case 2:
+        //            level = levelworker2.selectedindex switch
+        //            {
+        //                0 => 1,
+        //                1 => 2,
+        //                2 => 3,
+        //                _ => 0
+        //            };
 
-                    koef2();
-                    SChR_calculation();
-                    break;
-                case 3:
-                    level = levelworker3.SelectedIndex switch
-                    {
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                        _ => 0
-                    };
+        //            koef2();
+        //            schr_calculation();
+        //            break;
+        //        case 3:
+        //            level = levelworker3.selectedindex switch
+        //            {
+        //                0 => 1,
+        //                1 => 2,
+        //                2 => 3,
+        //                _ => 0
+        //            };
 
-                    koef3();
-                    SChR_calculation();
-                    break;
-                default:
-                    throw new ArgumentException("Invalid formula index");
-            }
-            Calendar_SelectedDateChanged(sender, e);
+        //            koef3();
+        //            schr_calculation();
+        //            break;
+        //        default:
+        //            throw new argumentexception("invalid formula index");
+        //    }
+        //    calendar_selecteddatechanged(sender, e);
 
-            isHandlingComboBoxSelection = false;
-        }
+        //    ishandlingcomboboxselection = false;
+        //}
 
         private bool AreValuesEnteredInKoefGroup(int groupIndex)
         {
@@ -466,7 +467,7 @@ namespace Full_modul
         public string SaveData(int selected)
         {
             string formulaName = GetFormulaName(selected);
-            string levelText = GetLevelText(selected);
+            //string levelText = GetLevelText(selected);
             string countText = GetCountText(selected);
             string SCHR = GetSCHR(selected);
             string result = GetResultText(selected);
@@ -485,7 +486,7 @@ namespace Full_modul
                         return string.Empty;
                     }
                     return $"{formulaName}\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                           $"Рассматриваемая должность: -\nКоличество: -\nСЧР: -\nРезультат: -\n================\n";
+                           $"Количество: -\nСЧР: -\nРезультат: -\n================\n";
                 }
             }
             else
@@ -493,7 +494,7 @@ namespace Full_modul
                 _warningsShown[selected] = false;
                 return $"{formulaName}\nНачало периода подсчёта: {startDate}\n" +
                        $"Конец периода подсчёта: {endDate}\n" +
-                       $"Рассматриваемая должность: {levelText}\nКоличество: {countText}\n" +
+                       $"Количество: {countText}\n" +
                        $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
             }
             return string.Empty;
@@ -511,17 +512,17 @@ namespace Full_modul
             }
         }
 
-        private string GetLevelText(int selected)
-        {
-            switch (selected)
-            {
-                case 0: return levelworker0.Text;
-                case 1: return levelworker1.Text;
-                case 2: return levelworker2.Text;
-                case 3: return levelworker3.Text;
-                default: return "";
-            }
-        }
+        //private string GetLevelText(int selected)
+        //{
+        //    switch (selected)
+        //    {
+        //        case 0: return levelworker0.Text;
+        //        case 1: return levelworker1.Text;
+        //        case 2: return levelworker2.Text;
+        //        case 3: return levelworker3.Text;
+        //        default: return "";
+        //    }
+        //}
 
         private string GetCountText(int selected)
         {
@@ -560,7 +561,7 @@ namespace Full_modul
         }
 
         public static int id = -1;
-        public static int level = -1;
+        //public static int level = -1;
         public static double SCHR = 0;
         public static string startDate, endDate;
         public static string command = ""; 
@@ -586,21 +587,20 @@ namespace Full_modul
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
-                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')" +
-                        $"AND level_worker = @LevelWorker";
+                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')";// + $"AND level_worker = @LevelWorker"
+                        
                 }
                 else if (id == 1)
                 {                    
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
-                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')" +
-                        $"AND level_worker = @LevelWorker";
+                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
                     sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
                     sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
-                    sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
+                    //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
                     count3.Text = count.ToString();
@@ -630,19 +630,19 @@ namespace Full_modul
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE (startwork_worker < @DateAgo OR startwork_worker > @DateAgo) " +
-                        $"AND endwork_worker < @DateLater AND fire_worker = 'По собственному желанию' AND level_worker = @LevelWorker";
+                        $"AND endwork_worker < @DateLater AND fire_worker = 'По собственному желанию'";// AND level_worker = @LevelWorker
                 }
                 else if (id == 1)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE (startwork_worker < @DateLater OR startwork_worker > @DateLater) " +
-                        $"AND endwork_worker < @DateAgo AND fire_worker = 'По собственному желанию' AND level_worker = @LevelWorker";
+                        $"AND endwork_worker < @DateAgo AND fire_worker = 'По собственному желанию'";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
                     sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
                     sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
-                    sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
+                    //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
                     count2.Text = count.ToString();
@@ -673,20 +673,20 @@ namespace Full_modul
                 {                    
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
                         $"WHERE startwork_worker < @DateAgo AND (endwork_worker > @DateLater OR endwork_worker = '1900-01-01') " +
-                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию') AND level_worker = @LevelWorker";
+                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию')";// AND level_worker = @LevelWorker
                 }
                 else if (id == 1)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
                         $"WHERE startwork_worker < @DateLater AND (endwork_worker > @DateAgo OR endwork_worker = '1900-01-01') " +
-                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию') AND level_worker = @LevelWorker";
+                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию')";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
                     sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
                     sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
-                    sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
+                    //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
                     count1.Text = count.ToString();
@@ -715,20 +715,18 @@ namespace Full_modul
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateAgo AND startwork_worker < @DateLater" +
-                    $" AND level_worker = @LevelWorker";
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateAgo AND startwork_worker < @DateLater";//+ $" AND level_worker = @LevelWorker"
                 }
                 else if (id == 1)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateLater AND startwork_worker < @DateAgo" +
-                    $" AND level_worker = @LevelWorker";
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateLater AND startwork_worker < @DateAgo";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
                     sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
                     sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
-                    sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
+                    //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
                     count0.Text = count.ToString();
@@ -772,7 +770,7 @@ namespace Full_modul
 
         public void SChR_calculation()
         {
-            if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
+            if (isDateLaterSelected && isDateAgoSelected) //if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
             {                
                 string query = "";
                 BuildQuery(id, ref query, comboBoxFormules.SelectedIndex);
@@ -786,7 +784,7 @@ Employees AS(
     SELECT id_worker, position_worker, startwork_worker, 
     CASE WHEN endwork_worker = '1900-01-01' THEN @EndDate ELSE endwork_worker END AS ActualEndDate
     FROM [calculator].[dbo].[worker]
-    WHERE startwork_worker <= @EndDate AND level_worker = '{level}'
+    WHERE startwork_worker <= @EndDate
 ),
 DailyCounts AS(
     SELECT DateValue, position_worker, COUNT(id_worker) AS DailyCount
@@ -796,7 +794,7 @@ DailyCounts AS(
 )
 SELECT SUM(DailyCount) AS TotalCount
 FROM DailyCounts
-OPTION(MAXRECURSION 0);";
+OPTION(MAXRECURSION 0);";//WHERE startwork_worker <= @EndDate AND level_worker = '{level}'
 
                 using (var command = new SqlCommand(query, DatabaseConnection.Instance.Connection))
                 {
@@ -883,16 +881,17 @@ OPTION(MAXRECURSION 0);";
             switch (comboBoxFormules.SelectedIndex)
             {
                 case 0:
-                    CalculateResult(count0, result0, levelworker0, Save0);
+                    //CalculateResult(count0, result0, levelworker0, Save0);
+                    CalculateResult(count0, result0, Save0);
                     break;
                 case 1:
-                    CalculateResult(count1, result1, levelworker1, Save1);
+                    CalculateResult(count1, result1, Save1);
                     break;
                 case 2:
-                    CalculateResult(count2, result2, levelworker2, Save2);
+                    CalculateResult(count2, result2, Save2);
                     break;
                 case 3:
-                    CalculateResult(count3, result3, levelworker3, Save3);
+                    CalculateResult(count3, result3, Save3);
                     break;
                 default:
                     break;
@@ -905,22 +904,23 @@ OPTION(MAXRECURSION 0);";
             UpdateTextBoxButtonStyle(resultTextBox, button);
         }
 
-        private void CalculateResult(TextBox countTextBox, TextBox resultTextBox, ComboBox levelWorkerComboBox, Button button)
+        //private void CalculateResult(TextBox countTextBox, TextBox resultTextBox, ComboBox levelWorkerComboBox, Button button)
+        private void CalculateResult(TextBox countTextBox, TextBox resultTextBox, Button button)
         {
             double factor = 0;
 
-            switch (levelWorkerComboBox.SelectedIndex)
-            {
-                case 0:
-                    factor = 0.2;
-                    break;
-                case 1:
-                case 2:
-                    factor = 0.8;
-                    break;
-                default:
-                    return;
-            }
+            //switch (levelWorkerComboBox.SelectedIndex)
+            //{
+            //    case 0:
+            //        factor = 0.2;
+            //        break;
+            //    case 1:
+            //    case 2:
+            //        factor = 0.8;
+            //        break;
+            //    default:
+            //        return;
+            //}
 
             resultTextBox.Text = (Double.Parse(countTextBox.Text) / SCHR * 1).ToString();
             resultTextBox.Text = Math.Round(Convert.ToDouble(resultTextBox.Text), 8).ToString();
