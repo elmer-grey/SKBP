@@ -121,7 +121,6 @@ namespace Full_modul
             }
         }
 
-        // Обновляем ExecuteReader с таймаутом
         public SqlDataReader ExecuteReader(string query, params SqlParameter[] parameters)
         {
             string connectionString = GetDecryptedConnectionString();

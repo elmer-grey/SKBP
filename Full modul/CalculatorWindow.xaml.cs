@@ -587,13 +587,12 @@ namespace Full_modul
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
-                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')";// + $"AND level_worker = @LevelWorker"
-                        
+                        $"WHERE start_date < @DateAgo AND(end_date > @DateLater OR end_date IS NULL)";// + $"AND level_worker = @LevelWorker"
                 }
                 else if (id == 1)
                 {                    
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
-                        $"WHERE startwork_worker < @DateAgo AND(endwork_worker > @DateLater OR endwork_worker = '1900-01-01')";
+                        $"WHERE start_date < @DateLater AND(end_date > @DateAgo OR end_date IS NULL)";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
@@ -629,13 +628,15 @@ namespace Full_modul
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE (startwork_worker < @DateAgo OR startwork_worker > @DateAgo) " +
-                        $"AND endwork_worker < @DateLater AND fire_worker = 'По собственному желанию'";// AND level_worker = @LevelWorker
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
+                        $"WHERE end_date BETWEEN @DateAgo AND @DateLater " +
+                        $"AND id_dismissal_reason IN(1, 4)";// AND level_worker = @LevelWorker
                 }
                 else if (id == 1)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE (startwork_worker < @DateLater OR startwork_worker > @DateLater) " +
-                        $"AND endwork_worker < @DateAgo AND fire_worker = 'По собственному желанию'";
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
+                        $"WHERE end_date BETWEEN @DateLater AND @DateAgo " +
+                        $"AND id_dismissal_reason IN(1, 4)";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
@@ -670,16 +671,16 @@ namespace Full_modul
             {
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
-                {                    
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
-                        $"WHERE startwork_worker < @DateAgo AND (endwork_worker > @DateLater OR endwork_worker = '1900-01-01') " +
-                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию')";// AND level_worker = @LevelWorker
+                {
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker]" +
+                        $"WHERE end_date BETWEEN @DateAgo AND @DateLater" +
+                        $"AND id_dismissal_reason IN (2, 3, 5)";// AND level_worker = @LevelWorker
                 }
                 else if (id == 1)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
-                        $"WHERE startwork_worker < @DateLater AND (endwork_worker > @DateAgo OR endwork_worker = '1900-01-01') " +
-                        $"AND (fire_worker = 'Увольнение' OR fire_worker = 'Выход на пенсию')";
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker]" +
+                        $"WHERE end_date BETWEEN @DateLater AND @DateAgo" +
+                        $"AND id_dismissal_reason IN (2, 3, 5)";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
@@ -715,11 +716,11 @@ namespace Full_modul
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateAgo AND startwork_worker < @DateLater";//+ $" AND level_worker = @LevelWorker"
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] WHERE start_date BETWEEN @DateAgo AND @DateLater";//+ $" AND level_worker = @LevelWorker"
                 }
                 else if (id == 1)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] WHERE startwork_worker > @DateLater AND startwork_worker < @DateAgo";
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] WHERE start_date BETWEEN @DateLater AND @DateAgo";
                 }
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
@@ -775,26 +776,26 @@ namespace Full_modul
                 string query = "";
                 BuildQuery(id, ref query, comboBoxFormules.SelectedIndex);
 
-                query += $@"; WITH DateRangeCTE AS(SELECT @StartDate AS DateValue            
-UNION ALL            
-SELECT DATEADD(day, 1, DateValue)
-FROM DateRangeCTE            
-WHERE DateValue < @EndDate),
-Employees AS(
-    SELECT id_worker, position_worker, startwork_worker, 
-    CASE WHEN endwork_worker = '1900-01-01' THEN @EndDate ELSE endwork_worker END AS ActualEndDate
-    FROM [calculator].[dbo].[worker]
-    WHERE startwork_worker <= @EndDate
-),
-DailyCounts AS(
-    SELECT DateValue, position_worker, COUNT(id_worker) AS DailyCount
-    FROM DateRangeCTE
-    JOIN Employees ON DateValue BETWEEN Employees.startwork_worker AND Employees.ActualEndDate
-    GROUP BY DateValue, position_worker
-)
-SELECT SUM(DailyCount) AS TotalCount
-FROM DailyCounts
-OPTION(MAXRECURSION 0);";//WHERE startwork_worker <= @EndDate AND level_worker = '{level}'
+                query += $@"SELECT 
+        SUM(
+            DATEDIFF(DAY,
+                CASE 
+                    WHEN start_date < @StartDate THEN @StartDate 
+                    ELSE start_date 
+                END,
+                CASE 
+                    WHEN end_date IS NULL THEN @EndDate
+                    WHEN end_date > @EndDate THEN @EndDate
+                    ELSE end_date
+                END
+            ) + 1
+        ) / 
+        CAST(DATEDIFF(DAY, @StartDate, @EndDate) + 1 AS FLOAT) AS AverageHeadcount
+    FROM 
+        [calculator].[dbo].[worker]
+    WHERE
+        start_date <= @EndDate AND 
+        (end_date >= @StartDate OR end_date IS NULL);";
 
                 using (var command = new SqlCommand(query, DatabaseConnection.Instance.Connection))
                 {
@@ -804,25 +805,14 @@ OPTION(MAXRECURSION 0);";//WHERE startwork_worker <= @EndDate AND level_worker =
                         {
                             if (reader.Read())
                             {
-                                if (reader.IsDBNull(reader.GetOrdinal("TotalCount")))
+                                if (reader.IsDBNull(reader.GetOrdinal("AverageHeadcount")))
                                 {
                                     SCHR = 0;
                                 }
                                 else
                                 {
-                                    DateTime startDateTime = DateTime.Parse(startDate);
-                                    DateTime endDateTime = DateTime.Parse(endDate);
-
-                                    int totalDays = (endDateTime - startDateTime).Days;
-
-                                    if (totalDays > 0)
-                                    {
-                                        SCHR = Math.Round(Convert.ToDouble(reader["TotalCount"]) / totalDays, 8);
-                                    }
-                                    else
-                                    {
-                                        SCHR = 0;
-                                    }
+                                    // Получаем уже рассчитанное среднее значение из запроса
+                                    SCHR = Math.Round(Convert.ToDouble(reader["AverageHeadcount"]), 8);
                                 }
                             }
                         }
@@ -830,6 +820,7 @@ OPTION(MAXRECURSION 0);";//WHERE startwork_worker <= @EndDate AND level_worker =
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Ошибка при выполнении запроса: {ex.Message}");
+                        SCHR = 0;
                     }
                 }
 

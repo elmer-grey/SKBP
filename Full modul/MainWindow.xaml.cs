@@ -22,6 +22,7 @@ namespace Full_modul
     {
         private CalculatorWindow calculatorWindow;
         private OrganizAndLegalConditWindow organizAndLegalConditWindow;
+        private Enterprise_card enterprise_Card;
         private SaveFile saveFile;
         private SaveFileWindowChoise saveFileWindowChoise;
 
@@ -210,6 +211,33 @@ namespace Full_modul
             this.Activate();
             this.WindowState = WindowState.Normal;
             organizAndLegalConditWindow = null;
+        }
+
+        private void Button_Enterprise_Click(object sender, RoutedEventArgs e)
+        {
+            if (enterprise_Card == null || !enterprise_Card.IsVisible)
+            {
+                enterprise_Card = new Enterprise_card();
+                enterprise_Card.Closed += EnterWindow_Closed;
+                enterprise_Card.Show();
+            }
+            else
+            {
+                if (enterprise_Card.WindowState == WindowState.Minimized)
+                {
+                    enterprise_Card.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    enterprise_Card.Activate();
+                }
+            }
+        }
+
+        private void EnterWindow_Closed(object sender, EventArgs e)
+        {
+            this.Activate();
+            enterprise_Card = null;
         }
     }
 }

@@ -22,6 +22,88 @@ namespace Full_modul
         public Enterprise_card()
         {
             InitializeComponent();
+            LoadCompanyData();
+        }
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                var image = sender as Image;
+                if (image != null)
+                {
+                    ContextMenu contextMenu = image.ContextMenu;
+                    contextMenu.IsOpen = true;
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void LoadCompanyData()
+        {
+            DatabaseHelper dbHelper = new DatabaseHelper();
+            var stats = dbHelper.GetCompanyStatistics();
+
+            CompanyNameText.Text = "\"Архимед\" Рекламная компания";
+            TotalEmployeesText.Text = stats.TotalEmployees.ToString();
+
+            // Заполнение разбивки по возрасту и гендерному составу
+            var ageGenderList = new List<DatabaseHelper.AgeGenderGroup>
+            {
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "18-30", MaleCount = stats.AgeGroups[0], FemaleCount = stats.AgeGroups[1] },
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "31-40", MaleCount = stats.AgeGroups[2], FemaleCount = stats.AgeGroups[3] },
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "41-50", MaleCount = stats.AgeGroups[4], FemaleCount = stats.AgeGroups[5] },
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "51-60", MaleCount = stats.AgeGroups[6], FemaleCount = stats.AgeGroups[7] },
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "61-65", MaleCount = stats.AgeGroups[8], FemaleCount = stats.AgeGroups[9] },
+                new DatabaseHelper.AgeGenderGroup { AgeGroup = "66+", MaleCount = stats.AgeGroups[10], FemaleCount = stats.AgeGroups[11] }
+            };
+
+            // Привязка списка к ItemsControl
+            AgeGenderBreakdown.ItemsSource = ageGenderList;
+
+            // Обновление гендерного состава
+            GenderCompositionText.Text = $"Мужчины: {stats.GenderCounts[0]}, Женщины: {stats.GenderCounts[1]}";
+
+            // Заполнение списка образования
+            var educationList = new List<string>
+            {
+                $"Среднее: {stats.EducationCounts[0]}",
+                $"Специальное: {stats.EducationCounts[1]}",
+                $"Неполное высшее: {stats.EducationCounts[2]}",
+                $"Высшее: {stats.EducationCounts[3]}"
+            };
+            EducationBreakdown.ItemsSource = educationList;
+
+            // Заполнение списка опыта
+            var experienceList = new List<string>
+            {
+                $"Менее 5 лет: {stats.ExperienceCounts[0]}",
+                $"6-10 лет: {stats.ExperienceCounts[1]}",
+                $"11-15 лет: {stats.ExperienceCounts[2]}",
+                $"16 и более лет: {stats.ExperienceCounts[3]}"
+            };
+            ExperienceBreakdown.ItemsSource = experienceList;
+
+            // Форматирование коэффициента удержания как процент
+            RetentionRateText.Text = $"{stats.RetentionRate:P2}";
         }
     }
 }
