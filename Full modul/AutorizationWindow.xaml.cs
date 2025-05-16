@@ -29,7 +29,7 @@ namespace Full_modul
             LoadSavedCredentials();
             _connectionCheckTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(5) // Проверка каждые 5 секунд
+                Interval = TimeSpan.FromSeconds(5)
             };
             _connectionCheckTimer.Tick += async (s, e) => await UpdateConnectionStatus();
 
@@ -212,10 +212,8 @@ namespace Full_modul
                     return;
                 }
 
-                // Показать Popup
                 ConnectionCheckPopup.IsOpen = true;
 
-                // Добавляем проверку перед запросом
                 if (!await DatabaseConnection.TestConnectionAsync())
                 {
                     var result = MessageBox.Show("Нет подключения к БД. Повторить попытку?",
@@ -225,12 +223,11 @@ namespace Full_modul
                     if (result == MessageBoxResult.Yes)
                     {
                         await UpdateConnectionStatus();
-                        HandleLogin(); // Рекурсивный вызов
+                        HandleLogin();
                     }
                     return;
                 }
 
-                // Сначала проверяем существует ли пользователь
                 int userCount = DatabaseConnection.Instance.ExecuteScalar<int>(
                     "SELECT COUNT(1) FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass",
                     new SqlParameter("@login", TextBox_Login.Text),
@@ -239,7 +236,6 @@ namespace Full_modul
 
                 if (userCount > 0)
                 {
-                    // Получаем данные пользователя отдельным запросом
                     var userData = DatabaseConnection.Instance.ExecuteReader(
                         "SELECT [login_hr], [pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login",
                         new SqlParameter("@login", TextBox_Login.Text)
@@ -300,7 +296,6 @@ namespace Full_modul
                 StringBuilder errorDetails = new StringBuilder();
                 errorDetails.AppendLine($"Произошла ошибка SQL (Код: {ex.Number}):");
 
-                // Перебираем все ошибки (некоторые запросы могут вызывать несколько ошибок)
                 foreach (SqlError error in ex.Errors)
                 {
                     errorDetails.AppendLine($"• Уровень: {error.Class}");
@@ -314,7 +309,6 @@ namespace Full_modul
             }
             finally
             {
-                // Скрыть Popup
                 ConnectionCheckPopup.IsOpen = false;
             }
         }

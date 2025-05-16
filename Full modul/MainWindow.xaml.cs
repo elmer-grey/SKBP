@@ -131,7 +131,7 @@ namespace Full_modul
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized; // Свернуть окно
+            this.WindowState = WindowState.Minimized;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -147,9 +147,9 @@ namespace Full_modul
                 if (image != null)
                 {
                     ContextMenu contextMenu = image.ContextMenu;
-                    contextMenu.IsOpen = true; // Открыть контекстное меню
+                    contextMenu.IsOpen = true;
                 }
-                e.Handled = true; // Отметить событие как обработанное
+                e.Handled = true;
             }
         }
 

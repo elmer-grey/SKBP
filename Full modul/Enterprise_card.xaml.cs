@@ -65,7 +65,6 @@ namespace Full_modul
             CompanyNameText.Text = "\"Архимед\" Рекламная компания";
             TotalEmployeesText.Text = stats.TotalEmployees.ToString();
 
-            // Заполнение разбивки по возрасту и гендерному составу
             var ageGenderList = new List<DatabaseHelper.AgeGenderGroup>
             {
                 new DatabaseHelper.AgeGenderGroup { AgeGroup = "18-30", MaleCount = stats.AgeGroups[0], FemaleCount = stats.AgeGroups[1] },
@@ -76,13 +75,10 @@ namespace Full_modul
                 new DatabaseHelper.AgeGenderGroup { AgeGroup = "66+", MaleCount = stats.AgeGroups[10], FemaleCount = stats.AgeGroups[11] }
             };
 
-            // Привязка списка к ItemsControl
             AgeGenderBreakdown.ItemsSource = ageGenderList;
 
-            // Обновление гендерного состава
             GenderCompositionText.Text = $"Мужчины: {stats.GenderCounts[0]}, Женщины: {stats.GenderCounts[1]}";
 
-            // Заполнение списка образования
             var educationList = new List<string>
             {
                 $"Среднее: {stats.EducationCounts[0]}",
@@ -92,7 +88,6 @@ namespace Full_modul
             };
             EducationBreakdown.ItemsSource = educationList;
 
-            // Заполнение списка опыта
             var experienceList = new List<string>
             {
                 $"Менее 5 лет: {stats.ExperienceCounts[0]}",
@@ -102,7 +97,6 @@ namespace Full_modul
             };
             ExperienceBreakdown.ItemsSource = experienceList;
 
-            // Форматирование коэффициента удержания как процент
             RetentionRateText.Text = $"{stats.RetentionRate:P2}";
         }
     }

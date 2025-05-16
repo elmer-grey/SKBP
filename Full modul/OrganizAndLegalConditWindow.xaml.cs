@@ -109,104 +109,53 @@ namespace Full_modul
             }
         }
 
-        private void UpdatePlaceholderVisibility(ComboBox comboBox)
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            var grid = (Grid)comboBox.Parent;
-            var placeholderText = (TextBlock)grid.Children[1];
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+            if (sender is RadioButton radioButton && radioButton.IsChecked == true)
             {
-                placeholderText.Visibility = selectedItem.Content.ToString() != "-" ? Visibility.Collapsed : Visibility.Visible;
-            }
-        }
+                int index = int.Parse(radioButton.Tag.ToString());
+                HandleFirstContainer(index, radioButton.Content.ToString());
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ComboBox comboBox)
-            {
-                UpdatePlaceholderVisibility(comboBox);
-                HandleFirstContainer(comboBox);
-
-                var comboBoxes1 = new[] { Box0, Box1, Box2, Box3, Box4, Box5, Box6 };
-                CalculateAverage(comboBoxes1, result0, ClickableImage2);
+                // Обновляем результаты
+                var radioGroups1 = new[] {
+            (Rb0_Yes, Rb0_No),
+            (Rb1_Yes, Rb1_No),
+            // ... все остальные пары RadioButton
+        };
+                CalculateAverage(radioGroups1, result0, ClickableImage2);
 
                 UpdateSecondContainerResults();
             }
         }
 
-        private void HandleFirstContainer(ComboBox comboBox)
+        private void HandleFirstContainer(int index, string selectedValue)
         {
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+            if (index == 1) // Для первого RadioButton, который влияет на Grid10
             {
-                string selectedValue = selectedItem.Content.ToString();
+                Grid10.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
+            }
 
-                if (comboBox == Box1)
-                {
-                    Grid10.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
-                }
-
-                if (comboBox == Box4)
-                {
-                    Grid13.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
-                }
+            if (index == 4) // Для четвертого RadioButton, который влияет на Grid13
+            {
+                Grid13.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 
-        private void UpdateSecondContainerResults()
-        {
-            int sum = 0;
-            int count = 0;
-            int visibleCount = 0;
-            bool isAnyGridVisible = false;
-
-            for (int i = 9; i <= 15; i++)
-            {
-                var comboBox = (ComboBox)this.FindName($"Box{i}");
-                var Grid = (Grid)this.FindName($"Grid{i}");
-
-                if (Grid.Visibility == Visibility.Visible)
-                {
-                    isAnyGridVisible = true;
-                    visibleCount++;
-
-                    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-                    {
-                        if (selectedItem.Content.ToString() == "Да")
-                        {
-                            sum += 1;
-                        }
-                        count++;
-                    }
-                }
-            }
-
-            if (isAnyGridVisible && count == visibleCount)
-            {
-                double average = (double)sum / visibleCount; 
-                result1.Text = average.ToString("0.######");
-                Save0.IsEnabled = true;
-            }
-            else
-            {
-                result1.Text = string.Empty;
-                Save0.IsEnabled = false;
-            }
-        }
-
-        private void CalculateAverage(ComboBox[] comboBoxes, TextBox resultText, Image clickableImage)
+        private void CalculateAverage((RadioButton yes, RadioButton no)[] radioGroups, TextBox resultText, Image clickableImage)
         {
             int sum = 0;
             int count = 0;
             bool allSelected = true;
 
-            foreach (var comboBox in comboBoxes)
+            foreach (var (yesRb, noRb) in radioGroups)
             {
-                if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+                if (yesRb.IsChecked == true)
                 {
-                    if (selectedItem.Content.ToString() == "Да")
-                    {
-                        sum += 1;
-                    }
+                    sum += 1;
+                    count++;
+                }
+                else if (noRb.IsChecked == true)
+                {
                     count++;
                 }
                 else
@@ -231,6 +180,202 @@ namespace Full_modul
                 resultText.Text = string.Empty;
             }
         }
+
+        private void UpdateSecondContainerResults()
+        {
+            int sum = 0;
+            int count = 0;
+            int visibleCount = 0;
+            bool isAnyGridVisible = false;
+
+            for (int i = 9; i <= 15; i++)
+            {
+                var grid = (Grid)this.FindName($"Grid{i}");
+                var yesRb = (RadioButton)this.FindName($"Rb{i}_Yes");
+                var noRb = (RadioButton)this.FindName($"Rb{i}_No");
+
+                if (grid.Visibility == Visibility.Visible)
+                {
+                    isAnyGridVisible = true;
+                    visibleCount++;
+
+                    if (yesRb.IsChecked == true)
+                    {
+                        sum += 1;
+                        count++;
+                    }
+                    else if (noRb.IsChecked == true)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            if (isAnyGridVisible && count == visibleCount)
+            {
+                double average = (double)sum / visibleCount;
+                result1.Text = average.ToString("0.######");
+                Save0.IsEnabled = true;
+            }
+            else
+            {
+                result1.Text = string.Empty;
+                Save0.IsEnabled = false;
+            }
+        }
+
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i <= 25; i++)
+            {
+                var yesRb = (RadioButton)this.FindName($"Rb{i}_Yes");
+                var noRb = (RadioButton)this.FindName($"Rb{i}_No");
+                if (yesRb != null) yesRb.IsChecked = false;
+                if (noRb != null) noRb.IsChecked = false;
+            }
+        }
+        private void YesButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i <= 25; i++)
+            {
+                var yesRb = (RadioButton)this.FindName($"Rb{i}_Yes");
+                var noRb = (RadioButton)this.FindName($"Rb{i}_No");
+                if (yesRb != null) yesRb.IsChecked = true;
+                if (noRb != null) noRb.IsChecked = false;
+            }
+        }
+        private void NoButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i <= 25; i++)
+            {
+                var yesRb = (RadioButton)this.FindName($"Rb{i}_Yes");
+                var noRb = (RadioButton)this.FindName($"Rb{i}_No");
+                if (yesRb != null) yesRb.IsChecked = false;
+                if (noRb != null) noRb.IsChecked = true;
+            }
+        }
+        //private void UpdatePlaceholderVisibility(ComboBox comboBox)
+        //{
+        //    var grid = (Grid)comboBox.Parent;
+        //    var placeholderText = (TextBlock)grid.Children[1];
+
+        //    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+        //    {
+        //        placeholderText.Visibility = selectedItem.Content.ToString() != "-" ? Visibility.Collapsed : Visibility.Visible;
+        //    }
+        //}
+
+        //private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    if (sender is ComboBox comboBox)
+        //    {
+        //        UpdatePlaceholderVisibility(comboBox);
+        //        HandleFirstContainer(comboBox);
+
+        //        var comboBoxes1 = new[] { Box0, Box1, Box2, Box3, Box4, Box5, Box6 };
+        //        CalculateAverage(comboBoxes1, result0, ClickableImage2);
+
+        //        UpdateSecondContainerResults();
+        //    }
+        //}
+
+        //private void HandleFirstContainer(ComboBox comboBox)
+        //{
+        //    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+        //    {
+        //        string selectedValue = selectedItem.Content.ToString();
+
+        //        if (comboBox == Box1)
+        //        {
+        //            Grid10.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
+        //        }
+
+        //        if (comboBox == Box4)
+        //        {
+        //            Grid13.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
+        //        }
+        //    }
+        //}
+
+        //private void UpdateSecondContainerResults()
+        //{
+        //    int sum = 0;
+        //    int count = 0;
+        //    int visibleCount = 0;
+        //    bool isAnyGridVisible = false;
+
+        //    for (int i = 9; i <= 15; i++)
+        //    {
+        //        var comboBox = (ComboBox)this.FindName($"Box{i}");
+        //        var Grid = (Grid)this.FindName($"Grid{i}");
+
+        //        if (Grid.Visibility == Visibility.Visible)
+        //        {
+        //            isAnyGridVisible = true;
+        //            visibleCount++;
+
+        //            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+        //            {
+        //                if (selectedItem.Content.ToString() == "Да")
+        //                {
+        //                    sum += 1;
+        //                }
+        //                count++;
+        //            }
+        //        }
+        //    }
+
+        //    if (isAnyGridVisible && count == visibleCount)
+        //    {
+        //        double average = (double)sum / visibleCount; 
+        //        result1.Text = average.ToString("0.######");
+        //        Save0.IsEnabled = true;
+        //    }
+        //    else
+        //    {
+        //        result1.Text = string.Empty;
+        //        Save0.IsEnabled = false;
+        //    }
+        //}
+
+        //private void CalculateAverage(ComboBox[] comboBoxes, TextBox resultText, Image clickableImage)
+        //{
+        //    int sum = 0;
+        //    int count = 0;
+        //    bool allSelected = true;
+
+        //    foreach (var comboBox in comboBoxes)
+        //    {
+        //        if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+        //        {
+        //            if (selectedItem.Content.ToString() == "Да")
+        //            {
+        //                sum += 1;
+        //            }
+        //            count++;
+        //        }
+        //        else
+        //        {
+        //            allSelected = false;
+        //            break;
+        //        }
+        //    }
+
+        //    if (allSelected && count > 0)
+        //    {
+        //        double average = (double)sum / count;
+        //        resultText.Text = average.ToString("0.#####");
+
+        //        if (clickableImage != null && resultText.Text != string.Empty)
+        //        {
+        //            clickableImage.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0.png"));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        resultText.Text = string.Empty;
+        //    }
+        //}
 
         private void SwitchButton_Click(object sender, RoutedEventArgs e)
         {
