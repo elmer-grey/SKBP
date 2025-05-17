@@ -108,7 +108,7 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
             
             <StackPanel Margin="10" Grid.Row="0">
                 <TextBlock Text="Название предприятия" FontSize="20" FontWeight="Bold" Margin="0,0,0,5"/>
-                <TextBlock x:Name="CompanyNameText" FontSize="18" Margin="0,0,0,5"/>
+                <TextBlock x:Name="CompanyNameText" FontSize="20" Margin="0,0,0,5"/>
             </StackPanel>
             
             <ScrollViewer Grid.Row="1">
@@ -118,11 +118,11 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Общее количество сотрудников:" FontSize="18" FontWeight="Bold" Margin="0,0,0,0" Grid.Column="0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TotalEmployeesText" FontSize="17" Margin="5,0,0,0" Grid.Column="1" VerticalAlignment="Center"/>
+                        <TextBlock Text="Общее количество сотрудников:" FontSize="18" FontWeight="Bold" Grid.Column="0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TotalEmployeesText" FontSize="18" Margin="5,0,0,0" Grid.Column="1" VerticalAlignment="Top"/>
                     </Grid>
 
-                    <TextBlock Text="Разбивка по возрастным группам:" FontSize="18" Margin="0,15,0,0" FontWeight="Bold"/>
+                    <TextBlock Text="Разбивка по возрастным группам:" FontSize="18" Margin="0,15,0,7" FontWeight="Bold"/>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
@@ -131,12 +131,12 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                         <Grid Margin="0,0,0,3">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="45"/>
+                                <ColumnDefinition Width="30"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Возраст" FontSize="17" Grid.Column="0"/>
-                            <TextBlock Text="М" FontSize="17" Grid.Column="1"/>
-                            <TextBlock Text="Ж" FontSize="17" Grid.Column="2"/>
+                            <TextBlock Text="Возраст" FontSize="18" Grid.Column="0"/>
+                            <TextBlock Text="М" FontSize="18" Grid.Column="1"/>
+                            <TextBlock Text="Ж" FontSize="18" Grid.Column="2"/>
                         </Grid>
                         <ItemsControl x:Name="AgeGenderBreakdown" Margin="0,0,0,10" Grid.Row="1">
                             <ItemsControl.ItemTemplate>
@@ -144,46 +144,94 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="40"/>
-                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="25"/>
+                                            <ColumnDefinition Width="45"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding AgeGroup}" Margin="0,0,10,2" FontSize="15" Grid.Column="0"/>
-                                        <TextBlock Text="{Binding MaleCount}" Margin="0,0,10,0" FontSize="15" Grid.Column="1"/>
-                                        <TextBlock Text="{Binding FemaleCount}" Margin="0,0,10,0" FontSize="15" Grid.Column="2"/>
+                                        <TextBlock Text="{Binding AgeGroup}" Margin="0,0,10,2" FontSize="16" Grid.Column="0"/>
+                                        <TextBlock Text="{Binding MaleCount}" Margin="0,0,10,0" FontSize="16" Grid.Column="1" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding FemaleCount}" Margin="0,0,10,0" FontSize="16" Grid.Column="2" HorizontalAlignment="Right"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Grid>
 
-                    <TextBlock Text="Гендерный состав (в общем):" FontSize="18" Margin="0,10,0,5" FontWeight="Bold"/>
+                    <TextBlock Text="Гендерный состав (в общем):" FontSize="18" Margin="0,10,0,7" FontWeight="Bold"/>
                     <TextBlock x:Name="GenderCompositionText" FontSize="16" Margin="0,0,0,10"/>
 
-                    <TextBlock Text="Образование:" FontSize="18" Margin="0,10,0,5" FontWeight="Bold"/>
-                    <ItemsControl x:Name="EducationBreakdown" Margin="0,0,0,10">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" FontSize="16"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Образование:" FontSize="18" Margin="0,10,0,5" FontWeight="Bold" Grid.Row="0"/>
+                        <ItemsControl x:Name="EducationBreakdown" Margin="0,0,0,10" Grid.Row="1">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="20"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Key}" FontSize="17" Grid.Column="0"/>
+                                        <TextBlock Text="{Binding Value}" FontSize="16" Grid.Column="1" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
 
-                    <TextBlock Text="Стаж работы:" FontSize="18" Margin="0,10,0,5" FontWeight="Bold"/>
-                    <ItemsControl x:Name="ExperienceBreakdown" Margin="0,0,0,10">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" FontSize="16"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Стаж работы:" FontSize="18" Margin="0,10,0,5" FontWeight="Bold" Grid.Row="0"/>
+                        <ItemsControl x:Name="ExperienceBreakdown" Margin="0,0,0,10" Grid.Row="1">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="20"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Key}" FontSize="17" Grid.Column="0"/>
+                                        <TextBlock Text="{Binding Value}" FontSize="16" Grid.Column="1" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Уровень удержания:" FontSize="18" Margin="0,5,0,5" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold"/>
                         <TextBlock x:Name="RetentionRateText" FontSize="16" Margin="5,0,0,0" Grid.Column="1" VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" 
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Left" 
+            Grid.Column="2" Margin="15,0,0,0">
+                            <Image x:Name="HelpImage"
+           Source="/Images/help.png" 
+           Width="24">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip x:Name="HelpToolTip"
+                     Placement="Mouse"
+                     StaysOpen="True">
+                                        <TextBlock Text="Уровень удержания сотрудников — процент сотрудников с максимальным стажем в компании" 
+                           FontFamily="Ubuntu" 
+                           FontWeight="Light" 
+                           FontSize="14"/>
+                                    </ToolTip>
+                                </ToolTipService.ToolTip>
+                                <ToolTipService.InitialShowDelay>1000</ToolTipService.InitialShowDelay>
+                                <ToolTipService.ShowDuration>6000</ToolTipService.ShowDuration>
+                            </Image>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </ScrollViewer>

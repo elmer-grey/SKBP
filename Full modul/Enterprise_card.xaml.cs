@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Full_modul
 {
@@ -23,6 +24,16 @@ namespace Full_modul
         {
             InitializeComponent();
             LoadCompanyData();
+            this.KeyDown += Enterprise_card_KeyDown;
+        }
+
+        private void Enterprise_card_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                CloseButton_Click(sender, e);
+                e.Handled = true;
+            }
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -77,23 +88,23 @@ namespace Full_modul
 
             AgeGenderBreakdown.ItemsSource = ageGenderList;
 
-            GenderCompositionText.Text = $"Мужчины: {stats.GenderCounts[0]}, Женщины: {stats.GenderCounts[1]}";
+            GenderCompositionText.Text = $"Мужчины: {stats.GenderCounts[0]}\nЖенщины: {stats.GenderCounts[1]}";
 
-            var educationList = new List<string>
+            var educationList = new Dictionary<string, int>
             {
-                $"Среднее: {stats.EducationCounts[0]}",
-                $"Специальное: {stats.EducationCounts[1]}",
-                $"Неполное высшее: {stats.EducationCounts[2]}",
-                $"Высшее: {stats.EducationCounts[3]}"
+                ["Среднее:"] = stats.EducationCounts[0],
+                ["Специальное:"] = stats.EducationCounts[1],
+                ["Неполное высшее:"] = stats.EducationCounts[2],
+                ["Высшее:"] = stats.EducationCounts[3]
             };
             EducationBreakdown.ItemsSource = educationList;
 
-            var experienceList = new List<string>
+            var experienceList = new Dictionary<string, int>
             {
-                $"Менее 5 лет: {stats.ExperienceCounts[0]}",
-                $"6-10 лет: {stats.ExperienceCounts[1]}",
-                $"11-15 лет: {stats.ExperienceCounts[2]}",
-                $"16 и более лет: {stats.ExperienceCounts[3]}"
+                ["Менее 5 лет:"] = stats.ExperienceCounts[0],
+                ["6-10 лет:"] = stats.ExperienceCounts[1],
+                ["11-15 лет:"] = stats.ExperienceCounts[2],
+                ["16 и более лет:"] = stats.ExperienceCounts[3]
             };
             ExperienceBreakdown.ItemsSource = experienceList;
 

@@ -161,6 +161,31 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="NotificationPopupStyle" TargetType="Popup">
+            <Setter Property="AllowsTransparency" Value="True"/>
+            <Setter Property="Placement" Value="Center"/>
+            <Setter Property="StaysOpen" Value="False"/>
+        </Style>
+
+        <Style x:Key="NotificationBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#AA000000"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform x:Name="PopupTransform" ScaleX="0.8" ScaleY="0.8"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NotificationTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="MaxWidth" Value="300"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -339,12 +364,12 @@ Value="#EBEBEB"/>
            Height="18"
            Margin="10,0,0,0"
                                                    Grid.Column="0"/>
-                                        <Button Click="YesButton_Click"
+                                        <Button Click="LegalYesButton_Click"
                         Content="Да"
                         Foreground="White"
                         FontSize="15"
                         FontWeight="Medium"
-                                                Grid.Column="2"
+                                                Grid.Column="3"
                         FontFamily="Ubuntu">
 
                                             <Button.Style>
@@ -375,12 +400,12 @@ Value="#9ed2ed"/>
                                                 </ControlTemplate>
                                             </Button.Template>
                                         </Button>
-                                        <Button Click="NoButton_Click"
+                                        <Button Click="LegalNoButton_Click"
                                                 Content="Нет"
                                                 Foreground="White"
                                                 FontSize="15"
                                                 FontWeight="Medium"
-                                                Grid.Column="3"
+                                                Grid.Column="4"
                                                 FontFamily="Ubuntu">
 
                                             <Button.Style>
@@ -411,12 +436,12 @@ Value="#7c7bc8"/>
                                                 </ControlTemplate>
                                             </Button.Template>
                                         </Button>
-                                        <Button Click="ResetButton_Click"
+                                        <Button Click="LegalResetButton_Click"
                                                 Content="Сбросить"
                                                 Foreground="White"
                                                 FontSize="15"
                                                 FontWeight="Medium"
-                                                Grid.Column="4"
+                                                Grid.Column="2"
                                                 FontFamily="Ubuntu">
 
                                             <Button.Style>
@@ -449,172 +474,9 @@ Value="IndianRed"/>
                                         </Button>
                                     </Grid>
                                 </StackPanel>
-                                
-                                <ScrollViewer Grid.Row="2" Margin="0,0,0,50" Grid.RowSpan="2">
-                                    <StackPanel>
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
 
-                                            <TextBlock Text="Текст 0000Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Текст 645454654 Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6ст 6Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15" TextWrapping="Wrap" MaxWidth="425">
+                                <ScrollViewer x:Name="DocumentsScrollViewer" Grid.Row="2" Margin="0,0,0,50" Grid.RowSpan="2"/>
 
-                                            </TextBlock>
-                                            <Image x:Name="DocIcon1" Grid.Column="1" Width="30" Height="30" Margin="5,0,0,0" 
-           Source="/Images/Reports.png" Visibility="Collapsed"
-           MouseLeftButtonDown="OpenDocument_Click" Tag="1"/>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb0_Yes" GroupName="Group0" Margin="5,0" 
-                            Style="{StaticResource CustomRadioButton}" Content="Есть"
-                            Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb0_No" GroupName="Group0" Margin="5,0" 
-                            Style="{StaticResource CustomRadioButton}" Content="Нет"
-                            Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 1 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15">
-                                                <ToolTipService.ToolTip>
-                                                    <ToolTip>
-                                                        <StackPanel>
-                                                            <TextBlock Text="Этот параметр влияет на Текст N" FontWeight="Bold"/>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </ToolTipService.ToolTip>
-                                            </TextBlock>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb1_Yes" GroupName="Group0" Margin="5,0" 
-                            Style="{StaticResource CustomRadioButton}" Content="Есть"
-                            Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb1_No" GroupName="Group0" Margin="5,0" 
-                            Style="{StaticResource CustomRadioButton}" Content="Нет"
-                            Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 2" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15"/>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb2_Yes" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Есть"
-Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb2_No" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Нет"
-Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 3" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15"/>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb3_Yes" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Есть"
-Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb3_No" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Нет"
-Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 4 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-FontWeight="Normal"
-FontSize="15">
-                                                    <ToolTipService.ToolTip>
-                                                        <ToolTip>
-                                                            <StackPanel>
-                                                                <TextBlock Text="Этот параметр влияет на Текст N" FontWeight="Bold"/>
-                                                            </StackPanel>
-                                                        </ToolTip>
-                                                    </ToolTipService.ToolTip>
-                                                </TextBlock>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb4_Yes" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Есть"
-Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb4_No" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Нет"
-Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 5" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15"/>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb5_Yes" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Есть"
-Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb5_No" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Нет"
-Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-                   FontWeight="Normal"
-                   FontSize="15"/>
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
-                                                <RadioButton x:Name="Rb6_Yes" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Есть"
-Checked="RadioButton_Checked" Tag="0"/>
-                                                <RadioButton x:Name="Rb6_No" GroupName="Group0" Margin="5,0" 
-Style="{StaticResource CustomRadioButton}" Content="Нет"
-Checked="RadioButton_Checked" Tag="0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </ScrollViewer>
-                                
                                 <Grid Grid.Row="3" Margin="0,10,0,0" VerticalAlignment="Center" Height="Auto">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="70*"/>
@@ -685,166 +547,152 @@ Checked="RadioButton_Checked" Tag="0"/>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="250"/>
-                                    <RowDefinition Height="50"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="245"/>
+                                    <RowDefinition Height="56"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
                                     <TextBlock Text="Организационные условия"
-            Foreground="Black"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            FontFamily="Ubuntu"
-            FontWeight="Bold"
-            FontSize="15"
-            Height="18"
-            Width="auto"/>
+Foreground="Black"
+VerticalAlignment="Center"
+HorizontalAlignment="Center"
+FontFamily="Ubuntu"
+FontWeight="Bold"
+FontSize="17"
+Height="18"/>
                                 </StackPanel>
-                                <ScrollViewer Grid.Row="1">
-                                    <StackPanel>
-                                        <Grid Margin="5" x:Name="Grid9">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
 
-                                            <TextBlock Text="Текст 999999Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6Тек
-                                       Текст 6Текст 6Текст 6Текст 6Текст 6Текст 6ст 6Текст 6" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15" TextWrapping="Wrap" MaxWidth="425"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box9" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText9" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
+                                <StackPanel Grid.Row="1" Margin="0,4,0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="35*"/>
+                                            <ColumnDefinition Width="15*"/>
+                                            <ColumnDefinition Width="15*"/>
+                                            <ColumnDefinition Width="15*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Отметить всё:"
+           Foreground="Black"
+           VerticalAlignment="Center"
+           HorizontalAlignment="Left"
+           FontFamily="Ubuntu"
+           FontWeight="Bold"
+           FontSize="15"
+           Height="18"
+           Margin="10,0,0,0"
+                                                   Grid.Column="0"/>
+                                        <Button Click="OrganYesButton_Click"
+                        Content="Да"
+                        Foreground="White"
+                        FontSize="15"
+                        FontWeight="Medium"
+                                                Grid.Column="2"
+                        FontFamily="Ubuntu">
 
-                                        <Grid Margin="5" x:Name="Grid10">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                    <Setter Property="Background" Value="#7dc5ea"/>
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver"
+Value="True">
+                                                            <Setter Property="Background"
+Value="#9ed2ed"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
 
-                                            <TextBlock Text="Текст 10 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box10" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText10" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Width="80" Height="27"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                        <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
 
-                                        <Grid Margin="5" x:Name="Grid11">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button Click="OrganNoButton_Click"
+                                                Content="Нет"
+                                                Foreground="White"
+                                                FontSize="15"
+                                                FontWeight="Medium"
+                                                Grid.Column="3"
+                                                FontFamily="Ubuntu">
 
-                                            <TextBlock Text="Текст 11" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box11" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText11" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                    <Setter Property="Background" Value="#6665cb"/>
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver"
+Value="True">
+                                                            <Setter Property="Background"
+Value="#7c7bc8"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
 
-                                        <Grid Margin="5" x:Name="Grid12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Width="80" Height="27"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                        <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
 
-                                            <TextBlock Text="Текст 12" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box12" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText12" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button Click="OrganResetButton_Click"
+                                                Content="Сбросить"
+                                                Foreground="White"
+                                                FontSize="15"
+                                                FontWeight="Medium"
+                                                Grid.Column="4"
+                                                FontFamily="Ubuntu">
 
-                                        <Grid Margin="5" x:Name="Grid13">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="TextElement.FontFamily"
+ Value="Fonts/#Dosis"/>
+                                                    <Setter Property="Background" Value="DarkRed"/>
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver"
+Value="True">
+                                                            <Setter Property="Background"
+Value="IndianRed"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
 
-                                            <TextBlock Text="Текст 13 (влияет)" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box13" Width="100" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText13" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Width="80" Height="27"
+                                CornerRadius="15"
+                                Background="{TemplateBinding Background}">
+                                                        <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
 
-                                        <Grid Margin="5" x:Name="Grid14">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 14" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box14" SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText14" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid Margin="5" x:Name="Grid15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Text="Текст 15" VerticalAlignment="Center" Margin="5" FontFamily="Ubuntu" 
-               FontWeight="Normal"
-               FontSize="15"/>
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="Box15"
-                                    SelectionChanged="ComboBox_SelectionChanged" SelectedIndex="-1" 
-      Style="{StaticResource ComboBoxChoise}">
-                                                    <ComboBoxItem Content="Да" />
-                                                    <ComboBoxItem Content="Нет" />
-                                                </ComboBox>
-                                                <TextBlock Text="－" HorizontalAlignment="Center" VerticalAlignment="Center" 
-       Visibility="Visible" Name="PlaceholderText15" Margin="0,0,20,0" IsHitTestVisible="False" />
-                                            </Grid>
-                                        </Grid>
-                                    </StackPanel>
-                                </ScrollViewer>
-                                <Grid Grid.Row="2" Margin="0,5,0,0">
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                                <ScrollViewer x:Name="MeasuresScrollViewer" Grid.Row="2" Margin="0,0,0,50" Grid.RowSpan="2"/>
+                                <Grid Grid.Row="3" Margin="0,10,0,0" VerticalAlignment="Center" Height="Auto">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="70*"/>
                                         <ColumnDefinition Width="40*"/>
@@ -941,6 +789,28 @@ Checked="RadioButton_Checked" Tag="0"/>
                         </StackPanel>
                     </Grid>
                 </ContentControl>
+                <Popup x:Name="NotificationPopup" 
+           StaysOpen="False" 
+           Placement="Center" 
+           PlacementTarget="{Binding ElementName=MainContent}"
+           AllowsTransparency="True"
+           HorizontalOffset="0"
+           VerticalOffset="-50">
+                    <Border Background="#AA000000" 
+                CornerRadius="10" 
+                Padding="15"
+                Opacity="0"
+                RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="PopupTransform" ScaleX="0.8" ScaleY="0.8"/>
+                        </Border.RenderTransform>
+                        <TextBlock x:Name="NotificationText" 
+                       Foreground="White"
+                       FontSize="14"
+                       TextWrapping="Wrap"
+                       MaxWidth="300"/>
+                    </Border>
+                </Popup>
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal"

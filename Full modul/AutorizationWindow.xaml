@@ -72,7 +72,6 @@
         </Popup>
         <Border Background="Black" Height="32"
                 MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
-
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -105,30 +104,66 @@
             </Grid>
         </Border>
 
-        <Grid Margin="0,30,0,0">
+        <Grid Margin="0,32,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="180*"/>
                 <RowDefinition Height="200*"/>
                 <RowDefinition Height="60*"/>
                 <RowDefinition Height="80*"/>
-                <RowDefinition Height="60*"/>
                 <RowDefinition Height="40*"/>
             </Grid.RowDefinitions>
 
             <Grid>
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                     <Grid>
-                        <Image Height="80" Width="Auto"
+                        <Image Height="75" Width="Auto"
                                Source="/Images/Logo.png"/>
                     </Grid>
                 </StackPanel>
+                
+                <Button Click="Button_Help_Click" BorderThickness="0" Grid.Column="2" VerticalAlignment="Top" Margin="0,4,4,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Image Source="/Images/help.png" Width="25"/>
+                    </StackPanel>
+                    <Button.ToolTip>
+                        <ToolTip>
+                            <TextBlock Text="Справка" FontFamily="Ubuntu" FontWeight="Light" FontSize="14"/>
+                        </ToolTip>
+                    </Button.ToolTip>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{x:Null}">
+                            <Setter Property="Background" Value="White"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#EAEAEA"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
 
             <StackPanel Grid.Row="1"
                         VerticalAlignment="Center" HorizontalAlignment="Center" 
-                        Width="275">
+                        Width="Auto">
                 <TextBox x:Name="TextBox_Login" 
-                         Width="275" 
+                         Width="300" 
                          Height="35" 
                          Margin="0,0,0,7"
                          FontFamily="Ubuntu" 
@@ -161,17 +196,17 @@
                         </Style>
                     </TextBox.Style>
                 </TextBox>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Grid x:Name="PasswordContainer" Margin="0,5,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Width="300" Margin="0,5,0,0">
+                    <Grid x:Name="PasswordContainer" >
                         <PasswordBox x:Name="PasswordBox" 
-                                     Width="238" 
+                                     Width="263" 
                                      Height="35" 
                                      Margin="0,0,5,0"
                                      FontSize="14"
+                                     Padding="5,9"
                                      VerticalAlignment="Center" 
                                      Background="#E2E2E2" 
                                      BorderThickness="0"
-                                     Padding="5,9"
                                      FontFamily="Ubuntu" 
                                      FontWeight="Light"
                                      KeyDown="TextBox_KeyDown"
@@ -199,7 +234,7 @@
                                     Margin="2,0,0,0"
                                     FontFamily="Ubuntu" 
                                     FontSize="15"
-                                    VerticalAlignment="Center" 
+                                    VerticalAlignment="Top" 
                                     HorizontalAlignment="Left"                                        
                                     Foreground="Black" 
                                     Background="Transparent"
@@ -248,7 +283,7 @@ CornerRadius="15">
                         Content="👁" 
                         Width="32" 
                         Height="34"  
-                            VerticalAlignment="Bottom" 
+                            VerticalAlignment="Center" 
                             HorizontalAlignment="Center"
                         Background="Transparent" 
                         BorderThickness="0"
@@ -352,8 +387,8 @@ Value="#EBEBEB"/>
                 <Button Click="Button_Login_Click"
                         Content="Вход"
                         Foreground="White"
-                        FontSize="17"
-                        FontWeight="Medium">
+                        FontSize="23"
+                        FontWeight="Bold">
 
                     <Button.Style>
                         <Style TargetType="Button">
@@ -373,7 +408,7 @@ Value="#EBEBEB"/>
 
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Width="100" Height="33"
+                            <Border Width="160" Height="38"
                                     CornerRadius="15"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter VerticalAlignment="Center"
@@ -385,40 +420,15 @@ Value="#EBEBEB"/>
                 </Button>
             </StackPanel>
 
-            <StackPanel Grid.Row="4" Orientation="Horizontal"
-            VerticalAlignment="Center" HorizontalAlignment="Center">
-
-                <Button Click="Button_Click"  BorderThickness="0">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/Images/help.png" Margin="0,0,6,0" HorizontalAlignment="Left" Width="30"/>
-                        <TextBlock Text="Справка" Margin="4,1,0,0" FontFamily="Ubuntu" FontWeight="Light" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{x:Null}">
-                            <Setter Property="Background" Value="White"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="Cursor" Value="Hand"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#EBEBEB"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
-            
-            <Grid Grid.Row="5">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Grid Grid.Row="4" Background="LightGray">
+                <Border 
+        Background="Transparent" 
+        BorderBrush="Gray" 
+        BorderThickness="1"
+        Width="360" 
+        Height="50"
+                    HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
                     <Ellipse x:Name="ConnectionIndicator" 
                              Width="12" 
                              Height="12" 

@@ -25,6 +25,8 @@
     <None Remove="Images\HR.png" />
     <None Remove="Images\HR1.ico" />
     <None Remove="Images\Image.png" />
+    <None Remove="Images\loading.gif" />
+    <None Remove="Images\Loading.png" />
     <None Remove="Images\Logo.png" />
     <None Remove="Images\Reports.png" />
     <None Remove="Images\User.png" />
@@ -85,6 +87,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\Image.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\loading.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Loading.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\Logo.png">

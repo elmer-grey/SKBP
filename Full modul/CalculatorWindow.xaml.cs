@@ -181,8 +181,8 @@ namespace Full_modul
             }
         }
 
-        private DateTime defaultDateLater = new DateTime(2023, 1, 1);
-        private DateTime defaultDateAgo = new DateTime(2022, 1, 1);
+        private DateTime defaultDateLater = new DateTime(2025, 1, 1);
+        private DateTime defaultDateAgo = new DateTime(2024, 1, 1);
 
         private bool isDateLaterSelected = false;
         private bool isDateAgoSelected = false;
@@ -485,17 +485,17 @@ namespace Full_modul
                     {
                         return string.Empty;
                     }
-                    return $"{formulaName}\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
-                           $"Количество: -\nСЧР: -\nРезультат: -\n================\n";
+                    return $"{formulaName}: -\nНачало периода подсчёта: -\nКонец периода подсчёта: -\n" +
+                           $"Количество: -\nСЧР: -\n================\n";
                 }
             }
             else
             {
                 _warningsShown[selected] = false;
-                return $"{formulaName}\nНачало периода подсчёта: {startDate}\n" +
+                return $"{formulaName}: {result}\nНачало периода подсчёта: {startDate}\n" +
                        $"Конец периода подсчёта: {endDate}\n" +
                        $"Количество: {countText}\n" +
-                       $"СЧР: {SCHR}\nРезультат: {result}\n================\n";
+                       $"СЧР: {SCHR}\n================\n";
             }
             return string.Empty;
         }
@@ -586,12 +586,12 @@ namespace Full_modul
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
                         $"WHERE start_date < @DateAgo AND(end_date > @DateLater OR end_date IS NULL)";// + $"AND level_worker = @LevelWorker"
                 }
                 else if (id == 1)
                 {                    
-                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker]" +
+                    command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
                         $"WHERE start_date < @DateLater AND(end_date > @DateAgo OR end_date IS NULL)";
                 }
 
@@ -652,7 +652,7 @@ namespace Full_modul
             }
         }
 
-        public void koef1()
+        public void koef1() //Коэффициент оборота по выбытию
         {
             DateTime DateLater;
             DateTime DateAgo;
@@ -672,14 +672,14 @@ namespace Full_modul
                 id = DateLater.Date > DateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
-                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker]" +
-                        $"WHERE end_date BETWEEN @DateAgo AND @DateLater" +
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] " +
+                        $"WHERE end_date BETWEEN @DateAgo AND @DateLater " +
                         $"AND id_dismissal_reason IN (2, 3, 5)";// AND level_worker = @LevelWorker
                 }
                 else if (id == 1)
                 {
-                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker]" +
-                        $"WHERE end_date BETWEEN @DateLater AND @DateAgo" +
+                    command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] " +
+                        $"WHERE end_date BETWEEN @DateLater AND @DateAgo " +
                         $"AND id_dismissal_reason IN (2, 3, 5)";
                 }
 
@@ -696,7 +696,7 @@ namespace Full_modul
             }
         }
 
-        public void koef0()
+        public void koef0() // Коэффициент оборота по приему
         {
             DateTime DateLater;
             DateTime DateAgo;

@@ -40,9 +40,11 @@ namespace Full_modul
             await UpdateConnectionStatus();
             _connectionCheckTimer.Start();
         }
+
         protected override void OnClosed(EventArgs e)
         {
             _connectionCheckTimer.Stop();
+            TempFileManager.CleanTempFiles();
             base.OnClosed(e);
         }
 
@@ -145,6 +147,11 @@ namespace Full_modul
                 TextBlock_ShowName.Visibility = Visibility.Collapsed;
             }
             TextBox_ShowPassword.Visibility = Visibility.Collapsed;
+
+            if (Keyboard.FocusedElement == PasswordBox)
+            {
+                PasswordBox.SelectAll();
+            }
         }
 
         private void PasswordBox_LostFocus(object sender, RoutedEventArgs e)
@@ -189,13 +196,13 @@ namespace Full_modul
             PasswordBox.Password = TextBox_ShowPassword.Text;
         }
 
+        private void Button_Help_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Вывод справки!");
+        }
+
         private async void HandleLogin()
         {
-            if (_isCheckingConnection)
-            {
-                //MessageBox.Show("Идет проверка подключения, подождите...");
-                //return;
-            }
 
             if (string.IsNullOrEmpty(TextBox_Login.Text) || string.IsNullOrEmpty(PasswordBox.Password))
             {
@@ -262,7 +269,7 @@ namespace Full_modul
                         return;
                     }
 
-                    MessageBox.Show("Вы вошли в систему!");
+                    //MessageBox.Show("Вы вошли в систему!");
                     new MainWindow().Show();
                     this.Close();
 
@@ -326,7 +333,6 @@ namespace Full_modul
                 {
                     var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                    // Тестируем подключение
                     using (var testConnection = new SqlConnection(newConnectionString))
                     {
                         testConnection.Open();
@@ -335,7 +341,6 @@ namespace Full_modul
 
                     stopwatch.Stop();
 
-                    // Обновляем подключение
                     DatabaseConnection.UpdateConnection(newConnectionString);
 
                     MessageBox.Show($"Подключение успешно обновлено!\n" +

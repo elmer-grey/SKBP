@@ -70,7 +70,7 @@ namespace Full_modul
                 Directory.CreateDirectory(calculatorFolderPath);
                 Directory.CreateDirectory(conditionsFolderPath);
 
-                MessageBox.Show("Папки 'Отчёты', 'Калькулятор' и 'Условия' были успешно созданы.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("При первом запуске программы созданы папки \"Отчёты\\Калькулятор\", \"Отчёты\\Условия\".", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

@@ -137,20 +137,50 @@ namespace Full_modul
         // Добавляем кэширование
         private static readonly ConcurrentDictionary<string, object> _cache = new();
 
-        public T ExecuteScalarWithCache<T>(string query, TimeSpan cacheDuration, params SqlParameter[] parameters)
+        //public T ExecuteScalarWithCache<T>(string query, TimeSpan cacheDuration, params SqlParameter[] parameters)
+        //{
+        //    var cacheKey = $"{query}_{string.Join("_", parameters.Select(p => p.Value))}";
+
+        //    if (_cache.TryGetValue(cacheKey, out var cached) &&
+        //        cached is Tuple<DateTime, T> cachedValue &&
+        //        DateTime.Now - cachedValue.Item1 < cacheDuration)
+        //    {
+        //        return cachedValue.Item2;
+        //    }
+
+        //    var result = ExecuteScalar<T>(query, parameters);
+        //    _cache[cacheKey] = Tuple.Create(DateTime.Now, result);
+        //    return result;
+        //}
+
+        public async Task<T> ExecuteScalarAsync<T>(string query, params SqlParameter[] parameters)
         {
-            var cacheKey = $"{query}_{string.Join("_", parameters.Select(p => p.Value))}";
-
-            if (_cache.TryGetValue(cacheKey, out var cached) &&
-                cached is Tuple<DateTime, T> cachedValue &&
-                DateTime.Now - cachedValue.Item1 < cacheDuration)
+            try
             {
-                return cachedValue.Item2;
+                using (var connection = new SqlConnection(GetDecryptedConnectionString()))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddRange(parameters);
+                    await connection.OpenAsync();
+                    var result = await command.ExecuteScalarAsync();
+                    return result == DBNull.Value ? default : (T)result;
+                }
             }
-
-            var result = ExecuteScalar<T>(query, parameters);
-            _cache[cacheKey] = Tuple.Create(DateTime.Now, result);
-            return result;
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка выполнения асинхронного запроса: {ex.Message}", ex);
+            }
+        }
+        public async Task<SqlDataReader> ExecuteReaderAsync(string query, params SqlParameter[] parameters)
+        {
+            var connection = new SqlConnection(GetDecryptedConnectionString());
+            var command = new SqlCommand(query, connection)
+            {
+                CommandTimeout = DefaultTimeout
+            };
+            command.Parameters.AddRange(parameters);
+            await connection.OpenAsync();
+            return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
         }
 
         public static DatabaseConnection Instance
