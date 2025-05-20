@@ -6,44 +6,86 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace Full_modul
 {
     /// <summary>
     /// Interaction logic for AutorizationWindow.xaml
     /// </summary>
-    public partial class AutorizationWindow : Window
+    public partial class AutorizationWindow : BaseWindow
     {
-        private bool _isCheckingConnection = false;
-        private DispatcherTimer _connectionCheckTimer;
-
+        private bool _isConnectionInitialized = false;
         public AutorizationWindow()
         {
             InitializeComponent();
+
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             TextBox_Login.GotFocus += TextBox_Login_GotFocus;
             TextBox_Login.LostFocus += TextBox_Login_LostFocus;
-            LoadSavedCredentials();
-            _connectionCheckTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(5)
-            };
-            _connectionCheckTimer.Tick += async (s, e) => await UpdateConnectionStatus();
 
-            Loaded += WindowLoaded;
+            LoadSavedCredentials();
+            this.Loaded += async (s, e) =>
+            {
+                await InitializeConnectionAsync();
+                UpdateConnectionStatus();
+            };
         }
-        private async void WindowLoaded(object sender, RoutedEventArgs e)
+
+        protected override async Task InitializeConnectionElementsAsync()
         {
-            await UpdateConnectionStatus();
-            _connectionCheckTimer.Start();
+            await base.InitializeConnectionElementsAsync();
+            UpdateConnectionStatus();
+        }
+
+        private async Task InitializeConnectionAsync()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = "Проверка подключения...";
+                }
+            });
+            ConnectionCheckPopup.IsOpen = true;
+            try
+            {
+                await CheckConnectionAsync(forceCheck: true);
+                _isConnectionInitialized = true;
+            }
+            finally
+            {
+                ConnectionCheckPopup.IsOpen = false;
+            }
+        }
+
+        private void UpdateConnectionStatus()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = IsConnected ? "Подключено" : "Нет подключения";
+                }
+                ConnectionCheckPopup.IsOpen = false;
+            });
+        }
+
+        protected override async void OnConnectionStateChanged(bool isConnected)
+        {
+            if (!_isConnectionInitialized) return;
+
+            base.OnConnectionStateChanged(isConnected);
+            UpdateConnectionStatus();
+
+            if (!isConnected)
+            {
+                await ShowNotification("Нет подключения к БД", Brushes.Red, true);
+            }
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            _connectionCheckTimer.Stop();
             TempFileManager.CleanTempFiles();
             base.OnClosed(e);
         }
@@ -64,24 +106,6 @@ namespace Full_modul
                     TextBlock_ShowName.Visibility = Visibility.Collapsed;
                 }
             }
-        }
-
-        private async Task UpdateConnectionStatus()
-        {
-            if (_isCheckingConnection) return;
-
-            _isCheckingConnection = true;
-            ConnectionStatusText.Text = "Проверка подключения...";
-            ConnectionIndicator.Fill = Brushes.Gray;
-
-            bool isConnected = await DatabaseConnection.TestConnectionAsync();
-
-            ConnectionIndicator.Fill = isConnected ? Brushes.Green : Brushes.Red;
-            ConnectionStatusText.Text = isConnected ? "Подключено" : "Нет подключения";
-            ConnectionIndicator.ToolTip = isConnected ?
-            "Подключение к БД активно" :
-            "Нет подключения к базе данных";
-            _isCheckingConnection = false;
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -201,36 +225,70 @@ namespace Full_modul
             MessageBox.Show("Вывод справки!");
         }
 
+        private bool _isManualCheck = false;
+
+        private async Task<bool> TryReconnectWithFeedback()
+        {
+            ConnectionCheckPopup.IsOpen = true;
+
+            try
+            {
+                // Обновляем статус перед попыткой подключения
+                Dispatcher.Invoke(() =>
+                {
+                    if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                    {
+                        statusText.Text = "Попытка подключения...";
+                    }
+                });
+
+                bool isConnected = await CheckConnectionAsync();
+
+                if (!isConnected)
+                {
+                    await ShowNotification("Не удалось подключиться к БД", Brushes.Red, true);
+                }
+
+                return isConnected;
+            }
+            finally
+            {
+                ConnectionCheckPopup.IsOpen = false;
+                UpdateConnectionStatus();
+            }
+        }
+
         private async void HandleLogin()
         {
-
             if (string.IsNullOrEmpty(TextBox_Login.Text) || string.IsNullOrEmpty(PasswordBox.Password))
             {
-                MessageBox.Show("Вы не ввели логин или пароль!\nПожалуйста, заполните поля!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Вы не ввели логин или пароль!\nПожалуйста, заполните поля!",
+                              "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             try
             {
-                // Секретная комбинация для админа
+                AppLogger.LogInfo($"Попытка входа пользователя: {TextBox_Login.Text}");
+
                 if (TextBox_Login.Text == "superadmin" && PasswordBox.Password == "change")
                 {
                     ShowConnectionStringDialog();
                     return;
                 }
 
-                ConnectionCheckPopup.IsOpen = true;
-
-                if (!await DatabaseConnection.TestConnectionAsync())
+                if (!IsConnected)
                 {
                     var result = MessageBox.Show("Нет подключения к БД. Повторить попытку?",
-                                              "Ошибка",
-                                              MessageBoxButton.YesNo);
+                                              "Ошибка", MessageBoxButton.YesNo);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        await UpdateConnectionStatus();
-                        HandleLogin();
+                        if (await TryReconnectWithFeedback())
+                        {
+                            HandleLogin();
+                        }
+                        return;
                     }
                     return;
                 }
@@ -238,15 +296,13 @@ namespace Full_modul
                 int userCount = DatabaseConnection.Instance.ExecuteScalar<int>(
                     "SELECT COUNT(1) FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass",
                     new SqlParameter("@login", TextBox_Login.Text),
-                    new SqlParameter("@pass", PasswordBox.Password)
-                );
+                    new SqlParameter("@pass", PasswordBox.Password));
 
                 if (userCount > 0)
                 {
                     var userData = DatabaseConnection.Instance.ExecuteReader(
                         "SELECT [login_hr], [pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login",
-                        new SqlParameter("@login", TextBox_Login.Text)
-                    );
+                        new SqlParameter("@login", TextBox_Login.Text));
 
                     using (userData)
                     {
@@ -269,7 +325,6 @@ namespace Full_modul
                         return;
                     }
 
-                    //MessageBox.Show("Вы вошли в систему!");
                     new MainWindow().Show();
                     this.Close();
 
@@ -281,8 +336,7 @@ namespace Full_modul
                 }
                 else if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
                 {
-                    // Резервный вход для admin/admin
-                    MessageBox.Show("Вы вошли в систему!");
+                    UserInfo.username = TextBox_Login.Text;
                     new MainWindow().Show();
                     this.Close();
 
@@ -297,6 +351,7 @@ namespace Full_modul
                     MessageBox.Show("Вы ввели неверный логин или пароль!",
                                   "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+                AppLogger.LogInfo($"Успешный вход: {UserInfo.username}");
             }
             catch (SqlException ex)
             {
@@ -313,10 +368,7 @@ namespace Full_modul
                 }
 
                 MessageBox.Show(errorDetails.ToString(), "Детали ошибки БД", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                ConnectionCheckPopup.IsOpen = false;
+                AppLogger.LogError($"Ошибка авторизации: {ex.Message}");
             }
         }
 

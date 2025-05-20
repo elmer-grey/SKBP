@@ -18,7 +18,7 @@ namespace Full_modul
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : BaseWindow
     {
         private CalculatorWindow calculatorWindow;
         private OrganizAndLegalConditWindow organizAndLegalConditWindow;
@@ -31,25 +31,88 @@ namespace Full_modul
             InitializeComponent();
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             this.Closing += MainWindow_Closing;
+            LoadUserDataAsync();
+            // Устанавливаем начальный статус
+            UpdateUserStatus(GetOfflineStatus());
+            InitializeConnectionStatus();
+        }
 
-            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') " +
-                "+ ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+        private string GetOfflineStatus()
+        {
+            return UserInfo.username == "admin"
+                ? "Администратор (оффлайн режим)"
+                : "Оффлайн режим";
+        }
+
+        private async Task LoadUserDataAsync()
+        {
+            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
+            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
+            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
             try
             {
-                string fullName = DatabaseConnection.Instance.ExecuteScalar<string>(
-                    query,
-                    new SqlParameter("@login", UserInfo.username)
-                );
+                if (!IsConnected)
+                {
+                    UpdateUserStatus(GetOfflineStatus());
+                    return;
+                }
 
-                user.Text = !string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор";
+                string fullName = await Task.Run(() =>
+                    DatabaseConnection.Instance.ExecuteScalar<string>(
+                        query,
+                        new SqlParameter("@login", UserInfo.username)));
+
+                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show("Ошибка при загрузке данных пользователя: " + ex.Message,
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                if (IsConnected)
+                {
+                    UpdateUserStatus("Не удалось загрузить данные");
+                }
+            }
+        }
+
+        protected override async Task InitializeConnectionElementsAsync()
+        {
+            await base.InitializeConnectionElementsAsync();
+            if (IsConnected)
+            {
+                await LoadUserDataAsync();
+            }
+        }
+
+        private void InitializeConnectionStatus()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = "Проверка подключения...";
+                }
+            });
+        }
+
+        private void UpdateUserStatus(string status)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                user.Text = status;
+            });
+        }
+
+        protected override async void OnConnectionStateChanged(bool isConnected)
+        {
+            base.OnConnectionStateChanged(isConnected);
+
+            if (isConnected)
+            {
+                await LoadUserDataAsync();
+            }
+            else
+            {
+                UpdateUserStatus(GetOfflineStatus());
             }
         }
 
@@ -155,12 +218,16 @@ namespace Full_modul
 
         private void OpenCalculator_Click(object sender, RoutedEventArgs e)
         {
+
             if (calculatorWindow == null || !calculatorWindow.IsVisible)
             {
+                if (!IsConnected && !EnsureDatabaseConnection(silent: false))
+                {
+                    return;
+                }
                 calculatorWindow = new CalculatorWindow();
                 calculatorWindow.Closed += CalculatorWindow_Closed;
                 calculatorWindow.Show();
-
                 this.WindowState = WindowState.Minimized;
             }
             else
@@ -187,10 +254,13 @@ namespace Full_modul
         {
             if (organizAndLegalConditWindow == null || !organizAndLegalConditWindow.IsVisible)
             {
+                if (!IsConnected && !EnsureDatabaseConnection(silent: false))
+                {
+                    return;
+                }
                 organizAndLegalConditWindow = new OrganizAndLegalConditWindow();
                 organizAndLegalConditWindow.Closed += ConditWindow_Closed;
                 organizAndLegalConditWindow.Show();
-
                 this.WindowState = WindowState.Minimized;
             }
             else
@@ -213,13 +283,22 @@ namespace Full_modul
             organizAndLegalConditWindow = null;
         }
 
-        private void Button_Enterprise_Click(object sender, RoutedEventArgs e)
+        private async void Button_Enterprise_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsConnected)
+            {
+                await EnqueueNotification(
+                    "Невозможно открыть карточку предприятия без подключения к БД",
+                    Brushes.Red,
+                    true);
+                return;
+            }
+
             if (enterprise_Card == null || !enterprise_Card.IsVisible)
             {
                 enterprise_Card = new Enterprise_card();
-                enterprise_Card.Closed += EnterWindow_Closed;
                 enterprise_Card.Show();
+                enterprise_Card.Closed += EnterWindow_Closed;
             }
             else
             {

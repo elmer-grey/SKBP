@@ -5,6 +5,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,39 +16,49 @@ namespace Full_modul
     public class DatabaseConnection
     {
         private static DatabaseConnection _instance;
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
         private SqlConnection _connection;
+        private DateTime _lastSuccessfulConnection;
+        private int _failedAttempts;
 
         private DatabaseConnection()
         {
             LoadConnectionString();
         }
 
+        public static bool IsInitialized { get; private set; }
+
+        public void Initialize()
+        {
+            if (IsInitialized) return;
+
+            LoadConnectionString();
+            _ = TestConnectionAsync().ConfigureAwait(false);
+            IsInitialized = true;
+
+            AppLogger.LogDbInfo("Подключение к БД инициализировано");
+        }
+
         private void LoadConnectionString()
         {
             try
             {
-                string encrypted = Settings.Default.ConnectionString;
-                string connectionString;
+                string connectionString = SecurityHelper.Decrypt(Settings.Default.ConnectionString);
 
-                if (string.IsNullOrEmpty(encrypted))
-                {
-                    connectionString = "Data Source=DESKTOP-TBLQV8A;" +
-                                     "Initial Catalog=calculator;" +
-                                     "User ID=sqlserver;" +
-                                     "Password=sqlserver;" +
-                                     "TrustServerCertificate=True";
-                }
-                else
-                {
-                    connectionString = SecurityHelper.Decrypt(encrypted);
-                }
                 _connection = new SqlConnection(connectionString);
+                AppLogger.LogDbInfo("Инициализировано новое подключение к БД");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки подключения: {ex.Message}");
-                throw;
+                _failedAttempts++;
+                AppLogger.LogError($"Ошибка загрузки подключения (попытка {_failedAttempts}): {ex.Message}");
+                if (_failedAttempts >= 3)
+                {
+                    MessageBox.Show($"Критическая ошибка подключения: {ex.Message}");
+                    throw;
+                }
+                Thread.Sleep(1000);
+                LoadConnectionString();
             }
         }
 
@@ -62,50 +74,84 @@ namespace Full_modul
                 {
                     _instance?.CloseConnection();
                     _instance = new DatabaseConnection();
+                    AppLogger.LogDbInfo("Обновлены параметры подключения");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка обновления подключения: {ex.Message}");
+                AppLogger.LogError($"Ошибка обновления подключения: {ex.Message}");
                 throw;
             }
         }
 
         private const int DefaultTimeout = 5;
+        private static bool _lastConnectionState;
+        private static DateTime _lastCheckTime = DateTime.MinValue;
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(10);
+        private static readonly SemaphoreSlim _connectionCheckSemaphore = new(1, 1);
+        private static DateTime _lastPingTime = DateTime.MinValue;
+        private static bool _lastPingResult;
+        private static DateTime _lastErrorLogTime = DateTime.MinValue;
+        private const int ErrorLogInterval = 30; // секунд между одинаковыми ошибками
+        private static readonly SemaphoreSlim _stateCacheLock = new(1, 1);
 
-        public static bool TestConnection(out string errorMessage)
+        public static bool TestConnectionCachedState()
         {
-            errorMessage = string.Empty;
+            _stateCacheLock.Wait();
             try
             {
-                var connectionString = GetDecryptedConnectionString();
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    return true;
-                }
+                return (DateTime.Now - _lastCheckTime).TotalSeconds < 5
+                    ? _lastConnectionState
+                    : false;
             }
-            catch (Exception ex)
+            finally
             {
-                errorMessage = ex.Message;
-                return false;
+                _stateCacheLock.Release();
             }
         }
 
         public static async Task<bool> TestConnectionAsync()
         {
+            await _connectionCheckSemaphore.WaitAsync();
             try
             {
-                var connectionString = GetDecryptedConnectionString();
-                using (var connection = new SqlConnection(connectionString))
+                if (DateTime.Now - _lastCheckTime < CacheDuration)
+                    return _lastConnectionState;
+
+                bool currentState = false;
+                try
                 {
-                    await connection.OpenAsync();
-                    return true;
+                    // Быстрая проверка доступности сервера
+                    if (!await IsServerReachable(GetServerNameFromConnectionString(), 500))
+                    {
+                        _lastConnectionState = false;
+                        return false;
+                    }
+
+                    // Проверка подключения к SQL с таймаутом
+                    using var cts = new CancellationTokenSource(1500); // Уменьшен таймаут
+                    await using var connection = new SqlConnection(GetDecryptedConnectionString());
+                    await connection.OpenAsync(cts.Token);
+                    currentState = true;
                 }
+                catch (OperationCanceledException)
+                {
+                    AppLogger.LogDbWarning("Проверка подключения отменена по таймауту");
+                    currentState = false;
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogDbError($"Ошибка подключения: {ex.Message}");
+                    currentState = false;
+                }
+
+                _lastConnectionState = currentState;
+                _lastCheckTime = DateTime.Now;
+                return currentState;
             }
-            catch
+            finally
             {
-                return false;
+                _connectionCheckSemaphore.Release();
             }
         }
 
@@ -134,24 +180,7 @@ namespace Full_modul
             return command.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
-        // Добавляем кэширование
         private static readonly ConcurrentDictionary<string, object> _cache = new();
-
-        //public T ExecuteScalarWithCache<T>(string query, TimeSpan cacheDuration, params SqlParameter[] parameters)
-        //{
-        //    var cacheKey = $"{query}_{string.Join("_", parameters.Select(p => p.Value))}";
-
-        //    if (_cache.TryGetValue(cacheKey, out var cached) &&
-        //        cached is Tuple<DateTime, T> cachedValue &&
-        //        DateTime.Now - cachedValue.Item1 < cacheDuration)
-        //    {
-        //        return cachedValue.Item2;
-        //    }
-
-        //    var result = ExecuteScalar<T>(query, parameters);
-        //    _cache[cacheKey] = Tuple.Create(DateTime.Now, result);
-        //    return result;
-        //}
 
         public async Task<T> ExecuteScalarAsync<T>(string query, params SqlParameter[] parameters)
         {
@@ -171,16 +200,64 @@ namespace Full_modul
                 throw new Exception($"Ошибка выполнения асинхронного запроса: {ex.Message}", ex);
             }
         }
-        public async Task<SqlDataReader> ExecuteReaderAsync(string query, params SqlParameter[] parameters)
+
+        private static async Task<bool> IsServerReachable(string host, int timeout)
         {
-            var connection = new SqlConnection(GetDecryptedConnectionString());
-            var command = new SqlCommand(query, connection)
+            try
             {
-                CommandTimeout = DefaultTimeout
-            };
-            command.Parameters.AddRange(parameters);
-            await connection.OpenAsync();
-            return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(host, timeout);
+                return reply.Status == IPStatus.Success;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string GetServerNameFromConnectionString()
+        {
+            var builder = new SqlConnectionStringBuilder(GetDecryptedConnectionString());
+            return builder.DataSource.Split(',')[0];
+        }
+
+        public T ExecuteScalar<T>(string query, params SqlParameter[] parameters)
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    using var cmd = new SqlCommand(query, Connection);
+                    cmd.Parameters.AddRange(parameters);
+
+                    var result = cmd.ExecuteScalar();
+                    return result == DBNull.Value ? default : (T)result;
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogDbError($"SQL ошибка (ExecuteScalar): {ex.Message}\nQuery: {query}");
+                    throw new Exception($"Ошибка выполнения запроса: {ex.Message}", ex);
+                }
+            }
+        }
+
+        public int ExecuteNonQuery(string query, params SqlParameter[] parameters)
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    using (var command = new SqlCommand(query, Connection))
+                    {
+                        command.Parameters.AddRange(parameters);
+                        return command.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Ошибка выполнения команды: {ex.Message}", ex);
+                }
+            }
         }
 
         public static DatabaseConnection Instance
@@ -208,46 +285,6 @@ namespace Full_modul
         {
             if (_connection.State == System.Data.ConnectionState.Open)
                 _connection.Close();
-        }
-
-        public T ExecuteScalar<T>(string query, params SqlParameter[] parameters)
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    using (var command = new SqlCommand(query, Connection))
-                    {
-                        command.Parameters.AddRange(parameters);
-                        var result = command.ExecuteScalar();
-                        return result == DBNull.Value ? default : (T)result;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Логирование ошибки
-                    throw new Exception($"Ошибка выполнения запроса: {ex.Message}", ex);
-                }
-            }
-        }
-
-        public int ExecuteNonQuery(string query, params SqlParameter[] parameters)
-        {
-            lock (_lock)
-            {
-                try
-                {
-                    using (var command = new SqlCommand(query, Connection))
-                    {
-                        command.Parameters.AddRange(parameters);
-                        return command.ExecuteNonQuery();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Ошибка выполнения команды: {ex.Message}", ex);
-                }
-            }
         }
     }
 }

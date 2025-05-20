@@ -18,11 +18,12 @@ namespace Full_modul
     /// <summary>
     /// Логика взаимодействия для Enterprise_card.xaml
     /// </summary>
-    public partial class Enterprise_card : Window
+    public partial class Enterprise_card : BaseWindow
     {
         public Enterprise_card()
         {
             InitializeComponent();
+
             LoadCompanyData();
             this.KeyDown += Enterprise_card_KeyDown;
         }

@@ -1,11 +1,11 @@
-﻿<Window x:Class="Full_modul.Enterprise_card"
+﻿<local:BaseWindow x:Class="Full_modul.Enterprise_card"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Full_modul"
         mc:Ignorable="d"
-        Height="350" Width="400"
+        Height="410" Width="400"
         ResizeMode="NoResize"
         Icon="Images\HR1.ico"
         Title="Карточка предприятия"
@@ -14,7 +14,7 @@
         WindowStyle="None" Background="White"
         BorderThickness="1" BorderBrush="Black">
 
-    <Window.Resources>
+    <local:BaseWindow.Resources>
         <Style x:Key="CloseButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Black"/>
             <Setter Property="Foreground" Value="White"/>
@@ -62,7 +62,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-    </Window.Resources>
+    </local:BaseWindow.Resources>
     
     <Grid>
         <Border Background="Black" Height="32"
@@ -237,4 +237,4 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
             </ScrollViewer>
         </Grid>
     </Grid>
-</Window>
+</local:BaseWindow>

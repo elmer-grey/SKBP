@@ -9,7 +9,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Calendar = System.Windows.Controls.Calendar;
 using Path = System.IO.Path;
 
@@ -18,7 +20,7 @@ namespace Full_modul
     /// <summary>
     /// Логика взаимодействия для CalculatorWindow.xaml
     /// </summary>    
-    public partial class CalculatorWindow : Window
+    public partial class CalculatorWindow : BaseWindow
     {
         public CalculatorWindow()
         {
@@ -31,23 +33,115 @@ namespace Full_modul
             this.Style = (Style)Application.Current.Resources["ComboBoxStyleCalendar"];
             this.Loaded += CalendarComboBox_Loaded;
 
-            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+            LoadUserDataAsync();
+
+            // Инициализация массивов
+            dateComboBoxAgo =
+            [
+        dateComboBoxAgo0, dateComboBoxAgo1, dateComboBoxAgo2, dateComboBoxAgo3
+            ];
+
+            dateComboBoxLater =
+            [
+        dateComboBoxLater0, dateComboBoxLater1, dateComboBoxLater2, dateComboBoxLater3
+            ];
+
+            dateTextBoxAgo =
+            [
+        dateTextBoxAgo0, dateTextBoxAgo1, dateTextBoxAgo2, dateTextBoxAgo3
+            ];
+
+            dateTextBoxLater =
+            [
+        dateTextBoxLater0, dateTextBoxLater1, dateTextBoxLater2, dateTextBoxLater3
+            ];
+
+            // Устанавливаем начальный статус
+            UpdateUserStatus(IsConnected ? "Загрузка..." : GetOfflineStatus());
+            InitializeConnectionStatus();
+        }
+
+        private string GetOfflineStatus()
+        {
+            return UserInfo.username == "admin"
+                ? "Администратор (оффлайн режим)"
+                : "Оффлайн режим";
+        }
+
+        private void InitializeConnectionStatus()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = "Проверка подключения...";
+                }
+            });
+        }
+
+        private async Task LoadUserDataAsync()
+        {
+            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
+            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
+            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
             try
             {
-                string fullName = DatabaseConnection.Instance.ExecuteScalar<string>(
-                    query,
-                    new SqlParameter("@login", UserInfo.username)
-                );
+                if (!IsConnected)
+                {
+                    UpdateUserStatus(GetOfflineStatus());
+                    return;
+                }
 
-                user.Text = !string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор";
+                string fullName = await Task.Run(() =>
+                    DatabaseConnection.Instance.ExecuteScalar<string>(
+                        query,
+                        new SqlParameter("@login", UserInfo.username)));
+
+                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки данных пользователя: {ex.Message}",
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                UpdateUserStatus("Не удалось загрузить данные");
+            }
+        }
+
+        protected override async Task InitializeConnectionElementsAsync()
+        {
+            await base.InitializeConnectionElementsAsync();
+            await LoadUserDataAsync();
+        }
+
+        private void UpdateUserStatus(string status)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                user.Text = status;
+            });
+        }
+
+        protected override async void OnConnectionStateChanged(bool isConnected)
+        {
+            base.OnConnectionStateChanged(isConnected);
+
+            if (isConnected)
+            {
+                await LoadUserDataAsync();
+                RefreshData();
+            }
+            else
+            {
+                UpdateUserStatus(GetOfflineStatus());
+            }
+        }
+
+        private void RefreshData()
+        {
+            if (AreDatesFilled(_currentKoefIndex))
+            {
+                SChR_calculation();
+                CalculateCurrentCoefficient();
+                CheckBoxVisibility();
             }
         }
 
@@ -116,56 +210,25 @@ namespace Full_modul
         {
             isDateLaterSelected = false;
             isDateAgoSelected = false;
-            //isLevelWorkerSelected = false;
             TextBlock_ShowName.Visibility = Visibility.Collapsed;
-            koefgroup0.Visibility = Visibility.Collapsed;
-            koefgroup1.Visibility = Visibility.Collapsed;
-            koefgroup2.Visibility = Visibility.Collapsed;
-            koefgroup3.Visibility = Visibility.Collapsed;
 
-            int selectedIndex = comboBoxFormules.SelectedIndex;
-
-            switch (selectedIndex)
+            foreach (var group in new[] { koefgroup0, koefgroup1, koefgroup2, koefgroup3 })
             {
-                case 0:
-                    koefgroup0.Visibility = Visibility.Visible;
-                    if (AreValuesEnteredInKoefGroup(0))
-                    {
-                        isDateLaterSelected = true;
-                        isDateAgoSelected = true;
-                        //isLevelWorkerSelected = true;
-                    }
-                    break;
-                case 1:
-                    koefgroup1.Visibility = Visibility.Visible;
-                    if (AreValuesEnteredInKoefGroup(1))
-                    {
-                        isDateLaterSelected = true;
-                        isDateAgoSelected = true;
-                        //isLevelWorkerSelected = true;
-                    }
-                    break;
-                case 2:
-                    koefgroup2.Visibility = Visibility.Visible;
-                    if (AreValuesEnteredInKoefGroup(2))
-                    {
-                        isDateLaterSelected = true;
-                        isDateAgoSelected = true;
-                        //isLevelWorkerSelected = true;
-                    }
-                    break;
-                case 3:
-                    koefgroup3.Visibility = Visibility.Visible;
-                    if (AreValuesEnteredInKoefGroup(3))
-                    {
-                        isDateLaterSelected = true;
-                        isDateAgoSelected = true;
-                        //isLevelWorkerSelected = true;
-                    }
-                    break;
-                default:
-                    break;
+                group.Visibility = Visibility.Collapsed;
             }
+
+            _currentKoefIndex = comboBoxFormules.SelectedIndex;
+
+            switch (_currentKoefIndex)
+            {
+                case 0: koefgroup0.Visibility = Visibility.Visible; break;
+                case 1: koefgroup1.Visibility = Visibility.Visible; break;
+                case 2: koefgroup2.Visibility = Visibility.Visible; break;
+                case 3: koefgroup3.Visibility = Visibility.Visible; break;
+            }
+
+            UpdateDatesSelectedState();
+            CheckBoxVisibility();
         }
 
         private void ComboBox_MouseDown(object sender, MouseButtonEventArgs e)
@@ -184,100 +247,141 @@ namespace Full_modul
         private DateTime defaultDateLater = new DateTime(2025, 1, 1);
         private DateTime defaultDateAgo = new DateTime(2024, 1, 1);
 
-        private bool isDateLaterSelected = false;
-        private bool isDateAgoSelected = false;
+        private bool isDateLaterSelected;
+        private bool isDateAgoSelected;
 
-        //private bool isLevelWorkerSelected = false;
+        private DateTime?[] selectedDatesAgo = new DateTime?[4];
+        private DateTime?[] selectedDatesLater = new DateTime?[4];
+
+        private ComboBox[] dateComboBoxAgo;
+        private ComboBox[] dateComboBoxLater;
+        private TextBox[] dateTextBoxAgo;
+        private TextBox[] dateTextBoxLater;
 
         private bool isHandlingComboBoxSelection = false;
+        private bool _isGlobalPeriod = false;
+        private int _currentKoefIndex = 0;
 
-        private void Calendar_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private async void Calendar_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             if (isHandlingComboBoxSelection) return;
             isHandlingComboBoxSelection = true;
 
-            Calendar calendar = sender as Calendar;
-            if (calendar != null)
+            if (sender is Calendar calendar && calendar.Tag is string textBoxName)
             {
                 DateTime? selectedDate = calendar.SelectedDate;
+                TextBox dateTextBox = FindName(textBoxName) as TextBox;
 
-                if (calendar.Tag != null)
+                if (dateTextBox != null && selectedDate.HasValue)
                 {
-                    string textBoxName = calendar.Tag.ToString();
+                    dateTextBox.Text = selectedDate.Value.ToShortDateString();
+                    UpdateDateStorage(textBoxName, selectedDate.Value);
+                    UpdateDatesSelectedState();
 
-                    TextBox dateTextBox = FindName(textBoxName) as TextBox;
-
-                    if (dateTextBox != null && selectedDate.HasValue)
+                    if (isDateAgoSelected && isDateLaterSelected)
                     {
-                        dateTextBox.Text = selectedDate.Value.ToShortDateString();
+                        if (!IsConnected)
+                        {
+                            MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
+                                          "Ошибка",
+                                          MessageBoxButton.OK,
+                                          MessageBoxImage.Error);
+                            isHandlingComboBoxSelection = false;
+                            return;
+                        }
 
-                        if (textBoxName == "dateTextBoxLater0")
+                        if (_isGlobalPeriod)
                         {
-                            isDateLaterSelected = true;
+                            ApplyGlobalDates();
                         }
-                        else if (textBoxName == "dateTextBoxAgo0")
+                        else
                         {
-                            isDateAgoSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxLater1")
-                        {
-                            isDateLaterSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxAgo1")
-                        {
-                            isDateAgoSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxLater2")
-                        {
-                            isDateLaterSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxAgo2")
-                        {
-                            isDateAgoSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxLater3")
-                        {
-                            isDateLaterSelected = true;
-                        }
-                        else if (textBoxName == "dateTextBoxAgo3")
-                        {
-                            isDateAgoSelected = true;
+                            SChR_calculation();
+                            CalculateCurrentCoefficient();
                         }
                     }
+
+                    CheckBoxVisibility();
                 }
 
-                Popup popup = FindVisualChild<Popup>(calendar);
-                if (popup != null)
+                if (FindVisualChild<Popup>(calendar) is Popup popup)
                 {
                     popup.IsOpen = false;
                 }
             }
 
-            //if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
-            if (isDateLaterSelected && isDateAgoSelected)
-            {
-                switch (comboBoxFormules.SelectedIndex)
-                {
-                    case 0:
-                        koef0();
-                        break;
-                    case 1:
-                        koef1();
-                        break;
-                    case 2:
-                        koef2();
-                        break;
-                    case 3:
-                        koef3();
-                        break;
-                    default:
-                        break;
-                }
-                SChR_calculation();
-            }
-            //ComboBox_SelectionChanged(sender, e);
-
             isHandlingComboBoxSelection = false;
+        }
+
+        private void UpdateDatesSelectedState()
+        {
+            isDateAgoSelected = selectedDatesAgo[_currentKoefIndex].HasValue;
+            isDateLaterSelected = selectedDatesLater[_currentKoefIndex].HasValue;
+        }
+
+        private void CalculateCurrentCoefficient()
+        {
+            switch (comboBoxFormules.SelectedIndex)
+            {
+                case 0: koef0(); break;
+                case 1: koef1(); break;
+                case 2: koef2(); break;
+                case 3: koef3(); break;
+            }
+        }
+
+        private void CalculateAllCoefficients()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                switch (i)
+                {
+                    case 0: koef0(); break;
+                    case 1: koef1(); break;
+                    case 2: koef2(); break;
+                    case 3: koef3(); break;
+                }
+            }
+        }
+
+        private void UpdateDateStorage(string textBoxName, DateTime date)
+        {
+            switch (textBoxName)
+            {
+                case "dateTextBoxAgo0": selectedDatesAgo[0] = date; break;
+                case "dateTextBoxLater0": selectedDatesLater[0] = date; break;
+                case "dateTextBoxAgo1": selectedDatesAgo[1] = date; break;
+                case "dateTextBoxLater1": selectedDatesLater[1] = date; break;
+                case "dateTextBoxAgo2": selectedDatesAgo[2] = date; break;
+                case "dateTextBoxLater2": selectedDatesLater[2] = date; break;
+                case "dateTextBoxAgo3": selectedDatesAgo[3] = date; break;
+                case "dateTextBoxLater3": selectedDatesLater[3] = date; break;
+            }
+        }
+
+        private void ApplyGlobalDates()
+        {
+            if (!selectedDatesAgo[_currentKoefIndex].HasValue ||
+                !selectedDatesLater[_currentKoefIndex].HasValue)
+                return;
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (i != _currentKoefIndex)
+                {
+                    selectedDatesAgo[i] = selectedDatesAgo[_currentKoefIndex];
+                    selectedDatesLater[i] = selectedDatesLater[_currentKoefIndex];
+
+                    dateTextBoxAgo[i].Text = selectedDatesAgo[i]?.ToShortDateString() ?? "";
+                    dateTextBoxLater[i].Text = selectedDatesLater[i]?.ToShortDateString() ?? "";
+                }
+            }
+
+            isDateAgoSelected = true;
+            isDateLaterSelected = true;
+
+            SChR_calculation();
+            CalculateAllCoefficients();
         }
 
         private void CalendarComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -334,101 +438,78 @@ namespace Full_modul
             }
         }
 
-        //private void combobox_selectionchanged(object sender, selectionchangedeventargs e)
-        //{
-        //    if (ishandlingcomboboxselection) return;
-        //    ishandlingcomboboxselection = true;
-
-        //    combobox levelworker = sender as combobox;
-        //    comboboxitem selecteditem = levelworker.selecteditem as comboboxitem;
-
-        //    if (selecteditem != null)
-        //    {
-        //        string? selectedvalue = selecteditem.content?.tostring();
-        //        levelworker.text = selectedvalue;
-
-        //        islevelworkerselected = true;
-        //    }
-
-        //    int selectedgroupindex = comboboxformules.selectedindex;
-        //    if (arevaluesenteredinkoefgroup(selectedgroupindex))
-        //    {
-        //        isdatelaterselected = true;
-        //        isdateagoselected = true;
-        //    }
-
-        //    switch (comboboxformules.selectedindex)
-        //    {
-        //        case 0:
-        //            level = levelworker0.selectedindex switch
-        //            {
-        //                0 => 1,
-        //                1 => 2,
-        //                2 => 3,
-        //                _ => 0
-        //            };
-
-        //            koef0();
-        //            schr_calculation();
-        //            break;
-        //        case 1:
-        //            level = levelworker1.selectedindex switch
-        //            {
-        //                0 => 1,
-        //                1 => 2,
-        //                2 => 3,
-        //                _ => 0
-        //            };
-
-        //            koef1();
-        //            schr_calculation();
-        //            break;
-        //        case 2:
-        //            level = levelworker2.selectedindex switch
-        //            {
-        //                0 => 1,
-        //                1 => 2,
-        //                2 => 3,
-        //                _ => 0
-        //            };
-
-        //            koef2();
-        //            schr_calculation();
-        //            break;
-        //        case 3:
-        //            level = levelworker3.selectedindex switch
-        //            {
-        //                0 => 1,
-        //                1 => 2,
-        //                2 => 3,
-        //                _ => 0
-        //            };
-
-        //            koef3();
-        //            schr_calculation();
-        //            break;
-        //        default:
-        //            throw new argumentexception("invalid formula index");
-        //    }
-        //    calendar_selecteddatechanged(sender, e);
-
-        //    ishandlingcomboboxselection = false;
-        //}
-
-        private bool AreValuesEnteredInKoefGroup(int groupIndex)
+        private bool AreDatesFilled(int koefIndex)
         {
-            switch (groupIndex)
+            return selectedDatesAgo[koefIndex].HasValue &&
+                   selectedDatesLater[koefIndex].HasValue;
+        }
+
+        private bool OtherCoefficientsHaveData()
+        {
+            for (int i = 0; i < 4; i++)
             {
-                case 0:
-                    return !string.IsNullOrEmpty(count0.Text) && !string.IsNullOrEmpty(dateTextBoxLater0.Text) && !string.IsNullOrEmpty(dateTextBoxAgo0.Text);
-                case 1:
-                    return !string.IsNullOrEmpty(count1.Text) && !string.IsNullOrEmpty(dateTextBoxLater1.Text) && !string.IsNullOrEmpty(dateTextBoxAgo1.Text);
-                case 2:
-                    return !string.IsNullOrEmpty(count2.Text) && !string.IsNullOrEmpty(dateTextBoxLater2.Text) && !string.IsNullOrEmpty(dateTextBoxAgo2.Text);
-                case 3:
-                    return !string.IsNullOrEmpty(count3.Text) && !string.IsNullOrEmpty(dateTextBoxLater3.Text) && !string.IsNullOrEmpty(dateTextBoxAgo3.Text);
-                default:
-                    return false;
+                if (i != _currentKoefIndex && AreDatesFilled(i))
+                    return true;
+            }
+            return false;
+        }
+
+        private void CheckBox_Date_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsConnected)
+            {
+                MessageBox.Show("Нет подключения к БД. Глобальный расчёт невозможен.",
+                              "Ошибка",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
+                CheckBox_Date.IsChecked = false;
+                return;
+            }
+
+            if (!AreDatesFilled(_currentKoefIndex))
+            {
+                CheckBox_Date.IsChecked = false;
+                return;
+            }
+
+            if (OtherCoefficientsHaveData())
+            {
+                var result = MessageBox.Show(
+                    "При включении единого периода все даты будут заменены на текущие. Продолжить?",
+                    "Подтверждение",
+                    MessageBoxButton.YesNo);
+
+                if (result == MessageBoxResult.No)
+                {
+                    CheckBox_Date.IsChecked = false;
+                    return;
+                }
+            }
+
+            _isGlobalPeriod = true;
+            ApplyGlobalDates();
+        }
+
+        private void CheckBox_Date_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _isGlobalPeriod = false;
+        }
+
+        private void CheckBoxVisibility()
+        {
+            bool shouldBeVisible = AreDatesFilled(_currentKoefIndex);
+
+            if (CheckBox_Date.Visibility == Visibility.Visible && !shouldBeVisible)
+            {
+                var fadeOut = new DoubleAnimation(0, TimeSpan.FromMilliseconds(200));
+                fadeOut.Completed += (s, _) => CheckBox_Date.Visibility = Visibility.Collapsed;
+                CheckBox_Date.BeginAnimation(OpacityProperty, fadeOut);
+            }
+            else if (CheckBox_Date.Visibility != Visibility.Visible && shouldBeVisible)
+            {
+                CheckBox_Date.Visibility = Visibility.Visible;
+                var fadeIn = new DoubleAnimation(1, TimeSpan.FromMilliseconds(200));
+                CheckBox_Date.BeginAnimation(OpacityProperty, fadeIn);
             }
         }
 
@@ -512,18 +593,6 @@ namespace Full_modul
             }
         }
 
-        //private string GetLevelText(int selected)
-        //{
-        //    switch (selected)
-        //    {
-        //        case 0: return levelworker0.Text;
-        //        case 1: return levelworker1.Text;
-        //        case 2: return levelworker2.Text;
-        //        case 3: return levelworker3.Text;
-        //        default: return "";
-        //    }
-        //}
-
         private string GetCountText(int selected)
         {
             switch (selected)
@@ -561,29 +630,42 @@ namespace Full_modul
         }
 
         public static int id = -1;
-        //public static int level = -1;
         public static double SCHR = 0;
         public static string startDate, endDate;
-        public static string command = ""; 
+        public static string command = "";
+
+        private bool TryGetDates(out DateTime dateAgo, out DateTime dateLater, TextBox agoTextBox, TextBox laterTextBox)
+        {
+            dateAgo = defaultDateAgo;
+            dateLater = defaultDateLater;
+
+            if (!DateTime.TryParse(agoTextBox.Text, out dateAgo) || !isDateAgoSelected)
+            {
+                dateAgo = defaultDateAgo;
+            }
+
+            if (!DateTime.TryParse(laterTextBox.Text, out dateLater) || !isDateLaterSelected)
+            {
+                dateLater = defaultDateLater;
+            }
+
+            return isDateLaterSelected && isDateAgoSelected;
+        }
 
         public void koef3()
         {
-            DateTime DateLater;
-            DateTime DateAgo;
-
-            if (!DateTime.TryParse(dateTextBoxLater3.Text, out DateLater) || !isDateLaterSelected)
+            if (!IsConnected)
             {
-                DateLater = defaultDateLater;
+                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
+                              "Ошибка",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
+                return;
             }
 
-            if (!DateTime.TryParse(dateTextBoxAgo3.Text, out DateAgo) || !isDateAgoSelected)
+            if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
-                DateAgo = defaultDateAgo;
-            }
-
-            if (isDateLaterSelected && isDateAgoSelected)
-            {
-                id = DateLater.Date > DateAgo.Date ? 0 : 1;
+                id = dateLater.Date > dateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
@@ -597,8 +679,8 @@ namespace Full_modul
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
-                    sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
-                    sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
+                    sqlCommand.Parameters.AddWithValue("@DateAgo", dateAgo);
+                    sqlCommand.Parameters.AddWithValue("@DateLater", dateLater);
                     //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
@@ -610,22 +692,18 @@ namespace Full_modul
 
         public void koef2()
         {
-            DateTime DateLater;
-            DateTime DateAgo;
-
-            if (!DateTime.TryParse(dateTextBoxLater2.Text, out DateLater) || !isDateLaterSelected)
+            if (!IsConnected)
             {
-                DateLater = defaultDateLater;
+                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
+                              "Ошибка",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
+                return;
             }
 
-            if (!DateTime.TryParse(dateTextBoxAgo2.Text, out DateAgo) || !isDateAgoSelected)
+            if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
-                DateAgo = defaultDateAgo;
-            }
-
-            if (isDateLaterSelected && isDateAgoSelected)
-            {
-                id = DateLater.Date > DateAgo.Date ? 0 : 1;
+                id = dateLater.Date > dateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM[calculator].[dbo].[worker] " +
@@ -641,8 +719,8 @@ namespace Full_modul
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
-                    sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
-                    sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
+                    sqlCommand.Parameters.AddWithValue("@DateAgo", dateAgo);
+                    sqlCommand.Parameters.AddWithValue("@DateLater", dateLater);
                     //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
@@ -654,22 +732,18 @@ namespace Full_modul
 
         public void koef1() //Коэффициент оборота по выбытию
         {
-            DateTime DateLater;
-            DateTime DateAgo;
-
-            if (!DateTime.TryParse(dateTextBoxLater1.Text, out DateLater) || !isDateLaterSelected)
+            if (!IsConnected)
             {
-                DateLater = defaultDateLater;
+                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
+                              "Ошибка",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Error);
+                return;
             }
 
-            if (!DateTime.TryParse(dateTextBoxAgo1.Text, out DateAgo) || !isDateAgoSelected)
+            if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
-                DateAgo = defaultDateAgo;
-            }
-
-            if (isDateLaterSelected && isDateAgoSelected)
-            {
-                id = DateLater.Date > DateAgo.Date ? 0 : 1;
+                id = dateLater.Date > dateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] " +
@@ -685,8 +759,8 @@ namespace Full_modul
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
-                    sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
-                    sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
+                    sqlCommand.Parameters.AddWithValue("@DateAgo", dateAgo);
+                    sqlCommand.Parameters.AddWithValue("@DateLater", dateLater);
                     //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
@@ -698,22 +772,9 @@ namespace Full_modul
 
         public void koef0() // Коэффициент оборота по приему
         {
-            DateTime DateLater;
-            DateTime DateAgo;
-
-            if (!DateTime.TryParse(dateTextBoxLater0.Text, out DateLater) || !isDateLaterSelected)
+            if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
-                DateLater = defaultDateLater;
-            }
-
-            if (!DateTime.TryParse(dateTextBoxAgo0.Text, out DateAgo) || !isDateAgoSelected)
-            {
-                DateAgo = defaultDateAgo;
-            }
-
-            if (isDateLaterSelected && isDateAgoSelected)
-            {
-                id = DateLater.Date > DateAgo.Date ? 0 : 1;
+                id = dateLater.Date > dateAgo.Date ? 0 : 1;
                 if (id == 0)
                 {
                     command = $"SELECT COUNT(*) FROM [calculator].[dbo].[worker] WHERE start_date BETWEEN @DateAgo AND @DateLater";//+ $" AND level_worker = @LevelWorker"
@@ -725,8 +786,8 @@ namespace Full_modul
 
                 using (var sqlCommand = new SqlCommand(command, DatabaseConnection.Instance.Connection))
                 {
-                    sqlCommand.Parameters.AddWithValue("@DateAgo", DateAgo);
-                    sqlCommand.Parameters.AddWithValue("@DateLater", DateLater);
+                    sqlCommand.Parameters.AddWithValue("@DateAgo", dateAgo);
+                    sqlCommand.Parameters.AddWithValue("@DateLater", dateLater);
                     //sqlCommand.Parameters.AddWithValue("@LevelWorker", level);
 
                     int count = (int)sqlCommand.ExecuteScalar();
@@ -736,47 +797,106 @@ namespace Full_modul
             }
         }
 
-        private void BuildQuery(int id, ref string query, int selectedIndex)
+        private TextBox? GetCountTextBox(int index) => index switch
         {
-            DateTime dateLater, dateAgo;
-
-            switch (selectedIndex)
-            {
-                case 0:
-                    DateTime.TryParse(dateTextBoxLater0.Text, out dateLater);
-                    DateTime.TryParse(dateTextBoxAgo0.Text, out dateAgo);
-                    break;
-                case 1:
-                    DateTime.TryParse(dateTextBoxLater1.Text, out dateLater);
-                    DateTime.TryParse(dateTextBoxAgo1.Text, out dateAgo);
-                    break;
-                case 2:
-                    DateTime.TryParse(dateTextBoxLater2.Text, out dateLater);
-                    DateTime.TryParse(dateTextBoxAgo2.Text, out dateAgo);
-                    break;
-                case 3:
-                    DateTime.TryParse(dateTextBoxLater3.Text, out dateLater);
-                    DateTime.TryParse(dateTextBoxAgo3.Text, out dateAgo);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid formula index");
-            }
-
-            startDate = id == 0 ? dateAgo.ToString("yyyy-MM-dd") : dateLater.ToString("yyyy-MM-dd");
-            endDate = id == 0 ? dateLater.ToString("yyyy-MM-dd") : dateAgo.ToString("yyyy-MM-dd");
-
-            query += $"DECLARE @StartDate DATE = '{startDate}'; " +
-                      $"DECLARE @EndDate DATE = '{endDate}';";
-        }
+            0 => count0,
+            1 => count1,
+            2 => count2,
+            3 => count3,
+            _ => null
+        };
+        private TextBox? GetResultTextBox(int index) => index switch
+        {
+            0 => result0,
+            1 => result1,
+            2 => result2,
+            3 => result3,
+            _ => null
+        };
+        private Button? GetSaveButton(int index) => index switch
+        {
+            0 => Save0,
+            1 => Save1,
+            2 => Save2,
+            3 => Save3,
+            _ => null
+        };
+        private TextBox? GetSchrTextBox(int index) => index switch
+        {
+            0 => SCHR0,
+            1 => SCHR1,
+            2 => SCHR2,
+            3 => SCHR3,
+            _ => null
+        };
+        private TextBox? GetDateAgoTextBox(int index) => index switch
+        {
+            0 => dateTextBoxAgo0,
+            1 => dateTextBoxAgo1,
+            2 => dateTextBoxAgo2,
+            3 => dateTextBoxAgo3,
+            _ => null
+        };
+        private TextBox? GetDateLaterTextBox(int index) => index switch
+        {
+            0 => dateTextBoxLater0,
+            1 => dateTextBoxLater1,
+            2 => dateTextBoxLater2,
+            3 => dateTextBoxLater3,
+            _ => null
+        };
 
         public void SChR_calculation()
         {
-            if (isDateLaterSelected && isDateAgoSelected) //if (isDateLaterSelected && isDateAgoSelected && isLevelWorkerSelected)
-            {                
-                string query = "";
-                BuildQuery(id, ref query, comboBoxFormules.SelectedIndex);
+            for (int i = 0; i < 4; i++)
+            {
+                if (_isGlobalPeriod || AreDatesFilled(i))
+                {
+                    CalculateSCHRForCoefficient(i);
+                }
+                else
+                {
+                    GetSchrTextBox(i).Text = "";
+                }
+            }
+        }
 
-                query += $@"SELECT 
+        private void CalculateSCHRForCoefficient(int coeffIndex)
+        {
+            DateTime dateAgo, dateLater;
+
+            switch (coeffIndex)
+            {
+                case 0:
+                    DateTime.TryParse(dateTextBoxAgo0.Text, out dateAgo);
+                    DateTime.TryParse(dateTextBoxLater0.Text, out dateLater);
+                    break;
+                case 1:
+                    DateTime.TryParse(dateTextBoxAgo1.Text, out dateAgo);
+                    DateTime.TryParse(dateTextBoxLater1.Text, out dateLater);
+                    break;
+                case 2:
+                    DateTime.TryParse(dateTextBoxAgo2.Text, out dateAgo);
+                    DateTime.TryParse(dateTextBoxLater2.Text, out dateLater);
+                    break;
+                case 3:
+                    DateTime.TryParse(dateTextBoxAgo3.Text, out dateAgo);
+                    DateTime.TryParse(dateTextBoxLater3.Text, out dateLater);
+                    break;
+                default:
+                    return;
+            }
+
+            // Определяем порядок дат
+            bool isNormalOrder = dateLater > dateAgo;
+            string startDate = isNormalOrder ? dateAgo.ToString("yyyy-MM-dd") : dateLater.ToString("yyyy-MM-dd");
+            string endDate = isNormalOrder ? dateLater.ToString("yyyy-MM-dd") : dateAgo.ToString("yyyy-MM-dd");
+
+            string query = $@"
+    DECLARE @StartDate DATE = '{startDate}'; 
+    DECLARE @EndDate DATE = '{endDate}';
+    
+    SELECT 
         SUM(
             DATEDIFF(DAY,
                 CASE 
@@ -797,137 +917,78 @@ namespace Full_modul
         start_date <= @EndDate AND 
         (end_date >= @StartDate OR end_date IS NULL);";
 
-                using (var command = new SqlCommand(query, DatabaseConnection.Instance.Connection))
+            using (var command = new SqlCommand(query, DatabaseConnection.Instance.Connection))
+            {
+                try
                 {
-                    try
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        TextBox schrTextBox = GetSchrTextBox(coeffIndex);
+
+                        if (reader.Read())
                         {
-                            if (reader.Read())
+                            if (reader.IsDBNull(reader.GetOrdinal("AverageHeadcount")))
                             {
-                                if (reader.IsDBNull(reader.GetOrdinal("AverageHeadcount")))
-                                {
-                                    SCHR = 0;
-                                }
-                                else
-                                {
-                                    // Получаем уже рассчитанное среднее значение из запроса
-                                    SCHR = Math.Round(Convert.ToDouble(reader["AverageHeadcount"]), 8);
-                                }
+                                schrTextBox.Text = "";
+                            }
+                            else
+                            {
+                                double schr = Math.Round(Convert.ToDouble(reader["AverageHeadcount"]), 8);
+                                schrTextBox.Text = schr.ToString();
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Ошибка при выполнении запроса: {ex.Message}");
-                        SCHR = 0;
+                        else
+                        {
+                            schrTextBox.Text = "";
+                        }
                     }
                 }
-
-                switch (comboBoxFormules.SelectedIndex)
+                catch (Exception ex)
                 {
-                    case 0:
-                        SCHR0.Text = SCHR.ToString();
-                        break;
-                    case 1:
-                        SCHR1.Text = SCHR.ToString();
-                        break;
-                    case 2:
-                        SCHR2.Text = SCHR.ToString();
-                        break;
-                    case 3:
-                        SCHR3.Text = SCHR.ToString();
-                        break;
-                    default:
-                        break;
+                    Console.WriteLine($"Ошибка при расчете СЧР для коэффициента {coeffIndex}: {ex.Message}");
+                    GetSchrTextBox(coeffIndex).Text = "";
                 }
-                result();
             }
         }
 
         public void result()
         {
-            if (SCHR == 0)
+            for (int i = 0; i < 4; i++)
             {
-                switch (comboBoxFormules.SelectedIndex)
-                {
-                    case 0:
-                        SetResultButtonAndStyle(0, result0, Save0);
-                        break;
-                    case 1:
-                        SetResultButtonAndStyle(1, result1, Save1);
-                        break;
-                    case 2:
-                        SetResultButtonAndStyle(2, result2, Save2);
-                        break;
-                    case 3:
-                        SetResultButtonAndStyle(3, result3, Save3);
-                        break;
-                    default:
-                        break;
-                }                
+                UpdateResultForCoefficient(i);
+            }
+        }
+
+        private void UpdateResultForCoefficient(int coeffIndex)
+        {
+            var countTextBox = GetCountTextBox(coeffIndex);
+            var resultTextBox = GetResultTextBox(coeffIndex);
+            var saveButton = GetSaveButton(coeffIndex);
+            var schrTextBox = GetSchrTextBox(coeffIndex);
+            var dateAgoTextBox = GetDateAgoTextBox(coeffIndex);
+            var dateLaterTextBox = GetDateLaterTextBox(coeffIndex);
+
+            bool shouldCalculate = _isGlobalPeriod || AreDatesFilled(coeffIndex);
+
+            if (!shouldCalculate)
+            {
+                schrTextBox.Text = "";
+                resultTextBox.Text = "";
+                saveButton.IsEnabled = false;
                 return;
             }
 
-            switch (comboBoxFormules.SelectedIndex)
+            if (!double.TryParse(schrTextBox.Text, out double schrValue) || schrValue == 0 ||
+                !double.TryParse(countTextBox.Text, out double countValue))
             {
-                case 0:
-                    //CalculateResult(count0, result0, levelworker0, Save0);
-                    CalculateResult(count0, result0, Save0);
-                    break;
-                case 1:
-                    CalculateResult(count1, result1, Save1);
-                    break;
-                case 2:
-                    CalculateResult(count2, result2, Save2);
-                    break;
-                case 3:
-                    CalculateResult(count3, result3, Save3);
-                    break;
-                default:
-                    break;
+                resultTextBox.Text = "";
+                saveButton.IsEnabled = false;
+                return;
             }
-        }
 
-        private void SetResultButtonAndStyle(int caseIndex, TextBox resultTextBox, Button button)
-        {
-            resultTextBox.Text = "0";
-            UpdateTextBoxButtonStyle(resultTextBox, button);
-        }
-
-        //private void CalculateResult(TextBox countTextBox, TextBox resultTextBox, ComboBox levelWorkerComboBox, Button button)
-        private void CalculateResult(TextBox countTextBox, TextBox resultTextBox, Button button)
-        {
-            double factor = 0;
-
-            //switch (levelWorkerComboBox.SelectedIndex)
-            //{
-            //    case 0:
-            //        factor = 0.2;
-            //        break;
-            //    case 1:
-            //    case 2:
-            //        factor = 0.8;
-            //        break;
-            //    default:
-            //        return;
-            //}
-
-            resultTextBox.Text = (Double.Parse(countTextBox.Text) / SCHR * 1).ToString();
-            resultTextBox.Text = Math.Round(Convert.ToDouble(resultTextBox.Text), 8).ToString();
-            UpdateTextBoxButtonStyle(resultTextBox, button);
-        }
-
-        private void UpdateTextBoxButtonStyle(TextBox resultTextBox, Button button)
-        {
-            if (!string.IsNullOrWhiteSpace(resultTextBox.Text))
-            {
-                button.IsEnabled = true;
-            }
-            else
-            {
-                button.IsEnabled = false;
-            }
+            double resultValue = countValue / schrValue;
+            resultTextBox.Text = Math.Round(resultValue, 8).ToString();
+            saveButton.IsEnabled = !string.IsNullOrWhiteSpace(resultTextBox.Text);
         }
     }
 }

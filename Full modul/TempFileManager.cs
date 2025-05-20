@@ -1,54 +1,72 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Full_modul
 {
     class TempFileManager
     {
-        private static readonly string TempFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "TempDocuments");
+        private static readonly string TempFolder;
 
-        private static readonly List<string> TempFiles = new List<string>();
+        private static readonly ConcurrentDictionary<string, string> _fileCache = new ConcurrentDictionary<string, string>();
 
         static TempFileManager()
         {
+            string appDataFolder = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    "HRCalculator");
+
+            if (!Directory.Exists(appDataFolder))
+            {
+                Directory.CreateDirectory(appDataFolder);
+                File.SetAttributes(appDataFolder, FileAttributes.Hidden);
+            }
+
+            TempFolder = Path.Combine(appDataFolder, "TempDocuments");
             if (!Directory.Exists(TempFolder))
             {
                 Directory.CreateDirectory(TempFolder);
-                File.SetAttributes(TempFolder, File.GetAttributes(TempFolder) | FileAttributes.Hidden);
             }
-
             CleanTempFiles();
         }
 
-        public static string GetTempFilePath(string fileName)
+        public static string GetTempFilePath(string serverFilePath)
         {
-            var tempPath = Path.Combine(TempFolder, Guid.NewGuid().ToString() + Path.GetExtension(fileName));
-            TempFiles.Add(tempPath);
-            return tempPath;
+            // Генерируем хеш от оригинального пути для постоянного имени
+            string fileHash = ComputeFileHash(serverFilePath);
+            string extension = Path.GetExtension(serverFilePath);
+            string tempFileName = $"{fileHash}{extension}";
+            string tempFilePath = Path.Combine(TempFolder, tempFileName);
+
+            _fileCache.TryAdd(serverFilePath, tempFilePath);
+            return tempFilePath;
         }
 
         public static void CleanTempFiles()
         {
             try
             {
-                foreach (var file in TempFiles)
-                {
-                    try { File.Delete(file); } catch { /* ignore */ }
-                }
-                TempFiles.Clear();
-
                 foreach (var file in Directory.GetFiles(TempFolder))
                 {
-                    try { File.Delete(file); } catch { /* ignore */ }
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch { }
                 }
             }
-            catch { /* ignore */ }
+            catch { }
+        }
+
+        private static string ComputeFileHash(string filePath)
+        {
+            using (var sha = SHA256.Create())
+            {
+                byte[] hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(filePath.ToLower()));
+                return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 16);
+            }
         }
     }
 }

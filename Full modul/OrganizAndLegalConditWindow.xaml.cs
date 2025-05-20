@@ -1,21 +1,17 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
+using WpfAnimatedGif;
 using Path = System.IO.Path;
 
 namespace Full_modul
@@ -45,7 +41,7 @@ namespace Full_modul
         public bool IsHighlighted { get; set; }
     }
 
-    public partial class OrganizAndLegalConditWindow : Window
+    public partial class OrganizAndLegalConditWindow : BaseWindow
     {
         private List<DocumentItem> _documentItems = new List<DocumentItem>();
         private Dictionary<int, Image> _documentIcons = new Dictionary<int, Image>();
@@ -56,37 +52,104 @@ namespace Full_modul
         private Dictionary<int, RadioButton> _measureNoButtons = new Dictionary<int, RadioButton>();
         private Queue<string> _notificationQueue;
         private bool _isNotificationShowing = false;
+        private bool _wasDisconnected;
         public OrganizAndLegalConditWindow()
         {
             InitializeComponent();
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
 
-            LoadUserData();
+            LoadUserDataAsync();
             InitializeData();
             CreateDocumentControls();
             CreateMeasureControls();
             _notificationQueue = new Queue<string>();
+
+            // Устанавливаем начальный статус
+            UpdateUserStatus(IsConnected ? "Загрузка..." : GetOfflineStatus());
+            InitializeConnectionStatus();
         }
 
-        private void LoadUserData()
+        private string GetOfflineStatus()
         {
-            string query = "SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+            return UserInfo.username == "admin"
+                ? "Администратор (оффлайн режим)"
+                : "Оффлайн режим";
+        }
+
+        private void InitializeConnectionStatus()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = "Проверка подключения...";
+                }
+            });
+        }
+
+        private async Task LoadUserDataAsync()
+        {
+            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
+            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
+            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
 
             try
             {
-                string fullName = DatabaseConnection.Instance.ExecuteScalar<string>(
-                    query,
-                    new SqlParameter("@login", UserInfo.username)
-                );
+                if (!IsConnected)
+                {
+                    UpdateUserStatus(GetOfflineStatus());
+                    return;
+                }
 
-                user.Text = !string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор";
+                string fullName = await Task.Run(() =>
+                    DatabaseConnection.Instance.ExecuteScalar<string>(
+                        query,
+                        new SqlParameter("@login", UserInfo.username)));
+
+                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки данных пользователя: {ex.Message}",
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                UpdateUserStatus("Не удалось загрузить данные");
+            }
+        }
+
+        protected override async Task InitializeConnectionElementsAsync()
+        {
+            await base.InitializeConnectionElementsAsync();
+            await LoadUserDataAsync(); // Загружаем данные сразу после инициализации подключения
+        }
+
+        private void UpdateUserStatus(string status)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                user.Text = status;
+            });
+        }
+
+        protected override async void OnConnectionStateChanged(bool isConnected)
+        {
+            base.OnConnectionStateChanged(isConnected);
+
+            if (isConnected)
+            {
+                AppLogger.LogDbInfo("Подключение восстановлено - обновление данных");
+                await LoadUserDataAsync();
+                await RefreshDocumentVerifications();
+            }
+            else
+            {
+                AppLogger.LogDbWarning("Потеряно подключение к серверу");
+                UpdateUserStatus(GetOfflineStatus());
+            }
+        }
+
+        private async Task RefreshDocumentVerifications()
+        {
+            foreach (var doc in _documentItems.Where(d => d.IsChecked))
+            {
+                await ProcessDocumentVerification(doc);
             }
         }
 
@@ -372,7 +435,7 @@ namespace Full_modul
 
                 ContainerLegal.RegisterName(grid.Name, grid);
 
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(400) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(340) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
@@ -380,13 +443,14 @@ namespace Full_modul
                 var textBlock = new TextBlock
                 {
                     Text = item.Text,
+                    HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5),
                     FontFamily = new FontFamily("Ubuntu"),
                     FontWeight = FontWeights.Normal,
                     FontSize = 15,
                     TextWrapping = TextWrapping.Wrap,
-                    MaxWidth = 425
+                    MaxWidth = 340
                 };
 
                 if (item.AffectsOtherContainer)
@@ -410,11 +474,12 @@ namespace Full_modul
                 {
                     Name = $"DocIcon{item.Id}",
                     Height = 30,
-                    Margin = new Thickness(5, 0, 0, 0),
                     Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png")),
                     Visibility = Visibility.Collapsed,
                     Tag = item.Id,
                     Cursor = Cursors.Hand,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
                     ToolTip = $"Открыть документ: {item.Text}"
                 };
                 _documentIcons[item.Id] = image;
@@ -426,6 +491,7 @@ namespace Full_modul
                 {
                     Orientation = Orientation.Horizontal,
                     HorizontalAlignment = HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 0, 7, 0),
                     Height = 30
                 };
 
@@ -485,20 +551,22 @@ namespace Full_modul
 
                 ContainerOrgan.RegisterName(grid.Name, grid);
 
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(340) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
                 // Текст меры
                 var textBlock = new TextBlock
                 {
                     Text = measure.Text,
+                    HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5),
                     FontFamily = new FontFamily("Ubuntu"),
                     FontWeight = FontWeights.Normal,
                     FontSize = 15,
                     TextWrapping = TextWrapping.Wrap,
-                    MaxWidth = 425
+                    MaxWidth = 340
                 };
                 Grid.SetColumn(textBlock, 0);
                 grid.Children.Add(textBlock);
@@ -508,6 +576,7 @@ namespace Full_modul
                 {
                     Orientation = Orientation.Horizontal,
                     HorizontalAlignment = HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 0, 7, 0),
                     Height = 30
                 };
 
@@ -540,7 +609,7 @@ namespace Full_modul
 
                 stackPanelRb.Children.Add(yesRb);
                 stackPanelRb.Children.Add(noRb);
-                Grid.SetColumn(stackPanelRb, 1);
+                Grid.SetColumn(stackPanelRb, 2);
                 grid.Children.Add(stackPanelRb);
 
                 measuresPanel.Children.Add(grid);
@@ -561,84 +630,165 @@ namespace Full_modul
                 bool isYes = radioButton.Content.ToString() == "Есть";
 
                 var document = _documentItems.FirstOrDefault(d => d.Id == id);
-                if (document != null)
-                {
-                    document.IsChecked = true;
+                if (document == null) return;
 
+                document.IsChecked = true;
+
+                if (document.AffectsOtherContainer)
+                {
+                    ProcessAffectedMeasures(document, isYes);
+                }
+
+                if (isYes)
+                {
+                    await ProcessDocumentVerification(document);
+                }
+                else
+                {
                     if (_documentIcons.TryGetValue(id, out Image docIcon))
                     {
-                        if (isYes)
-                        {
-                            docIcon.Opacity = 0.5;
-                            docIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Images/loading.gif"));
-                            docIcon.Visibility = Visibility.Visible;
-
-                            bool fileExists = await CheckDocumentExistsOnServer(document.Text);
-
-                            if (fileExists)
-                            {
-                                docIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png"));
-                                docIcon.Opacity = 1;
-                                document.HasDocument = true;
-                            }
-                            else
-                            {
-                                docIcon.Visibility = Visibility.Collapsed;
-                                document.HasDocument = false;
-
-                                ShowDocumentNotFoundNotification(document.Text);
-                            }
-                        }
-                        else
-                        {
-                            docIcon.Visibility = Visibility.Collapsed;
-                        }
-                    }
-
-                    if (document.AffectsOtherContainer)
-                    {
-                        foreach (var affectedId in document.AffectedItems)
-                        {
-                            var measure = _organizationalMeasures.FirstOrDefault(m => m.Id == affectedId);
-                            if (measure != null && ContainerOrgan.FindName($"MeasureGrid{measure.Id}") is Grid grid)
-                            {
-                                bool wasVisibleBefore = grid.Visibility == Visibility.Visible;
-                                grid.Visibility = isYes ? Visibility.Visible : Visibility.Collapsed;
-
-                                if (!wasVisibleBefore && isYes)
-                                {
-                                    grid.Background = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0));
-                                    measure.IsHighlighted = true;
-                                }
-                                else if (!isYes)
-                                {
-                                    _measureYesButtons[measure.Id].IsChecked = false;
-                                    _measureNoButtons[measure.Id].IsChecked = false;
-                                    measure.IsSelected = false;
-                                    measure.IsHighlighted = false;
-                                    grid.Background = Brushes.Transparent;
-                                    CalculateSecondContainerResult();
-                                }
-                            }
-                        }
+                        docIcon.Visibility = Visibility.Collapsed;
                     }
                 }
                 CalculateFirstContainerResult();
             }
         }
+
+        private void ProcessAffectedMeasures(DocumentItem document, bool isYes)
+        {
+            foreach (var affectedId in document.AffectedItems)
+            {
+                var measure = _organizationalMeasures.FirstOrDefault(m => m.Id == affectedId);
+                if (measure != null && ContainerOrgan.FindName($"MeasureGrid{measure.Id}") is Grid grid)
+                {
+                    bool wasVisibleBefore = grid.Visibility == Visibility.Visible;
+                    grid.Visibility = isYes ? Visibility.Visible : Visibility.Collapsed;
+
+                    if (!wasVisibleBefore && isYes)
+                    {
+                        grid.Background = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0));
+                        measure.IsHighlighted = true;
+                    }
+                    else if (!isYes)
+                    {
+                        _measureYesButtons[measure.Id].IsChecked = false;
+                        _measureNoButtons[measure.Id].IsChecked = false;
+                        measure.IsSelected = false;
+                        measure.IsHighlighted = false;
+                        grid.Background = Brushes.Transparent;
+                        CalculateSecondContainerResult();
+                    }
+                }
+            }
+        }
+
+        private bool _connectionWarningShown = false;
+
+        private async Task ProcessDocumentVerification(DocumentItem document)
+        {
+            if (!IsConnected)
+            {
+                if (!_connectionWarningShown)
+                {
+                    _connectionWarningShown = true;
+                    AppLogger.LogDbWarning("Нет подключения к серверу. Проверка документов невозможна.");
+                    await EnqueueNotification(
+                        "Нет подключения к серверу. Проверка наличия документа(-ов) невозможна.",
+                        Brushes.Red,
+                        false);
+                }
+                return;
+            }
+            else
+            {
+                _connectionWarningShown = false;
+            }
+
+            if (!_documentIcons.TryGetValue(document.Id, out Image docIcon))
+            {
+                return;
+            }
+
+            try
+            {
+                docIcon.Opacity = 0.5;
+                SetLoadingGif(docIcon);
+                docIcon.Visibility = Visibility.Visible;
+
+                bool fileExists = await CheckDocumentExistsOnServer(document.Text);
+
+                if (fileExists)
+                {
+                    StopLoadingGif(docIcon);
+                    docIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png"));
+                    docIcon.Opacity = 1;
+                    document.HasDocument = true;
+                }
+                else
+                {
+                    docIcon.Visibility = Visibility.Collapsed;
+                    document.HasDocument = false;
+                    AppLogger.LogWarning($"Документ не найден на сервере: {document.Text}");
+                    ShowDocumentNotFoundNotification(document.Text);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка при проверке документа {document.Text}: {ex.Message}");
+                docIcon.Visibility = Visibility.Collapsed;
+                document.HasDocument = false;
+                await ShowNotification("Ошибка при проверке документа", Brushes.Red);
+            }
+        }
+
+        private void SetLoadingGif(Image image)
+        {
+            if (image == null) return;
+
+            try
+            {
+                var gif = new BitmapImage();
+                gif.BeginInit();
+                gif.UriSource = new Uri("pack://application:,,,/Images/loading.gif");
+                gif.CacheOption = BitmapCacheOption.OnLoad;
+                gif.EndInit();
+
+                ImageBehavior.SetAnimatedSource(image, gif);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка загрузки GIF: {ex.Message}");
+                image.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png"));
+            }
+        }
+
+        private void StopLoadingGif(Image image)
+        {
+            if (image == null) return;
+            ImageBehavior.SetAnimatedSource(image, null);
+        }
+
         private async Task<bool> CheckDocumentExistsOnServer(string documentName)
         {
             try
             {
+                if (!IsConnected)
+                {
+                    AppLogger.LogDbWarning("Попытка проверки документа без подключения");
+                    return false;
+                }
+
                 string query = "SELECT COUNT(1) FROM Documents WHERE DocumentName = @DocumentName";
                 int count = await DatabaseConnection.Instance.ExecuteScalarAsync<int>(
                     query,
                     new SqlParameter("@DocumentName", documentName));
 
+                AppLogger.LogDebug($"Результат проверки документа {documentName}: {count > 0}");
                 return count > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.LogError($"Ошибка проверки документа {documentName}: {ex.Message}");
                 return false;
             }
         }
@@ -818,6 +968,10 @@ namespace Full_modul
                 _documentYesButtons[item.Id].IsChecked = false;
                 _documentNoButtons[item.Id].IsChecked = false;
                 item.IsChecked = false;
+                if (_documentIcons.TryGetValue(item.Id, out Image docIcon))
+                {
+                    docIcon.Visibility = Visibility.Collapsed;
+                }
             }
             result0.Text = string.Empty;
             ClickableImage2.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Gray.png"));
@@ -903,44 +1057,84 @@ namespace Full_modul
 
             image.IsEnabled = false;
             Cursor = Cursors.Wait;
+            AppLogger.LogInfo($"Попытка открытия документа ID: {image.Tag}");
 
-            using (var loadingIndicator = new LoadingIndicator())
+            try
             {
-                try
+                int documentId = (int)image.Tag;
+                var document = _documentItems.FirstOrDefault(d => d.Id == documentId);
+
+                if (document == null) return;
+                if (!document.HasDocument)
                 {
-                    int documentId = (int)image.Tag;
-                    var document = _documentItems.FirstOrDefault(d => d.Id == documentId);
+                    await ShowNotification("Документ не найден", Brushes.Orange);
+                    return;
+                }
+                if (!IsConnected)
+                {
+                    AppLogger.LogDbWarning("Нет подключения к серверу");
+                    await ShowNotification("Нет подключения - невозможно проверить документ", Brushes.Red);
+                    return;
+                }
+                string serverFilePath = await GetDocumentPathFromDatabase(document.Text);
+                string filePath = await GetDocumentFilePath(serverFilePath);
 
-                    if (document == null || !document.HasDocument) return;
+                OpenDocumentWithRetry(filePath);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка: {ex.Message}");
+                await ShowNotification($"Ошибка: {ex.Message}", Brushes.Red);
+            }
+            finally
+            {
+                image.IsEnabled = true;
+                Cursor = Cursors.Arrow;
+            }
+        }
 
-                    string documentPath = await GetDocumentPathFromDatabase(document.Text);
+        private async Task<string> GetDocumentFilePath(string serverFilePath)
+        {
+            string localPath = TempFileManager.GetTempFilePath(serverFilePath);
 
-                    if (string.IsNullOrEmpty(documentPath))
+            if (File.Exists(localPath))
+            {
+                // Проверяем, открыт ли файл перед любыми действиями
+                if (IsFileOpen(localPath))
+                {
+                    if (TryActivateExistingWindow(localPath))
                     {
-                        MessageBox.Show("Документ не найден на сервере", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
+                        AppLogger.LogInfo($"Активировано существующее окно: {localPath}");
+                        return localPath;
                     }
+                }
 
-                    if (!File.Exists(documentPath))
-                    {
-                        MessageBox.Show("Файл документа не найден", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
+                // Если файл существует и не открыт, используем локальную копию
+                return localPath;
+            }
 
-                    OpenDocumentInAdobeReader(documentPath);
-                }
-                catch (Exception ex)
+            if (!IsConnected)
+                throw new Exception("Нет подключения к серверу");
+
+            return await DownloadFileFromServer(serverFilePath);
+        }
+
+        private void OpenDocumentWithRetry(string filePath)
+        {
+            try
+            {
+                if (TryActivateExistingWindow(filePath))
                 {
-                    MessageBox.Show($"Ошибка при открытии документа: {ex.Message}", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    AppLogger.LogInfo($"Активировано существующее окно: {filePath}");
+                    return;
                 }
-                finally
-                {
-                    image.IsEnabled = true;
-                    Cursor = Cursors.Arrow;
-                }
+
+                OpenDocumentInAdobeReader(filePath);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка открытия: {ex.Message}");
+                throw;
             }
         }
 
@@ -948,46 +1142,35 @@ namespace Full_modul
         {
             string query = "SELECT ServerFilePath FROM Documents WHERE DocumentName = @DocumentName";
 
-            try
-            {
-                string serverFilePath = await DatabaseConnection.Instance.ExecuteScalarAsync<string>(
-                    query,
-                    new SqlParameter("@DocumentName", documentName));
+            string serverFilePath = await DatabaseConnection.Instance.ExecuteScalarAsync<string>(
+                query,
+                new SqlParameter("@DocumentName", documentName));
 
-                if (string.IsNullOrEmpty(serverFilePath))
-                {
-                    throw new FileNotFoundException("Путь к документу не найден в базе данных");
-                }
-
-                if (!File.Exists(serverFilePath))
-                {
-                    throw new FileNotFoundException($"Файл не найден по указанному пути: {serverFilePath}");
-                }
-                return await DownloadFileFromServer(serverFilePath);
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(serverFilePath))
             {
-                throw new Exception($"Ошибка получения документа: {ex.Message}", ex);
+                throw new FileNotFoundException("Путь к документу не найден в БД");
             }
+
+            return serverFilePath;
         }
 
         private async Task<string> DownloadFileFromServer(string serverFilePath)
         {
+            string tempFilePath = TempFileManager.GetTempFilePath(serverFilePath);
+
             try
             {
-                var tempFilePath = TempFileManager.GetTempFilePath(Path.GetFileName(serverFilePath));
-
-                using (FileStream sourceStream = new FileStream(serverFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                using (FileStream destinationStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var sourceStream = new FileStream(serverFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var destinationStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await sourceStream.CopyToAsync(destinationStream);
                 }
-
                 return tempFilePath;
             }
-            catch (Exception ex)
+            catch (IOException ioEx)
             {
-                throw new Exception($"Ошибка копирования файла с сервера: {ex.Message}", ex);
+                AppLogger.LogError($"Ошибка доступа к файлу: {ioEx.Message}");
+                throw new Exception("Не удалось загрузить файл, так как он может быть открыт в другой программе.", ioEx);
             }
         }
 
@@ -995,16 +1178,14 @@ namespace Full_modul
         {
             try
             {
-                ProcessStartInfo psi = new ProcessStartInfo
+                Process.Start(new ProcessStartInfo
                 {
                     FileName = "AcroRd32.exe",
-                    Arguments = $"\"{filePath}\"",
+                    Arguments = $"/A \"page=1\" \"{filePath}\"",
                     UseShellExecute = true
-                };
-
-                Process.Start(psi);
+                });
             }
-            catch (Exception ex)
+            catch
             {
                 try
                 {
@@ -1014,12 +1195,63 @@ namespace Full_modul
                         UseShellExecute = true
                     });
                 }
-                catch
+                catch (Exception ex)
                 {
-                    throw new Exception($"Не удалось открыть документ. Убедитесь, что Adobe Reader установлен.\n{ex.Message}");
+                    AppLogger.LogError($"Не удалось открыть документ: {ex.Message}");
+                    throw new Exception("Не удалось открыть документ. Проверьте, установлена ли программа для PDF.", ex);
                 }
             }
         }
+
+        private bool IsFileOpen(string filePath)
+        {
+            try
+            {
+                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    // Если файл открыт, это вызовет исключение
+                    return false;
+                }
+            }
+            catch (IOException)
+            {
+                // Если возникло исключение, значит файл открыт
+                return true;
+            }
+        }
+
+        private bool TryActivateExistingWindow(string filePath)
+        {
+            try
+            {
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
+                var processes = Process.GetProcesses()
+                    .Where(p => !string.IsNullOrEmpty(p.MainWindowTitle))
+                    .Where(p => p.MainWindowTitle.Contains(fileName));
+
+                foreach (var process in processes)
+                {
+                    // Активируем окно
+                    SetForegroundWindow(process.MainWindowHandle);
+                    ShowWindow(process.MainWindowHandle, SW_RESTORE);
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_RESTORE = 9;
+
 
         public class LoadingIndicator : IDisposable
         {
@@ -1062,128 +1294,6 @@ namespace Full_modul
                 _overlayWindow.Close();
             }
         }
-        //private void UpdatePlaceholderVisibility(ComboBox comboBox)
-        //{
-        //    var grid = (Grid)comboBox.Parent;
-        //    var placeholderText = (TextBlock)grid.Children[1];
-
-        //    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-        //    {
-        //        placeholderText.Visibility = selectedItem.Content.ToString() != "-" ? Visibility.Collapsed : Visibility.Visible;
-        //    }
-        //}
-
-        //private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    if (sender is ComboBox comboBox)
-        //    {
-        //        UpdatePlaceholderVisibility(comboBox);
-        //        HandleFirstContainer(comboBox);
-
-        //        var comboBoxes1 = new[] { Box0, Box1, Box2, Box3, Box4, Box5, Box6 };
-        //        CalculateAverage(comboBoxes1, result0, ClickableImage2);
-
-        //        UpdateSecondContainerResults();
-        //    }
-        //}
-
-        //private void HandleFirstContainer(ComboBox comboBox)
-        //{
-        //    if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-        //    {
-        //        string selectedValue = selectedItem.Content.ToString();
-
-        //        if (comboBox == Box1)
-        //        {
-        //            Grid10.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
-        //        }
-
-        //        if (comboBox == Box4)
-        //        {
-        //            Grid13.Visibility = selectedValue == "Нет" ? Visibility.Collapsed : Visibility.Visible;
-        //        }
-        //    }
-        //}
-
-        //private void UpdateSecondContainerResults()
-        //{
-        //    int sum = 0;
-        //    int count = 0;
-        //    int visibleCount = 0;
-        //    bool isAnyGridVisible = false;
-
-        //    for (int i = 9; i <= 15; i++)
-        //    {
-        //        var comboBox = (ComboBox)this.FindName($"Box{i}");
-        //        var Grid = (Grid)this.FindName($"Grid{i}");
-
-        //        if (Grid.Visibility == Visibility.Visible)
-        //        {
-        //            isAnyGridVisible = true;
-        //            visibleCount++;
-
-        //            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-        //            {
-        //                if (selectedItem.Content.ToString() == "Да")
-        //                {
-        //                    sum += 1;
-        //                }
-        //                count++;
-        //            }
-        //        }
-        //    }
-
-        //    if (isAnyGridVisible && count == visibleCount)
-        //    {
-        //        double average = (double)sum / visibleCount; 
-        //        result1.Text = average.ToString("0.######");
-        //        Save0.IsEnabled = true;
-        //    }
-        //    else
-        //    {
-        //        result1.Text = string.Empty;
-        //        Save0.IsEnabled = false;
-        //    }
-        //}
-
-        //private void CalculateAverage(ComboBox[] comboBoxes, TextBox resultText, Image clickableImage)
-        //{
-        //    int sum = 0;
-        //    int count = 0;
-        //    bool allSelected = true;
-
-        //    foreach (var comboBox in comboBoxes)
-        //    {
-        //        if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-        //        {
-        //            if (selectedItem.Content.ToString() == "Да")
-        //            {
-        //                sum += 1;
-        //            }
-        //            count++;
-        //        }
-        //        else
-        //        {
-        //            allSelected = false;
-        //            break;
-        //        }
-        //    }
-
-        //    if (allSelected && count > 0)
-        //    {
-        //        double average = (double)sum / count;
-        //        resultText.Text = average.ToString("0.#####");
-
-        //        if (clickableImage != null && resultText.Text != string.Empty)
-        //        {
-        //            clickableImage.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Arrow_Blue0.png"));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        resultText.Text = string.Empty;
-        //    }
-        //}
 
         private void SwitchButton_Click(object sender, RoutedEventArgs e)
         {

@@ -15,9 +15,10 @@ namespace Full_modul
         private const string ReportsFolderName = "Отчёты";
         private const string CalculatorFolderName = "Калькулятор";
         private const string ConditionsFolderName = "Условия";
-
+        public static DateTime StartTime { get; private set; }
         protected override void OnStartup(StartupEventArgs e)
         {
+            StartTime = DateTime.Now;
             if (string.IsNullOrEmpty(Settings.Default.ConnectionString))
             {
                 string rawConnection = BuildConnectionString(
@@ -30,8 +31,30 @@ namespace Full_modul
                 Settings.Default.Save();
             }
 
+            string decryptedConnection = SecurityHelper.Decrypt(Settings.Default.ConnectionString);
+            SqlConnectionStringBuilder builder = new(decryptedConnection)
+            {
+                ConnectTimeout = 3 
+            };
+
+            Settings.Default.ConnectionString = SecurityHelper.Encrypt(builder.ToString());
+            Settings.Default.Save();
+
+            DatabaseConnection.Instance.Initialize();
             base.OnStartup(e);
             CreateReportFolders();
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                Exception ex = (Exception)args.ExceptionObject;
+                MessageBox.Show($"Необработанное исключение: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            };
+
+            DispatcherUnhandledException += (sender, args) =>
+            {
+                MessageBox.Show($"Необработанное исключение в UI: {args.Exception.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                args.Handled = true;
+            };
         }
 
         private string BuildConnectionString(string server, string database, string userId, string password)
@@ -73,6 +96,5 @@ namespace Full_modul
                 MessageBox.Show("При первом запуске программы созданы папки \"Отчёты\\Калькулятор\", \"Отчёты\\Условия\".", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
     }
 }
