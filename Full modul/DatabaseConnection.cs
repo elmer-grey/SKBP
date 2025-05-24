@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Full_modul
 {
@@ -28,15 +29,24 @@ namespace Full_modul
 
         public static bool IsInitialized { get; private set; }
 
-        public void Initialize()
+        public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
             if (IsInitialized) return;
 
-            LoadConnectionString();
-            _ = TestConnectionAsync().ConfigureAwait(false);
-            IsInitialized = true;
-
-            AppLogger.LogDbInfo("Подключение к БД инициализировано");
+            try
+            {
+                IsInitialized = await TestConnectionAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                AppLogger.LogWarning("Database initialization was canceled");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Database initialization failed: {ex.Message}");
+                throw;
+            }
         }
 
         private void LoadConnectionString()
@@ -62,16 +72,28 @@ namespace Full_modul
             }
         }
 
+        private static string _lastConnectionString;
+        private static DateTime _lastConnectionChangeTime = DateTime.MinValue;
+
         public static void UpdateConnection(string newRawConnectionString)
         {
             try
             {
                 string encrypted = SecurityHelper.Encrypt(newRawConnectionString);
-                Settings.Default.ConnectionString = encrypted;
-                Settings.Default.Save();
+
+                if (Settings.Default.ConnectionString == encrypted &&
+                    (DateTime.Now - _lastConnectionChangeTime).TotalMinutes < 5)
+                {
+                    return;
+                }
 
                 lock (_lock)
                 {
+                    Settings.Default.ConnectionString = encrypted;
+                    Settings.Default.Save();
+                    _lastConnectionString = newRawConnectionString;
+                    _lastConnectionChangeTime = DateTime.Now;
+
                     _instance?.CloseConnection();
                     _instance = new DatabaseConnection();
                     AppLogger.LogDbInfo("Обновлены параметры подключения");
@@ -85,73 +107,24 @@ namespace Full_modul
         }
 
         private const int DefaultTimeout = 5;
-        private static bool _lastConnectionState;
-        private static DateTime _lastCheckTime = DateTime.MinValue;
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(10);
-        private static readonly SemaphoreSlim _connectionCheckSemaphore = new(1, 1);
-        private static DateTime _lastPingTime = DateTime.MinValue;
-        private static bool _lastPingResult;
-        private static DateTime _lastErrorLogTime = DateTime.MinValue;
-        private const int ErrorLogInterval = 30; // секунд между одинаковыми ошибками
-        private static readonly SemaphoreSlim _stateCacheLock = new(1, 1);
 
-        public static bool TestConnectionCachedState()
+        public static async Task<bool> TestConnectionAsync(CancellationToken cancellationToken)
         {
-            _stateCacheLock.Wait();
             try
             {
-                return (DateTime.Now - _lastCheckTime).TotalSeconds < 5
-                    ? _lastConnectionState
-                    : false;
-            }
-            finally
-            {
-                _stateCacheLock.Release();
-            }
-        }
+                await using var connection = new SqlConnection(GetDecryptedConnectionString());
 
-        public static async Task<bool> TestConnectionAsync()
-        {
-            await _connectionCheckSemaphore.WaitAsync();
-            try
-            {
-                if (DateTime.Now - _lastCheckTime < CacheDuration)
-                    return _lastConnectionState;
+                var openTask = connection.OpenAsync(cancellationToken);
 
-                bool currentState = false;
-                try
+                if (await Task.WhenAny(openTask, Task.Delay(2000, cancellationToken)) == openTask)
                 {
-                    // Быстрая проверка доступности сервера
-                    if (!await IsServerReachable(GetServerNameFromConnectionString(), 500))
-                    {
-                        _lastConnectionState = false;
-                        return false;
-                    }
-
-                    // Проверка подключения к SQL с таймаутом
-                    using var cts = new CancellationTokenSource(1500); // Уменьшен таймаут
-                    await using var connection = new SqlConnection(GetDecryptedConnectionString());
-                    await connection.OpenAsync(cts.Token);
-                    currentState = true;
+                    return openTask.Status == TaskStatus.RanToCompletion;
                 }
-                catch (OperationCanceledException)
-                {
-                    AppLogger.LogDbWarning("Проверка подключения отменена по таймауту");
-                    currentState = false;
-                }
-                catch (Exception ex)
-                {
-                    AppLogger.LogDbError($"Ошибка подключения: {ex.Message}");
-                    currentState = false;
-                }
-
-                _lastConnectionState = currentState;
-                _lastCheckTime = DateTime.Now;
-                return currentState;
+                return false;
             }
-            finally
+            catch
             {
-                _connectionCheckSemaphore.Release();
+                return false;
             }
         }
 
@@ -180,8 +153,6 @@ namespace Full_modul
             return command.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
-        private static readonly ConcurrentDictionary<string, object> _cache = new();
-
         public async Task<T> ExecuteScalarAsync<T>(string query, params SqlParameter[] parameters)
         {
             try
@@ -201,7 +172,7 @@ namespace Full_modul
             }
         }
 
-        private static async Task<bool> IsServerReachable(string host, int timeout)
+        public static async Task<bool> IsServerReachable(string host, int timeout)
         {
             try
             {
@@ -215,7 +186,7 @@ namespace Full_modul
             }
         }
 
-        private static string GetServerNameFromConnectionString()
+        public static string GetServerNameFromConnectionString()
         {
             var builder = new SqlConnectionStringBuilder(GetDecryptedConnectionString());
             return builder.DataSource.Split(',')[0];
@@ -233,12 +204,46 @@ namespace Full_modul
                     var result = cmd.ExecuteScalar();
                     return result == DBNull.Value ? default : (T)result;
                 }
+                catch (SqlException sqlEx)
+                {
+                    string userMessage = sqlEx.Number switch
+                    {
+                        208 => "Ошибка: запрашиваемая таблица не существует",
+                        547 => "Ошибка ограничения внешнего ключа",
+                        2627 => "Нарушение уникальности данных",
+                        _ => $"Ошибка базы данных: {sqlEx.Message}"
+                    };
+
+                    AppLogger.LogDbError($"SQL ошибка (ExecuteScalar): {sqlEx.Message}\nQuery: {query}");
+                    ShowNotification(userMessage, Brushes.Red, 5);
+                    return default;
+                }
                 catch (Exception ex)
                 {
-                    AppLogger.LogDbError($"SQL ошибка (ExecuteScalar): {ex.Message}\nQuery: {query}");
-                    throw new Exception($"Ошибка выполнения запроса: {ex.Message}", ex);
+                    AppLogger.LogDbError($"Общая ошибка (ExecuteScalar): {ex.Message}\nQuery: {query}");
+                    ShowNotification("Произошла непредвиденная ошибка при выполнении запроса", Brushes.Red, 5);
+                    return default;
                 }
             }
+        }
+        private static void ShowNotification(string message, Brush color, int durationSeconds = 3)
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    var notification = new NotificationWindow(message, color, durationSeconds);
+
+                    notification.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+                    notification.Show();
+                }
+                catch (Exception ex)
+                {
+                    // Фолбэк в консоль если всё совсем сломалось
+                    AppLogger.LogError($"Ошибка показа уведомления: {ex.Message}");
+                }
+            });
         }
 
         public int ExecuteNonQuery(string query, params SqlParameter[] parameters)
@@ -253,9 +258,25 @@ namespace Full_modul
                         return command.ExecuteNonQuery();
                     }
                 }
+                catch (SqlException sqlEx)
+                {
+                    string userMessage = sqlEx.Number switch
+                    {
+                        208 => "Ошибка: запрашиваемая таблица не существует",
+                        547 => "Ошибка: нарушение ограничений данных",
+                        2627 => "Ошибка: дублирование уникальных данных",
+                        _ => $"Ошибка базы данных: {sqlEx.Message}"
+                    };
+
+                    AppLogger.LogDbError($"SQL ошибка (ExecuteNonQuery): {sqlEx.Message}\nQuery: {query}");
+                    ShowNotification(userMessage, Brushes.Red, 5);
+                    return -1;
+                }
                 catch (Exception ex)
                 {
-                    throw new Exception($"Ошибка выполнения команды: {ex.Message}", ex);
+                    AppLogger.LogDbError($"Общая ошибка (ExecuteNonQuery): {ex.Message}\nQuery: {query}");
+                    ShowNotification("Произошла непредвиденная ошибка при выполнении команды", Brushes.Red, 5);
+                    return -1;
                 }
             }
         }

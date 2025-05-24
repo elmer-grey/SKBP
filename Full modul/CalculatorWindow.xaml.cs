@@ -56,78 +56,30 @@ namespace Full_modul
         dateTextBoxLater0, dateTextBoxLater1, dateTextBoxLater2, dateTextBoxLater3
             ];
 
-            // Устанавливаем начальный статус
-            UpdateUserStatus(IsConnected ? "Загрузка..." : GetOfflineStatus());
-            InitializeConnectionStatus();
-        }
-
-        private string GetOfflineStatus()
-        {
-            return UserInfo.username == "admin"
-                ? "Администратор (оффлайн режим)"
-                : "Оффлайн режим";
-        }
-
-        private void InitializeConnectionStatus()
-        {
-            Dispatcher.Invoke(() =>
+            this.Loaded += OnWindowLoaded;
+            Loaded += (s, e) =>
             {
-                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
-                {
-                    statusText.Text = "Проверка подключения...";
-                }
-            });
+                RefreshData();
+            };
         }
 
-        private async Task LoadUserDataAsync()
+        protected void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
-            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
-            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
-
-            try
+            if (Owner is MainWindow mainWindow)
             {
-                if (!IsConnected)
-                {
-                    UpdateUserStatus(GetOfflineStatus());
-                    return;
-                }
-
-                string fullName = await Task.Run(() =>
-                    DatabaseConnection.Instance.ExecuteScalar<string>(
-                        query,
-                        new SqlParameter("@login", UserInfo.username)));
-
-                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
+                mainWindow.RegisterChildWindow(this);
             }
-            catch
-            {
-                UpdateUserStatus("Не удалось загрузить данные");
-            }
+            this.Loaded -= OnWindowLoaded;
         }
 
         protected override async Task InitializeConnectionElementsAsync()
         {
+            IsConnected = await ConnectionCoordinator.GetConnectionStateAsync();
             await base.InitializeConnectionElementsAsync();
-            await LoadUserDataAsync();
-        }
 
-        private void UpdateUserStatus(string status)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                user.Text = status;
-            });
-        }
-
-        protected override async void OnConnectionStateChanged(bool isConnected)
-        {
-            base.OnConnectionStateChanged(isConnected);
-
-            if (isConnected)
+            if (IsConnected)
             {
                 await LoadUserDataAsync();
-                RefreshData();
             }
             else
             {
@@ -135,7 +87,7 @@ namespace Full_modul
             }
         }
 
-        private void RefreshData()
+        protected override async Task RefreshData()
         {
             if (AreDatesFilled(_currentKoefIndex))
             {
@@ -208,16 +160,25 @@ namespace Full_modul
 
         private void comboBoxFormules_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            isDateLaterSelected = false;
-            isDateAgoSelected = false;
+            _currentKoefIndex = comboBoxFormules.SelectedIndex;
+            if (!AreDatesFilled(_currentKoefIndex))
+            {
+                isDateLaterSelected = false;
+                isDateAgoSelected = false;
+            } else
+            {
+                isDateLaterSelected = true;
+                isDateAgoSelected = true;
+            }
+
+            RefreshData();
+
             TextBlock_ShowName.Visibility = Visibility.Collapsed;
 
             foreach (var group in new[] { koefgroup0, koefgroup1, koefgroup2, koefgroup3 })
             {
                 group.Visibility = Visibility.Collapsed;
             }
-
-            _currentKoefIndex = comboBoxFormules.SelectedIndex;
 
             switch (_currentKoefIndex)
             {
@@ -446,10 +407,21 @@ namespace Full_modul
 
         private bool OtherCoefficientsHaveData()
         {
+            DateTime? currentAgo = selectedDatesAgo[_currentKoefIndex];
+            DateTime? currentLater = selectedDatesLater[_currentKoefIndex];
+
             for (int i = 0; i < 4; i++)
             {
                 if (i != _currentKoefIndex && AreDatesFilled(i))
-                    return true;
+                {
+                    DateTime? otherAgo = selectedDatesAgo[i];
+                    DateTime? otherLater = selectedDatesLater[i];
+
+                    if (otherAgo != currentAgo || otherLater != currentLater)
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -474,12 +446,14 @@ namespace Full_modul
 
             if (OtherCoefficientsHaveData())
             {
-                var result = MessageBox.Show(
+                var dialog = new CustomMessage(
                     "При включении единого периода все даты будут заменены на текущие. Продолжить?",
                     "Подтверждение",
-                    MessageBoxButton.YesNo);
+                    new List<string> { "Да", "Нет" });
 
-                if (result == MessageBoxResult.No)
+                dialog.ShowDialog();
+
+                if (dialog.Result != "Да")
                 {
                     CheckBox_Date.IsChecked = false;
                     return;
@@ -495,21 +469,44 @@ namespace Full_modul
             _isGlobalPeriod = false;
         }
 
+        public bool _isFirstRun = true;
+
         private void CheckBoxVisibility()
         {
+            if (_isFirstRun)
+            {
+                CheckBox_Date.Visibility = Visibility.Collapsed;
+                CheckBox_Date.IsChecked = false;
+                _isGlobalPeriod = false;
+                _isFirstRun = false;
+                return;
+            }
+
             bool shouldBeVisible = AreDatesFilled(_currentKoefIndex);
 
-            if (CheckBox_Date.Visibility == Visibility.Visible && !shouldBeVisible)
+            if (shouldBeVisible)
             {
-                var fadeOut = new DoubleAnimation(0, TimeSpan.FromMilliseconds(200));
-                fadeOut.Completed += (s, _) => CheckBox_Date.Visibility = Visibility.Collapsed;
-                CheckBox_Date.BeginAnimation(OpacityProperty, fadeOut);
+                if (CheckBox_Date.Visibility != Visibility.Visible)
+                {
+                    CheckBox_Date.Visibility = Visibility.Visible;
+                    var fadeIn = new DoubleAnimation(1, TimeSpan.FromMilliseconds(200));
+                    CheckBox_Date.BeginAnimation(OpacityProperty, fadeIn);
+                }
+                CheckBox_Date.IsChecked = _isGlobalPeriod;
             }
-            else if (CheckBox_Date.Visibility != Visibility.Visible && shouldBeVisible)
+            else
             {
-                CheckBox_Date.Visibility = Visibility.Visible;
-                var fadeIn = new DoubleAnimation(1, TimeSpan.FromMilliseconds(200));
-                CheckBox_Date.BeginAnimation(OpacityProperty, fadeIn);
+                if (CheckBox_Date.Visibility == Visibility.Visible)
+                {
+                    var fadeOut = new DoubleAnimation(0, TimeSpan.FromMilliseconds(200));
+                    fadeOut.Completed += (s, _) =>
+                    {
+                        CheckBox_Date.Visibility = Visibility.Collapsed;
+                        CheckBox_Date.IsChecked = false;
+                        _isGlobalPeriod = false;
+                    };
+                    CheckBox_Date.BeginAnimation(OpacityProperty, fadeOut);
+                }
             }
         }
 
@@ -517,29 +514,55 @@ namespace Full_modul
         {            
             ExportData();
         }
-        
+
         public void ExportData()
-        {           
-            var result = MessageBox.Show("Вы запустили процедуру сохранения данных.\nЕсли Вы хотите сохранить только данные вычисления, то нажмите \"Да\"\n" +
-                "Если хотите сохранить несколько вычислений, то нажмите \"Нет\"", "Процедура сохранения", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            SaveFileWindowChoise saveFileWindow = new SaveFileWindowChoise(this, null, "CalculatorWindow");
-            if (result == MessageBoxResult.No)
+        {
+            var dialog = new CustomMessage(
+                "Выберите тип сохранения:",
+                "Процедура сохранения",
+                new List<string> { "Отменить", "Текущий", "Несколько" });
+
+            dialog.ShowDialog();
+
+            switch (dialog.Result)
             {
-                SaveFile SF = new SaveFile();
-                SF.ShowDialog();
-                if (Data.Check0 == false && Data.Check1 == false && Data.Check2 == false && Data.Check3 == false)
-                {
-                    MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                } else
-                {
-                    Data.SaveFile = 0;
-                    saveFileWindow.ShowDialog();
-                }
-            }
-            else if (result == MessageBoxResult.Yes)
-            {
-                Data.BoxIndex = comboBoxFormules.SelectedIndex;
-                saveFileWindow.ShowDialog();
+                case "Текущий":
+                    Data.BoxIndex = comboBoxFormules.SelectedIndex;
+                    Data.SaveFile = 1;
+                    Data.Check0 = Data.Check1 = Data.Check2 = Data.Check3 = false;
+
+                    switch (Data.BoxIndex)
+                    {
+                        case 0: Data.Check0 = true; break;
+                        case 1: Data.Check1 = true; break;
+                        case 2: Data.Check2 = true; break;
+                        case 3: Data.Check3 = true; break;
+                    }
+
+                    var saveFileWindowCurrent = new SaveFileWindowChoise(this, null, "CalculatorWindow");
+                    saveFileWindowCurrent.ShowDialog();
+                    break;
+
+                case "Несколько":
+                    var saveFileDialog = new SaveFile();
+                    var dialogResult = saveFileDialog.ShowDialog();
+
+                    if (dialogResult == true)
+                    {
+                        if (Data.Check0 || Data.Check1 || Data.Check2 || Data.Check3)
+                        {
+                            Data.SaveFile = 0;
+                            var saveFileWindowMultiple = new SaveFileWindowChoise(this, null, "CalculatorWindow");
+                            saveFileWindowMultiple.ShowDialog();
+                        }
+                    }
+                    break;
+
+                case "Отменить":
+                default:
+                    MessageBox.Show("Сохранение файла было отменено!", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
             }
         }
 
@@ -548,12 +571,18 @@ namespace Full_modul
         public string SaveData(int selected)
         {
             string formulaName = GetFormulaName(selected);
-            //string levelText = GetLevelText(selected);
             string countText = GetCountText(selected);
             string SCHR = GetSCHR(selected);
             string result = GetResultText(selected);
             _warningsShown[selected] = false;
 
+            var dateAgoTextBox = GetDateAgoTextBox(selected);
+            var dateLaterTextBox = GetDateLaterTextBox(selected);
+
+            // Парсим даты
+            DateTime startDate, endDate;
+            DateTime.TryParse(dateAgoTextBox?.Text, out startDate);
+            DateTime.TryParse(dateLaterTextBox?.Text, out endDate);
             if (string.IsNullOrEmpty(result))
             {
                 if (!_warningsShown[selected])
@@ -573,8 +602,8 @@ namespace Full_modul
             else
             {
                 _warningsShown[selected] = false;
-                return $"{formulaName}: {result}\nНачало периода подсчёта: {startDate}\n" +
-                       $"Конец периода подсчёта: {endDate}\n" +
+                return $"{formulaName}: {result}\nНачало периода подсчёта: {startDate.ToShortDateString()}\n" +
+                       $"Конец периода подсчёта: {endDate.ToShortDateString()}\n" +
                        $"Количество: {countText}\n" +
                        $"СЧР: {SCHR}\n================\n";
             }
@@ -654,15 +683,6 @@ namespace Full_modul
 
         public void koef3()
         {
-            if (!IsConnected)
-            {
-                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
-                return;
-            }
-
             if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
                 id = dateLater.Date > dateAgo.Date ? 0 : 1;
@@ -692,15 +712,6 @@ namespace Full_modul
 
         public void koef2()
         {
-            if (!IsConnected)
-            {
-                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
-                return;
-            }
-
             if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
                 id = dateLater.Date > dateAgo.Date ? 0 : 1;
@@ -732,15 +743,6 @@ namespace Full_modul
 
         public void koef1() //Коэффициент оборота по выбытию
         {
-            if (!IsConnected)
-            {
-                MessageBox.Show("Нет подключения к БД. Расчет невозможен.",
-                              "Ошибка",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
-                return;
-            }
-
             if (TryGetDates(out var dateAgo, out var dateLater, dateTextBoxAgo0, dateTextBoxLater0))
             {
                 id = dateLater.Date > dateAgo.Date ? 0 : 1;
@@ -989,6 +991,79 @@ namespace Full_modul
             double resultValue = countValue / schrValue;
             resultTextBox.Text = Math.Round(resultValue, 8).ToString();
             saveButton.IsEnabled = !string.IsNullOrWhiteSpace(resultTextBox.Text);
+        }
+
+        public object SaveState()
+        {
+            return new
+            {
+                CurrentKoefIndex = _currentKoefIndex,
+                SelectedDatesAgo = selectedDatesAgo.Select(d => d?.ToString("yyyy-MM-dd")).ToArray(),
+                SelectedDatesLater = selectedDatesLater.Select(d => d?.ToString("yyyy-MM-dd")).ToArray(),
+                IsGlobalPeriod = _isGlobalPeriod,
+                CheckBoxVisible = CheckBox_Date.Visibility == Visibility.Visible,
+                DateTextBoxValues = new[]
+                {
+            dateTextBoxAgo0.Text,
+            dateTextBoxAgo1.Text,
+            dateTextBoxAgo2.Text,
+            dateTextBoxAgo3.Text,
+            dateTextBoxLater0.Text,
+            dateTextBoxLater1.Text,
+            dateTextBoxLater2.Text,
+            dateTextBoxLater3.Text
+        }
+            };
+        }
+
+        public void RestoreState(object state)
+        {
+            if (state == null) return;
+
+            try
+            {
+                dynamic data = state;
+
+                _currentKoefIndex = (int)data.CurrentKoefIndex;
+                _isGlobalPeriod = (bool)data.IsGlobalPeriod;
+
+                var datesAgo = (string[])data.SelectedDatesAgo;
+                var datesLater = (string[])data.SelectedDatesLater;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    selectedDatesAgo[i] = !string.IsNullOrEmpty(datesAgo[i]) ?
+                        DateTime.Parse(datesAgo[i]) : (DateTime?)null;
+                    selectedDatesLater[i] = !string.IsNullOrEmpty(datesLater[i]) ?
+                        DateTime.Parse(datesLater[i]) : (DateTime?)null;
+                }
+
+                var dateTextBoxValues = (string[])data.DateTextBoxValues;
+                dateTextBoxAgo0.Text = dateTextBoxValues[0];
+                dateTextBoxAgo1.Text = dateTextBoxValues[1];
+                dateTextBoxAgo2.Text = dateTextBoxValues[2];
+                dateTextBoxAgo3.Text = dateTextBoxValues[3];
+                dateTextBoxLater0.Text = dateTextBoxValues[4];
+                dateTextBoxLater1.Text = dateTextBoxValues[5];
+                dateTextBoxLater2.Text = dateTextBoxValues[6];
+                dateTextBoxLater3.Text = dateTextBoxValues[7];
+
+                _isFirstRun = false;
+                comboBoxFormules.SelectedIndex = _currentKoefIndex;
+                UpdateDatesSelectedState();
+
+                CheckBoxVisibility();
+
+                if (AreDatesFilled(_currentKoefIndex))
+                {
+                    SChR_calculation();
+                    CalculateCurrentCoefficient();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка восстановления состояния: {ex.Message}");
+            }
         }
     }
 }

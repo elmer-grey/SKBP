@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Full modul": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

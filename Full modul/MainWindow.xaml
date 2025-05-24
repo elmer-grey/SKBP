@@ -143,7 +143,7 @@
                 <StackPanel Grid.Column="2">
                     <Button Click="Button_Enterprise_Click"  BorderThickness="0">
                         <StackPanel Orientation="Vertical">
-                            <Image Source="/Images/User.png" Width="40" Height="40" />
+                            <Image Source="/Images/Enterprice.png" Width="40" Height="40" />
                             <TextBlock Text="Карточка предприятия" VerticalAlignment="Center" FontFamily="Ubuntu" FontWeight="Normal" />
                         </StackPanel>
                         <Button.Style>
@@ -422,52 +422,54 @@ Width="900"
 Height="50"
             HorizontalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                        <Ellipse x:Name="ConnectionIndicator" 
-                     Width="12" 
-                     Height="12" 
-                     Fill="Gray" 
-                     VerticalAlignment="Center"
-                     ToolTip="Статус подключения к БД">
-                            <Ellipse.Resources>
-                                <Style TargetType="Ellipse">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Red">
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
-                                                        Duration="0:0:0.4">
-                                                            <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="DarkRed"/>
-                                                            <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Red"/>
-                                                        </ColorAnimationUsingKeyFrames>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.EnterActions>
-                                        </DataTrigger>
+                    <Ellipse x:Name="ConnectionIndicator" 
+Width="12" 
+Height="12" 
+Fill="Gray" 
+VerticalAlignment="Center"
+ToolTip="Статус подключения к БД">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="Gray"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill.Color}" Value="Red">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
+                                   Duration="0:0:0.9">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.3" Value="DarkRed"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="Red"/>
+                                                    </ColorAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Green">
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
-                                                        Duration="0:0:0.3">
-                                                            <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="LimeGreen"/>
-                                                            <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Green"/>
-                                                        </ColorAnimationUsingKeyFrames>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.EnterActions>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Ellipse.Resources>
-                        </Ellipse>
+                                    <!--<DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill.Color}" Value="Green">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
+                                   Duration="0:0:0.9">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.3" Value="LimeGreen"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="Green"/>
+                                                    </ColorAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>-->
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
 
-                        <TextBlock x:Name="ConnectionStatusText" 
+                    <TextBlock x:Name="ConnectionStatusText" 
                        Text="" 
                        Margin="5,0,0,0"
                        VerticalAlignment="Center"
-                       FontSize="12"/>
+                       FontSize="12"
+                                   MouseDown="ConnectionStatus_MouseDown"/>
                     </StackPanel>
                 </Grid>
         </Grid>

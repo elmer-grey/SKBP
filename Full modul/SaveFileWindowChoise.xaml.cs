@@ -37,11 +37,11 @@ namespace Full_modul
 
             if (_previousWindow == "CalculatorWindow")
             {
-                MessageTextBlock.Text = "Вы запустили процедуру сохранения отчёта! \nВведите в окно ниже название файла. \nВнимание! Он будет сохранен в соответствующую папку, где находится данное ПО!";
+                MessageTextBlock.Text = "Введите название файла:";
             }
             else if (_previousWindow == "OrganizAndLegalConditWindow")
             {
-                MessageTextBlock.Text = "Вы запустили процедуру сохранения документа с результатами! \nВведите в окно ниже название файла. \nВнимание! Он будет сохранен в соответствующую папку, где находится данное ПО!";
+                MessageTextBlock.Text = "Введите название файла:";
             }
         }
 
@@ -50,7 +50,11 @@ namespace Full_modul
             string fileName = FileNameTextBox.Text.Trim();
             if (string.IsNullOrEmpty(fileName))
             {
-                MessageBox.Show("Пожалуйста, введите название файла.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                var errorDialog = new CustomMessage(
+                    "Пожалуйста, укажите название файла.",
+                    "Ошибка",
+                    new List<string> { "OK" });
+                errorDialog.ShowDialog();
                 return;
             }
 
@@ -113,17 +117,18 @@ namespace Full_modul
 
                         if (!hasDataToSave)
                         {
-                            MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            var errorDialog = new CustomMessage(
+                                "Сохранение файла было отменено!",
+                                "Ошибка",
+                                new List<string> { "OK" });
+                            errorDialog.ShowDialog();
                             this.Close();
                             return;
                         }
 
-                        Data.SaveFile = 1;
-
                         using (StreamWriter sw = new StreamWriter(filePath, true))
                         {
                             sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
-
                             foreach (var data in dataToSave)
                             {
                                 sw.WriteLine(data);
@@ -135,35 +140,31 @@ namespace Full_modul
                         string data = string.Empty;
                         switch (Data.BoxIndex)
                         {
-                            case 0:
-                                data = _calculatorWindow.SaveData(0);
-                                break;
-                            case 1:
-                                data = _calculatorWindow.SaveData(1);
-                                break;
-                            case 2:
-                                data = _calculatorWindow.SaveData(2);
-                                break;
-                            case 3:
-                                data = _calculatorWindow.SaveData(3);
-                                break;
-                            default:
-                                break;
+                            case 0: data = _calculatorWindow.SaveData(0); break;
+                            case 1: data = _calculatorWindow.SaveData(1); break;
+                            case 2: data = _calculatorWindow.SaveData(2); break;
+                            case 3: data = _calculatorWindow.SaveData(3); break;
                         }
 
                         if (string.IsNullOrEmpty(data))
                         {
-                            MessageBox.Show("Сохранение файла было отменено пользователем!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            var errorDialog = new CustomMessage(
+                                "Сохранение файла было отменено!",
+                                "Ошибка",
+                                new List<string> { "OK" });
+                            errorDialog.ShowDialog();
                             this.Close();
                             return;
                         }
+
                         using (StreamWriter sw = new StreamWriter(filePath, true))
                         {
                             sw.WriteLine("Пользователь {0}. Время {1}\n", UserInfo.username, DateTime.Now);
                             sw.WriteLine(data);
                         }
                     }
-                } else
+                }
+                else
                 {
                     string data = _organizAndLegalConditWindow.SaveData();
                     using (StreamWriter sw = new StreamWriter(filePath, true))
@@ -172,11 +173,20 @@ namespace Full_modul
                         sw.WriteLine(data);
                     }
                 }
-                MessageBox.Show("Файл успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                var successDialog = new CustomMessage(
+                    "Файл успешно сохранен!",
+                    "Успех",
+                    new List<string> { "OK" });
+                successDialog.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                var errorDialog = new CustomMessage(
+                    $"Ошибка при сохранении файла: {ex.Message}",
+                    "Ошибка",
+                    new List<string> { "OK" });
+                errorDialog.ShowDialog();
             }
             finally
             {
@@ -208,6 +218,8 @@ namespace Full_modul
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            MessageBox.Show("Сохранение файла было отменено!", "Ошибка",
+    MessageBoxButton.OK, MessageBoxImage.Error);
             this.Close();
         }
 

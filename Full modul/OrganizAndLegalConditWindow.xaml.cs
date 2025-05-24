@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -35,6 +36,7 @@ namespace Full_modul
         public int Id { get; set; }
         public string Text { get; set; }
         public bool IsSelected { get; set; }
+        public bool IsChecked { get; set; }
         public bool IsEnabled { get; set; }
         public bool RequiresDocument { get; set; }
         public int RequiredDocumentId { get; set; }
@@ -53,6 +55,7 @@ namespace Full_modul
         private Queue<string> _notificationQueue;
         private bool _isNotificationShowing = false;
         private bool _wasDisconnected;
+        private bool _isWindowLoaded = false;
         public OrganizAndLegalConditWindow()
         {
             InitializeComponent();
@@ -63,93 +66,57 @@ namespace Full_modul
             CreateDocumentControls();
             CreateMeasureControls();
             _notificationQueue = new Queue<string>();
+            this.Loaded += OnWindowLoaded;
 
-            // Устанавливаем начальный статус
-            UpdateUserStatus(IsConnected ? "Загрузка..." : GetOfflineStatus());
-            InitializeConnectionStatus();
+            //UpdateUserStatus(IsConnected ? "Загрузка..." : GetOfflineStatus());
+            //InitializeConnectionStatus();
         }
 
-        private string GetOfflineStatus()
+        protected void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            return UserInfo.username == "admin"
-                ? "Администратор (оффлайн режим)"
-                : "Оффлайн режим";
-        }
-
-        private void InitializeConnectionStatus()
-        {
-            Dispatcher.Invoke(() =>
+            _isWindowLoaded = true;
+            if (Owner is MainWindow mainWindow)
             {
-                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
-                {
-                    statusText.Text = "Проверка подключения...";
-                }
-            });
-        }
-
-        private async Task LoadUserDataAsync()
-        {
-            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
-            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
-            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
-
-            try
-            {
-                if (!IsConnected)
-                {
-                    UpdateUserStatus(GetOfflineStatus());
-                    return;
-                }
-
-                string fullName = await Task.Run(() =>
-                    DatabaseConnection.Instance.ExecuteScalar<string>(
-                        query,
-                        new SqlParameter("@login", UserInfo.username)));
-
-                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
-            }
-            catch
-            {
-                UpdateUserStatus("Не удалось загрузить данные");
+                mainWindow.RegisterChildWindow(this);
             }
         }
 
         protected override async Task InitializeConnectionElementsAsync()
         {
             await base.InitializeConnectionElementsAsync();
-            await LoadUserDataAsync(); // Загружаем данные сразу после инициализации подключения
+            await LoadUserDataAsync();
         }
 
-        private void UpdateUserStatus(string status)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                user.Text = status;
-            });
-        }
-
-        protected override async void OnConnectionStateChanged(bool isConnected)
+        protected override void OnConnectionStateChanged(bool isConnected)
         {
             base.OnConnectionStateChanged(isConnected);
 
-            if (isConnected)
+            if (!isConnected)
             {
-                AppLogger.LogDbInfo("Подключение восстановлено - обновление данных");
-                await LoadUserDataAsync();
-                await RefreshDocumentVerifications();
+                AppLogger.LogDbWarning("Потеряно подключение к серверу (документы)");
             }
-            else
-            {
-                AppLogger.LogDbWarning("Потеряно подключение к серверу");
-                UpdateUserStatus(GetOfflineStatus());
-            }
+        }
+
+        protected override async Task RefreshData()
+        {
+            await RefreshDocumentVerifications();
         }
 
         private async Task RefreshDocumentVerifications()
         {
             foreach (var doc in _documentItems.Where(d => d.IsChecked))
             {
-                await ProcessDocumentVerification(doc);
+                if (_documentYesButtons.TryGetValue(doc.Id, out RadioButton yesButton) && yesButton.IsChecked == true)
+                {
+                    await ProcessDocumentVerification(doc);
+                }
+                else
+                {
+                    if (_documentIcons.TryGetValue(doc.Id, out Image docIcon))
+                    {
+                        docIcon.Visibility = Visibility.Collapsed;
+                    }
+                }
             }
         }
 
@@ -197,6 +164,7 @@ namespace Full_modul
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            _connectionWarningShown = false;
             this.Close();
         }
 
@@ -406,14 +374,14 @@ namespace Full_modul
         new OrganizationalMeasure
         {
             Id = 3,
-            Text = "Обеспечение СИЗ",
+            Text = "Страхование жизни",
             RequiresDocument = false,
             IsEnabled = true
         },
         new OrganizationalMeasure
         {
             Id = 4,
-            Text = "Обеспечение СИЗ",
+            Text = "Проведение предварительных и периодических медицинских осмотров и психосвидетельствования",
             RequiresDocument = false,
             IsEnabled = true
         },
@@ -641,7 +609,10 @@ namespace Full_modul
 
                 if (isYes)
                 {
-                    await ProcessDocumentVerification(document);
+                    if (IsConnected)
+                    {
+                        await ProcessDocumentVerification(document);
+                    }
                 }
                 else
                 {
@@ -654,6 +625,8 @@ namespace Full_modul
             }
         }
 
+        private bool _hasSwitchedToOrgan = false;
+
         private void ProcessAffectedMeasures(DocumentItem document, bool isYes)
         {
             foreach (var affectedId in document.AffectedItems)
@@ -664,7 +637,7 @@ namespace Full_modul
                     bool wasVisibleBefore = grid.Visibility == Visibility.Visible;
                     grid.Visibility = isYes ? Visibility.Visible : Visibility.Collapsed;
 
-                    if (!wasVisibleBefore && isYes)
+                    if (!wasVisibleBefore && isYes && _hasSwitchedToOrgan)
                     {
                         grid.Background = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0));
                         measure.IsHighlighted = true;
@@ -868,7 +841,7 @@ namespace Full_modul
                 if (measure != null && ContainerOrgan.FindName($"MeasureGrid{measure.Id}") is Grid grid)
                 {
                     measure.IsSelected = true;
-
+                    measure.IsChecked = true;
                     if (measure.IsHighlighted)
                     {
                         grid.Background = Brushes.Transparent;
@@ -1057,7 +1030,7 @@ namespace Full_modul
 
             image.IsEnabled = false;
             Cursor = Cursors.Wait;
-            AppLogger.LogInfo($"Попытка открытия документа ID: {image.Tag}");
+            AppLogger.LogInfo($"Попытка открытия документа: {image.Name}");
 
             try
             {
@@ -1099,7 +1072,6 @@ namespace Full_modul
 
             if (File.Exists(localPath))
             {
-                // Проверяем, открыт ли файл перед любыми действиями
                 if (IsFileOpen(localPath))
                 {
                     if (TryActivateExistingWindow(localPath))
@@ -1109,7 +1081,6 @@ namespace Full_modul
                     }
                 }
 
-                // Если файл существует и не открыт, используем локальную копию
                 return localPath;
             }
 
@@ -1252,7 +1223,6 @@ namespace Full_modul
 
         private const int SW_RESTORE = 9;
 
-
         public class LoadingIndicator : IDisposable
         {
             private readonly Window _overlayWindow;
@@ -1303,6 +1273,7 @@ namespace Full_modul
                 {
                     ContainerLegal.Visibility = Visibility.Collapsed;
                     ContainerOrgan.Visibility = Visibility.Visible;
+                    _hasSwitchedToOrgan = true;
                     CalculateSecondContainerResult();
                 }
             }
@@ -1352,6 +1323,129 @@ namespace Full_modul
                     $"Организационные условия\nПолученный коэффициент: {result1.Text}\n================\n";
             }
             return string.Empty;
+        }
+
+        public object SaveState()
+        {
+            return new
+            {
+                DocumentStates = _documentItems.Select(d => new
+                {
+                    d.Id,
+                    d.IsChecked,
+                    HasYes = _documentYesButtons[d.Id].IsChecked == true
+                }),
+                MeasureStates = _organizationalMeasures.Select(m => new
+                {
+                    m.Id,
+                    m.IsChecked,
+                    HasYes = _measureYesButtons[m.Id].IsChecked == true
+                }),
+                CurrentContainer = ContainerLegal.Visibility == Visibility.Visible ? "Legal" : "Organ"
+            };
+        }
+
+        public void RestoreState(object state)
+        {
+            if (state == null) return;
+            if (!_isWindowLoaded)
+            {
+                this.Loaded += (s, e) => RestoreState(state);
+                return;
+            }
+
+            try
+            {
+                dynamic data = state;
+
+                foreach (var docState in data.DocumentStates)
+                {
+                    int id = (int)docState.Id;
+                    bool isChecked = (bool)docState.IsChecked;
+                    bool hasYes = (bool)docState.HasYes;
+
+                    if (isChecked)
+                    {
+                        if (hasYes)
+                        {
+                            _documentYesButtons[id].IsChecked = true;
+                            _documentIcons[id].Visibility = IsConnected ? Visibility.Visible : Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            _documentNoButtons[id].IsChecked = true;
+                            _documentIcons[id].Visibility = Visibility.Collapsed;
+                        }
+                    }
+                    else
+                    {
+                        _documentYesButtons[id].IsChecked = false;
+                        _documentNoButtons[id].IsChecked = false;
+                    }
+                }
+
+                foreach (var measure in _organizationalMeasures)
+                {
+                    if (ContainerOrgan.FindName($"MeasureGrid{measure.Id}") is Grid grid
+                        && grid.Visibility == Visibility.Visible)
+                    {
+                        _measureYesButtons[measure.Id].IsChecked = false;
+                        _measureNoButtons[measure.Id].IsChecked = false;
+                        measure.IsSelected = false;
+                    }
+                }
+
+                foreach (var measureState in data.MeasureStates)
+                {
+                    int id = (int)measureState.Id;
+                    bool hasYes = (bool)measureState.HasYes;
+                    bool isChecked = (bool)measureState.IsChecked;
+
+                    var measure = _organizationalMeasures.FirstOrDefault(m => m.Id == id);
+                    if (measure != null)
+                    {
+                        if (isChecked)
+                        {
+                            if (hasYes)
+                            {
+                                _measureYesButtons[id].IsChecked = true;
+                                measure.IsSelected = true;
+                            }
+                            else
+                            {
+                                _measureNoButtons[id].IsChecked = true;
+                                measure.IsSelected = true;
+                            }
+                        }
+                        else
+                        {
+                            _measureYesButtons[id].IsChecked = false;
+                            _measureNoButtons[id].IsChecked = false;
+                        }
+                    }
+                }
+
+                ContainerLegal.Visibility = Visibility.Visible;
+                ContainerOrgan.Visibility = Visibility.Collapsed;
+                _hasSwitchedToOrgan = false;
+                CalculateFirstContainerResult();
+                CalculateSecondContainerResult();
+
+                Dispatcher.BeginInvoke(new Action(async () =>
+                {
+                    await Task.Delay(400);
+
+                    foreach (var doc in _documentItems.Where(d =>
+                        d.IsChecked && _documentYesButtons[d.Id].IsChecked == true))
+                    {
+                        await ProcessDocumentVerification(doc);
+                    }
+                }), DispatcherPriority.Background);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка восстановления состояния документов: {ex.Message}");
+            }
         }
     }
 }

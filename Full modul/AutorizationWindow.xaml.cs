@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Full_modul
 {
@@ -15,43 +16,41 @@ namespace Full_modul
     /// </summary>
     public partial class AutorizationWindow : BaseWindow
     {
-        private bool _isConnectionInitialized = false;
+        private bool _lastKnownConnectionState;
+        private bool _isInitialConnectionCheckComplete;
         public AutorizationWindow()
         {
             InitializeComponent();
-
+            InitializeAsync();
+            TextBox_ShowPassword.ContextMenu = null;
+        }
+        private async void InitializeAsync()
+        {
+            LoginButton.IsEnabled = true;
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             TextBox_Login.GotFocus += TextBox_Login_GotFocus;
             TextBox_Login.LostFocus += TextBox_Login_LostFocus;
-
             LoadSavedCredentials();
-            this.Loaded += async (s, e) =>
-            {
-                await InitializeConnectionAsync();
-                UpdateConnectionStatus();
-            };
+
+            _ = Task.Run(() => InitializeConnectionSafeAsync());
         }
 
         protected override async Task InitializeConnectionElementsAsync()
         {
             await base.InitializeConnectionElementsAsync();
-            UpdateConnectionStatus();
         }
 
-        private async Task InitializeConnectionAsync()
+        private async Task InitializeConnectionSafeAsync()
         {
-            Dispatcher.Invoke(() =>
-            {
-                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
-                {
-                    statusText.Text = "Проверка подключения...";
-                }
-            });
-            ConnectionCheckPopup.IsOpen = true;
             try
             {
-                await CheckConnectionAsync(forceCheck: true);
-                _isConnectionInitialized = true;
+                SetConnectionUI("Проверка подключения...", Brushes.Gray, false);
+
+                bool isConnected = await ConnectionCoordinator.GetConnectionStateAsync();
+                _lastKnownConnectionState = isConnected;
+                _connectionInitialized = true;
+
+                await ProcessConnectionResult(isConnected);
             }
             finally
             {
@@ -59,24 +58,51 @@ namespace Full_modul
             }
         }
 
-        private void UpdateConnectionStatus()
+        private async Task ProcessConnectionResult(bool isConnected)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                ConnectionStatusText.Text = isConnected ? "Подключено" : "Нет подключения";
+                ConnectionIndicator.Fill = isConnected ? Brushes.LimeGreen : Brushes.Red;
+                LoginButton.IsEnabled = isConnected ? true : false;
+            });
+
+            if (isConnected)
+            {
+                AppLogger.LogInfo("Успешное подключение к БД");
+            }
+            else
+            {
+                _wasDisconnected = true;
+                AppLogger.LogWarning("Отсутствует подключение к БД");
+                await ShowNotification("Нет подключения к БД", Brushes.Red, true);
+            }
+        }
+
+        private void SetConnectionUI(string status, Brush color, bool isEnabled)
         {
             Dispatcher.Invoke(() =>
             {
-                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
-                {
-                    statusText.Text = IsConnected ? "Подключено" : "Нет подключения";
-                }
-                ConnectionCheckPopup.IsOpen = false;
+                ConnectionStatusText.Text = status;
+                ConnectionIndicator.Fill = color;
+                LoginButton.IsEnabled = isEnabled;
             });
         }
 
         protected override async void OnConnectionStateChanged(bool isConnected)
         {
-            if (!_isConnectionInitialized) return;
+            if (!_connectionInitialized)
+                return;
 
             base.OnConnectionStateChanged(isConnected);
-            UpdateConnectionStatus();
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (LoginButton.IsEnabled != isConnected)
+                {
+                    LoginButton.IsEnabled = isConnected;
+                }
+            }, DispatcherPriority.Background);
 
             if (!isConnected)
             {
@@ -94,17 +120,24 @@ namespace Full_modul
         {
             if (Properties.Settings.Default.RememberMe)
             {
-                TextBox_Login.Text = Properties.Settings.Default.Username;
+                if (!string.IsNullOrEmpty(Properties.Settings.Default.Username))
+                {
+                    TextBox_Login.Text = Properties.Settings.Default.Username;
+                    TextBox_Login.Foreground = Brushes.Black;
+                    TextBox_Login.IsReadOnly = false;
+                }
+
                 PasswordBox.Password = Properties.Settings.Default.Password;
                 CheckBox_SaveData.IsChecked = true;
-                if (string.IsNullOrEmpty(PasswordBox.Password))
-                {
-                    TextBlock_ShowName.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    TextBlock_ShowName.Visibility = Visibility.Collapsed;
-                }
+
+                TextBlock_ShowName.Visibility = string.IsNullOrEmpty(PasswordBox.Password)
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
+            else
+            {
+                UserInfo.username = "";
+                UserInfo.password = "";
             }
         }
 
@@ -128,15 +161,12 @@ namespace Full_modul
 
         private void TextBox_Login_GotFocus(object sender, RoutedEventArgs e)
         {
+            TextBox_Login.IsReadOnly = false;
+
             if (TextBox_Login.Text == "Введите логин")
             {
                 TextBox_Login.Text = "";
-                TextBox_Login.Foreground = new SolidColorBrush(Colors.Black);
-                TextBox_Login.IsReadOnly = false;
-            } else if (TextBox_Login.Text == UserInfo.username)
-            {
-                TextBox_Login.Foreground = new SolidColorBrush(Colors.Black);
-                TextBox_Login.IsReadOnly = false;
+                TextBox_Login.Foreground = Brushes.Black;
             }
         }
 
@@ -187,6 +217,27 @@ namespace Full_modul
                 PasswordBox.Password = "";
             }
         }
+        
+        private void TextBox_ShowPassword_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+            }
+
+            if (e.Key == Key.Apps)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void TextBox_ShowPassword_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                e.Handled = true;
+            }
+        }
 
         private void ShowPasswordButton_Click(object sender, RoutedEventArgs e)
         {
@@ -225,20 +276,19 @@ namespace Full_modul
             MessageBox.Show("Вывод справки!");
         }
 
-        private bool _isManualCheck = false;
-
         private async Task<bool> TryReconnectWithFeedback()
         {
             ConnectionCheckPopup.IsOpen = true;
 
             try
             {
-                // Обновляем статус перед попыткой подключения
                 Dispatcher.Invoke(() =>
                 {
-                    if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                    if (FindVisualChild<Ellipse>("ConnectionIndicator") is Ellipse indicator &&
+                    FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
                     {
-                        statusText.Text = "Попытка подключения...";
+                        statusText.Text = "Проверка подключения...";
+                        indicator.Fill = Brushes.Gray;
                     }
                 });
 
@@ -254,7 +304,8 @@ namespace Full_modul
             finally
             {
                 ConnectionCheckPopup.IsOpen = false;
-                UpdateConnectionStatus();
+                //UpdateConnectionStatus();
+                UpdateConnectionUI();
             }
         }
 
@@ -269,15 +320,26 @@ namespace Full_modul
 
             try
             {
-                AppLogger.LogInfo($"Попытка входа пользователя: {TextBox_Login.Text}");
-
                 if (TextBox_Login.Text == "superadmin" && PasswordBox.Password == "change")
                 {
+                    AppLogger.LogInfo($"Начало изменения строки подключения суперадминистратором");
+                    TextBox_Login.Text = "";
+                    PasswordBox.Password = "";
+                    TextBlock_ShowName.Visibility = Visibility.Visible;
                     ShowConnectionStringDialog();
                     return;
                 }
 
-                if (!IsConnected)
+                AppLogger.LogInfo($"Попытка входа пользователя: {TextBox_Login.Text}");
+                bool isConnected = false;
+                for (int i = 0; i < 3; i++)
+                {
+                    isConnected = await ConnectionCoordinator.GetConnectionStateAsync();
+                    if (isConnected) break;
+                    await Task.Delay(1000);
+                }
+
+                if (!isConnected)
                 {
                     var result = MessageBox.Show("Нет подключения к БД. Повторить попытку?",
                                               "Ошибка", MessageBoxButton.YesNo);
@@ -292,7 +354,7 @@ namespace Full_modul
                     }
                     return;
                 }
-
+                Keyboard.ClearFocus();
                 int userCount = DatabaseConnection.Instance.ExecuteScalar<int>(
                     "SELECT COUNT(1) FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND pass_hr = @pass",
                     new SqlParameter("@login", TextBox_Login.Text),
@@ -300,6 +362,19 @@ namespace Full_modul
 
                 if (userCount > 0)
                 {
+                    bool isBlocked = DatabaseConnection.Instance.ExecuteScalar<int>(
+        "SELECT COUNT(1) FROM [calculator].[dbo].[hr] WHERE login_hr = @login AND endwork_hr IS NOT NULL",
+        new SqlParameter("@login", TextBox_Login.Text)) > 0;
+
+                    if (isBlocked)
+                    {
+                        MessageBox.Show("Учетная запись заблокирована!\nОбратитесь к администратору.",
+                                        "Доступ запрещен",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Error);
+                        return;
+                    }
+
                     var userData = DatabaseConnection.Instance.ExecuteReader(
                         "SELECT [login_hr], [pass_hr] FROM [calculator].[dbo].[hr] WHERE login_hr = @login",
                         new SqlParameter("@login", TextBox_Login.Text));
@@ -318,6 +393,10 @@ namespace Full_modul
                         var changePasswordWindow = new ChangePassWindow();
                         if (changePasswordWindow.ShowDialog() == true)
                         {
+                            TextBox_ShowPassword.Text = "";
+                            UserInfo.username = TextBox_Login.Text;
+                            PasswordBox.Password = "";
+                            TextBlock_ShowName.Visibility = Visibility.Visible;
                             return;
                         }
                         MessageBox.Show("Изменение пароля отменено!", "Уведомление",
@@ -325,25 +404,32 @@ namespace Full_modul
                         return;
                     }
 
-                    new MainWindow().Show();
+                    var mainWindow = new MainWindow();
+                    mainWindow.InitializeWithConnectionState(_lastKnownConnectionState);
+                    mainWindow.Show();
                     this.Close();
 
                     if (!(bool)CheckBox_SaveData.IsChecked)
                     {
                         TextBox_Login.Text = "";
                         PasswordBox.Password = "";
+                        TextBox_ShowPassword.Text = "";
                     }
                 }
                 else if (TextBox_Login.Text == "admin" && PasswordBox.Password == "admin")
                 {
                     UserInfo.username = TextBox_Login.Text;
-                    new MainWindow().Show();
+
+                    var mainWindow = new MainWindow();
+                    mainWindow.InitializeWithConnectionState(_lastKnownConnectionState);
+                    mainWindow.Show();
                     this.Close();
 
                     if (!(bool)CheckBox_SaveData.IsChecked)
                     {
                         TextBox_Login.Text = "";
                         PasswordBox.Password = "";
+                        TextBox_ShowPassword.Text = "";
                     }
                 }
                 else
@@ -411,12 +497,26 @@ namespace Full_modul
                 }
             }
         }
-
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && IsConnected)
+            {
+                ProcessLogin();
+                e.Handled = true;
+            }
+        }
+
+        private async void Button_Login_Click(object sender, RoutedEventArgs e)
+        {
+            ProcessLogin();
+        }
+
+        private void ProcessLogin()
+        {
+            try
             {
                 HandleLogin();
+
                 if ((bool)CheckBox_SaveData.IsChecked)
                 {
                     CheckBox_SaveData_Checked(CheckBox_SaveData, new RoutedEventArgs());
@@ -425,26 +525,28 @@ namespace Full_modul
                 {
                     CheckBox_SaveData_Unchecked(CheckBox_SaveData, new RoutedEventArgs());
                 }
-                e.Handled = true;
             }
-        }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка входа: {ex.Message}");
+                Dispatcher.InvokeAsync(() =>
+                    MessageBox.Show("Ошибка при входе в систему"),
+                    DispatcherPriority.Background);
+            }
 
-        private void Button_Login_Click(object sender, RoutedEventArgs e)
-        {
-            HandleLogin();
-            if ((bool)CheckBox_SaveData.IsChecked)
-            {
-                CheckBox_SaveData_Checked(CheckBox_SaveData, new RoutedEventArgs());
-            }
-            else
-            {
-                CheckBox_SaveData_Unchecked(CheckBox_SaveData, new RoutedEventArgs());
-            }
         }
 
         private void CheckBox_SaveData_Checked(object sender, RoutedEventArgs e)
         {
-            Settings.Default.Username = TextBox_Login.Text;
+            if (TextBox_Login.Text != "Введите логин")
+            {
+                Settings.Default.Username = TextBox_Login.Text;
+            }
+            else
+            {
+                Settings.Default.Username = "";
+            }
+
             Settings.Default.Password = PasswordBox.Password;
             Settings.Default.RememberMe = true;
             Settings.Default.Save();
@@ -452,10 +554,15 @@ namespace Full_modul
 
         private void CheckBox_SaveData_Unchecked(object sender, RoutedEventArgs e)
         {
-            Settings.Default.Username = string.Empty;
-            Settings.Default.Password = string.Empty;
             Settings.Default.RememberMe = false;
             Settings.Default.Save();
+
+            if (TextBox_Login.Text == "Введите логин" || string.IsNullOrWhiteSpace(TextBox_Login.Text))
+            {
+                TextBox_Login.Text = "Введите логин";
+                TextBox_Login.Foreground = new SolidColorBrush(Color.FromArgb(192, 10, 10, 10));
+                TextBox_Login.IsReadOnly = true;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

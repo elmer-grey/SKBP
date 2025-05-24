@@ -1,7 +1,11 @@
-﻿using System.Windows;
+﻿using Microsoft.Data.SqlClient;
+using System.Diagnostics;
+using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using static Full_modul.AppLogger;
@@ -14,18 +18,20 @@ namespace Full_modul
         private Queue<(string, Brush, bool)> _notificationQueue = new();
         private bool _isNotificationActive;
         private bool _isCheckingConnection;
-        private bool _wasDisconnected;
+        public bool _wasDisconnected;
         private bool _isFirstConnection = true;
         private DateTime _lastDisconnectTime;
         private int _disconnectCount;
         protected bool _connectionInitialized = false;
-        protected bool IsConnected { get; private set; }
+        protected CancellationTokenSource _connectionCheckCts;
+        private bool _isWindowEnabled = true;
+        public bool IsConnected { get; set; }
 
         public BaseWindow()
         {
             if (!DatabaseConnection.IsInitialized)
             {
-                DatabaseConnection.Instance.Initialize();
+                DatabaseConnection.Instance.InitializeAsync();
             }
             _connectionCheckTimer = new DispatcherTimer
             {
@@ -45,43 +51,92 @@ namespace Full_modul
 
         protected virtual async Task InitializeConnectionElementsAsync()
         {
-            await CheckConnectionAsync(true);
+            await CheckConnectionAsync();
         }
+
+        public virtual void SetConnectionState(bool isConnected)
+        {
+            if (IsConnected != isConnected)
+            {
+                IsConnected = isConnected;
+                Dispatcher.InvokeAsync(async () =>
+                {
+                    await UpdateFullStatus();
+                    OnConnectionStateChanged(isConnected);
+                });
+            }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _connectionCheckTimer.Stop();
+            _connectionCheckCts?.Cancel();
+            base.OnClosed(e);
+        }
+
+        private DateTime _lastConnectionCheckTime = DateTime.MinValue;
+        private const int ConnectionCheckInterval = 20; // секунд между проверками
 
         protected async Task<bool> CheckConnectionAsync(bool forceCheck = false)
         {
+            if (!forceCheck && (DateTime.Now - _lastConnectionCheckTime).TotalSeconds < ConnectionCheckInterval)
+            {
+                return IsConnected;
+            }
+
             if (_isCheckingConnection)
                 return IsConnected;
 
             _isCheckingConnection = true;
+            _connectionCheckCts?.Cancel();
+            _connectionCheckCts = new CancellationTokenSource();
+
             try
             {
+                _lastConnectionCheckTime = DateTime.Now;
 
-                bool newState = await ConnectionCoordinator.SafeCheckConnectionAsync(async () =>
+                var isConnected = await Task.Run(async () =>
                 {
                     try
                     {
-                        bool result = await DatabaseConnection.TestConnectionAsync();
-                        _connectionInitialized = true;
-                        return result;
+                        if (forceCheck) ConnectionCoordinator.ResetCache();
+
+                        var server = DatabaseConnection.GetServerNameFromConnectionString();
+                        if (!await DatabaseConnection.IsServerReachable(server, 500))
+                            return false;
+
+                        return await DatabaseConnection.TestConnectionAsync(_connectionCheckCts.Token);
                     }
-                    catch (TimeoutException)
+                    catch
                     {
-                        AppLogger.LogDbWarning("Проверка подключения превысила таймаут");
                         return false;
                     }
-                });
+                }, _connectionCheckCts.Token).ConfigureAwait(false);
 
-                if (newState != IsConnected || forceCheck)
+                if (IsConnected != isConnected || forceCheck)
                 {
-                    IsConnected = newState;
-                    await UpdateConnectionUI();
-                    if (_connectionInitialized)
+                    if (forceCheck)
                     {
-                        OnConnectionStateChanged(IsConnected);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            if (FindVisualChild<Ellipse>("ConnectionIndicator") is Ellipse indicator &&
+                                FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                            {
+                                statusText.Text = "Проверка подключения...";
+                                indicator.Fill = Brushes.Gray;
+                            }
+                        });
+                        await Task.Delay(3000);
                     }
+                    IsConnected = isConnected;
+                    await UpdateConnectionUI(
+                        isConnected ? "Подключено" : "Нет подключения",
+                        isConnected ? Brushes.LimeGreen : Brushes.Red);
+
+                    OnConnectionStateChanged(isConnected);
                 }
-                return IsConnected;
+
+                return isConnected;
             }
             finally
             {
@@ -89,75 +144,187 @@ namespace Full_modul
             }
         }
 
-        private bool _disconnectNotificationShown;
-        private static readonly object _notificationLock = new();
-
-        protected virtual void OnConnectionStateChanged(bool isConnected)
+        private async Task UpdateConnectionUI(string status, Brush indicatorColor)
         {
-            if (DateTime.Now - App.StartTime < TimeSpan.FromSeconds(2))
-                return;
-            lock (_notificationLock)
+            await Dispatcher.InvokeAsync(() =>
             {
-                if (isConnected)
+                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText &&
+                    FindVisualChild<Ellipse>("ConnectionIndicator") is Ellipse indicator)
                 {
-                    _disconnectNotificationShown = false;
-                    if (_wasDisconnected)
-                    {
-                        var downtime = DateTime.Now - _lastDisconnectTime;
-                        AppLogger.LogDbConnectionEvent(
-                            $"Подключение восстановлено после {downtime.TotalSeconds:F1} сек",
-                            ConnectionEventType.Reconnected);
-
-                        if (!_isFirstConnection)
-                        {
-                            ShowGlobalNotification("Подключение восстановлено", Brushes.Green);
-                        }
-                        _wasDisconnected = false;
-                    }
+                    statusText.Text = status;
+                    indicator.Fill = indicatorColor;
                 }
-                else if (!_wasDisconnected && !_disconnectNotificationShown)
+            }, DispatcherPriority.Background);
+        }
+
+        protected TextBlock UserStatusTextBlock => FindVisualChild<TextBlock>("user");
+
+        protected virtual string GetOfflineStatus()
+        {
+            return UserInfo.username == "admin"
+                ? "Администратор (оффлайн режим)"
+                : "Оффлайн режим";
+        }
+
+        protected virtual async Task LoadUserDataAsync()
+        {
+            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
+        COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
+        AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
+
+            try
+            {
+                if (!IsConnected)
                 {
-                    _disconnectNotificationShown = true;
-                    _lastDisconnectTime = DateTime.Now;
-                    _disconnectCount++;
-                    AppLogger.LogDbWarning($"Потеряно подключение (#{_disconnectCount})");
-                    _wasDisconnected = true;
-
-                    ShowGlobalNotification("Нет подключения к БД", Brushes.Red);
+                    await UpdateFullStatus();
+                    return;
                 }
+
+                string fullName = await Task.Run(() =>
+                    DatabaseConnection.Instance.ExecuteScalar<string>(
+                        query,
+                        new SqlParameter("@login", UserInfo.username)));
+
+                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
+            }
+            catch
+            {
+                UpdateUserStatus("Не удалось загрузить данные");
             }
         }
 
-        private static bool _globalNotificationShown;
-        private static void ShowGlobalNotification(string message, Brush color)
+        protected void UpdateUserStatus(string status)
         {
-            if (_globalNotificationShown) return;
-
-            Application.Current.Dispatcher.Invoke(() =>
+            if (Dispatcher.CheckAccess())
             {
-                try
+                if (UserStatusTextBlock != null)
                 {
-                    var mainWindow = Application.Current.MainWindow;
-                    var notification = new NotificationWindow(message, color, 5)
-                    {
-                        Owner = mainWindow,
-                        WindowStartupLocation = mainWindow != null
-                            ? WindowStartupLocation.CenterOwner
-                            : WindowStartupLocation.CenterScreen
-                    };
-
-                    notification.Closed += (s, e) => _globalNotificationShown = false;
-                    _globalNotificationShown = true;
-                    notification.Show();
+                    UserStatusTextBlock.Text = status;
                 }
-                catch (Exception ex)
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() => UpdateUserStatus(status)));
+            }
+        }
+
+        protected async Task UpdateFullStatus()
+        {
+            await Dispatcher.InvokeAsync(async () =>
+            {
+
+                await UpdateConnectionUI(
+                        IsConnected ? "Подключено" : "Нет подключения",
+                        IsConnected ? Brushes.LimeGreen : Brushes.Red);
+                if (IsConnected)
                 {
-                    AppLogger.LogError($"Ошибка показа глобального уведомления: {ex.Message}");
+                    await LoadUserDataAsync();
+                }
+                else
+                {
+                    UpdateUserStatus(GetOfflineStatus());
                 }
             });
         }
 
-        protected async Task ShowNotification(string message, Brush color, bool isCritical = false)
+        private string _lastDisconnectReason;
+        private static readonly SemaphoreSlim _notificationLock = new SemaphoreSlim(1, 1);
+
+        private class ReleaseWrapper : IDisposable
+        {
+            private readonly SemaphoreSlim _semaphore;
+            public ReleaseWrapper(SemaphoreSlim semaphore) => _semaphore = semaphore;
+            public void Dispose() => _semaphore.Release();
+        }
+
+        protected virtual async void OnConnectionStateChanged(bool isConnected)
+        {
+            if (DateTime.Now - App.StartTime < TimeSpan.FromSeconds(2))
+                return;
+
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                await UpdateFullStatus();
+
+                if (isConnected)
+                {
+                    if (_wasDisconnected)
+                    {
+                        var downtime = DateTime.Now - _lastDisconnectTime;
+                        string disconnectReason = _lastDisconnectReason ?? "причина неизвестна";
+                        AppLogger.LogDbConnectionEvent(
+                            $"Подключение восстановлено после {downtime.TotalSeconds:F1} сек. Причина: {disconnectReason}",
+                            ConnectionEventType.Reconnected);
+
+                        await ShowNotification("Подключение восстановлено", Brushes.Green);
+                        _wasDisconnected = false;
+                        _lastDisconnectReason = null;
+                        await RefreshData();
+                    }
+                }
+                else if (!isConnected && !_wasDisconnected)
+                {
+                    await ShowNotification("Нет подключения к БД", Brushes.Red, true);
+                    _lastDisconnectTime = DateTime.Now;
+                    _disconnectCount++;
+                    _lastDisconnectReason = await GetConnectionFailureReason().ConfigureAwait(false);
+                    AppLogger.LogDbWarning($"Потеряно подключение (#{_disconnectCount}). Причина: {_lastDisconnectReason}");
+                    _wasDisconnected = true;
+                }
+            });
+        }
+                
+        protected virtual Task RefreshData()
+        {
+            return Task.CompletedTask;
+        }
+
+        private async Task<string> GetConnectionFailureReason()
+        {
+            try
+            {
+                string server = DatabaseConnection.GetServerNameFromConnectionString();
+
+                bool isServerReachable = await DatabaseConnection.IsServerReachable(server, 500)
+                    .ConfigureAwait(false);
+
+                if (!isServerReachable)
+                {
+                    return "сервер не отвечает";
+                }
+
+                bool testResult = await DatabaseConnection.TestConnectionAsync(_connectionCheckCts.Token)
+                    .ConfigureAwait(false);
+
+                if (testResult)
+                {
+                    return "временный сбой (соединение восстановилось)";
+                }
+
+                return "ошибка аутентификации или доступа к БД";
+            }
+            catch (SqlException sqlEx)
+            {
+                return sqlEx.Number switch
+                {
+                    -2 => "таймаут подключения",
+                    53 => "сервер SQL недоступен",
+                    18456 => "ошибка аутентификации",
+                    4060 => "неверное имя базы данных",
+                    _ => $"ошибка SQL (код {sqlEx.Number})"
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                return "проверка подключения отменена";
+            }
+            catch (Exception ex)
+            {
+                return $"ошибка: {ex.GetType().Name}";
+            }
+        }
+
+        public async Task ShowNotification(string message, Brush color, bool isCritical = false)
         {
             await (isCritical ? Application.Current.Dispatcher : Dispatcher).InvokeAsync(() =>
             {
@@ -237,7 +404,6 @@ namespace Full_modul
         private DateTime _lastUiUpdateTime = DateTime.MinValue;
         protected async Task UpdateConnectionUI()
         {
-            // Ограничиваем частоту обновления UI
             if ((DateTime.Now - _lastUiUpdateTime).TotalMilliseconds < 500)
                 return;
 
@@ -247,7 +413,7 @@ namespace Full_modul
                     FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
                 {
                     statusText.Text = IsConnected ? "Подключено" : "Нет подключения";
-                    indicator.Fill = IsConnected ? Brushes.Green : Brushes.Red;
+                    indicator.Fill = IsConnected ? Brushes.LimeGreen : Brushes.Red;
                     _lastUiUpdateTime = DateTime.Now;
                 }
             });
@@ -274,7 +440,52 @@ namespace Full_modul
 
         protected T FindVisualChild<T>(string name) where T : DependencyObject
         {
-            return FindName(name) as T;
+            if (string.IsNullOrEmpty(name) || this == null)
+                return null;
+
+            if (this is T rootElement && this is FrameworkElement rootFe && rootFe.Name == name)
+                return rootElement;
+
+            return Application.Current.Dispatcher.Invoke(() => FindVisualChildRecursive<T>(this, name));
+        }
+
+
+        private static T FindVisualChildRecursive<T>(DependencyObject parent, string name)
+            where T : DependencyObject
+        {
+            if (parent == null)
+                return null;
+
+            try
+            {
+                if (!(parent is Visual || parent is Visual3D))
+                    return null;
+
+                int childrenCount = Application.Current.Dispatcher.Invoke(() => VisualTreeHelper.GetChildrenCount(parent));
+                for (int i = 0; i < childrenCount; i++)
+                {
+                    var child = Application.Current.Dispatcher.Invoke(() => VisualTreeHelper.GetChild(parent, i));
+                    if (child == null)
+                        continue;
+
+                    if (child is T result &&
+                        child is FrameworkElement fe &&
+                        fe.Name == name)
+                    {
+                        return result;
+                    }
+
+                    var childResult = FindVisualChildRecursive<T>(child, name);
+                    if (childResult != null)
+                        return childResult;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка поиска визуального элемента: {ex.Message}");
+            }
+
+            return null;
         }
 
         private bool IsClosing()

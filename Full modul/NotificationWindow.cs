@@ -10,18 +10,21 @@ namespace Full_modul
     public class NotificationWindow : Window
     {
         private readonly DispatcherTimer _timer;
+        private static NotificationWindow _currentWindow;
+        private static readonly object _lock = new();
 
         public NotificationWindow(string message, Brush color, int durationSeconds = 3)
         {
             WindowStyle = WindowStyle.None;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
             AllowsTransparency = true;
             Background = Brushes.Transparent;
-            Width = 300;
+            MaxWidth = 350;
             Height = 100;
-            Topmost = true;
-            Cursor = Cursors.Hand;
-            MouseDown += (s, e) => CloseWithAnimation();
+            ShowInTaskbar = false;
+            Topmost = false;
+            Focusable = true;
+            SizeToContent = SizeToContent.WidthAndHeight;
+            Cursor = Cursors.Arrow;
 
             var content = new Border
             {
@@ -30,38 +33,49 @@ namespace Full_modul
                 Padding = new Thickness(10),
                 Child = new TextBlock
                 {
+                    FontSize = 16,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Text = message,
                     Foreground = Brushes.White,
                     TextWrapping = TextWrapping.Wrap,
-                    TextAlignment = TextAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    TextAlignment = TextAlignment.Center
                 }
             };
 
+            content.MouseEnter += (s, e) => Cursor = Cursors.Hand;
+            content.MouseLeave += (s, e) => Cursor = Cursors.Arrow;
+
+            PreviewKeyDown += (s, e) => { if (e.Key == Key.Escape) CloseWithAnimation(); };
+            MouseDown += (s, e) => CloseWithAnimation();
+
             Content = content;
 
-            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(durationSeconds) };
-            _timer.Tick += (s, e) => CloseWindow();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            _timer = new DispatcherTimer(DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromSeconds(durationSeconds)
+            };
+            _timer.Tick += (s, e) => CloseWithAnimation();
+
             _timer.Start();
         }
 
         public void CloseWithAnimation()
         {
+            if (!IsLoaded) return;
+
             _timer.Stop();
             var anim = new DoubleAnimation(0, TimeSpan.FromSeconds(0.2));
             anim.Completed += (s, e) => Close();
             BeginAnimation(OpacityProperty, anim);
         }
 
-        private void CloseWindow()
-        {
-            _timer.Stop();
-            CloseWithAnimation();
-        }
-
         protected override void OnClosed(EventArgs e)
         {
-            _timer.Stop();
+            if (_currentWindow == this)
+            {
+                _currentWindow = null;
+            }
             base.OnClosed(e);
         }
     }

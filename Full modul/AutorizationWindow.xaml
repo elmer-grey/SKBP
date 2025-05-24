@@ -196,7 +196,7 @@
                     </TextBox.Style>
                 </TextBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Width="300" Margin="0,5,0,0">
-                    <Grid x:Name="PasswordContainer" >
+                    <Grid x:Name="PasswordContainer">
                         <PasswordBox x:Name="PasswordBox" 
                                      Width="263" 
                                      Height="35" 
@@ -258,7 +258,9 @@
                                  FontWeight="Light"
                                  Visibility="Collapsed"
                                  KeyDown="TextBox_KeyDown"
-                                 TextChanged="TextBox_ShowPassword_TextChanged">
+                                 TextChanged="TextBox_ShowPassword_TextChanged"
+                                 PreviewKeyDown="TextBox_ShowPassword_PreviewKeyDown"
+                                 PreviewMouseDown="TextBox_ShowPassword_PreviewMouseDown">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="Template">
@@ -382,8 +384,9 @@ Value="#EBEBEB"/>
             </Grid>
 
             <StackPanel Grid.Row="3"
-                        VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Button Click="Button_Login_Click"
+                        VerticalAlignment="Top" HorizontalAlignment="Center">
+                <Button Name ="LoginButton"
+                        Click="Button_Login_Click"
                         Content="Вход"
                         Foreground="White"
                         FontSize="23"
@@ -427,53 +430,53 @@ Value="#EBEBEB"/>
         Width="360" 
         Height="50"
                     HorizontalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Ellipse x:Name="ConnectionIndicator" 
-                             Width="12" 
-                             Height="12" 
-                             Fill="Gray" 
-                             VerticalAlignment="Center"
-                             ToolTip="Статус подключения к БД">
-                        <Ellipse.Resources>
+             Width="12" 
+             Height="12" 
+             Fill="Gray" 
+             VerticalAlignment="Center"
+             ToolTip="Статус подключения к БД">
+                        <Ellipse.Style>
                             <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="Gray"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Red">
+                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill.Color}" Value="Red">
                                         <DataTrigger.EnterActions>
                                             <BeginStoryboard>
                                                 <Storyboard>
                                                     <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
-                                                                Duration="0:0:0.3">
-                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="DarkRed"/>
-                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Red"/>
+                                                Duration="0:0:0.9">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.3" Value="DarkRed"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="Red"/>
                                                     </ColorAnimationUsingKeyFrames>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
                                     </DataTrigger>
 
-                                    <DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill}" Value="Green">
+                                    <!--<DataTrigger Binding="{Binding ElementName=ConnectionIndicator, Path=Fill.Color}" Value="Green">
                                         <DataTrigger.EnterActions>
                                             <BeginStoryboard>
                                                 <Storyboard>
                                                     <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.Fill).(SolidColorBrush.Color)"
-                                                                Duration="0:0:0.3">
-                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.1" Value="LimeGreen"/>
-                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.2" Value="Green"/>
+                                                Duration="0:0:0.9">
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.3" Value="LimeGreen"/>
+                                                        <DiscreteColorKeyFrame KeyTime="0:0:0.8" Value="Green"/>
                                                     </ColorAnimationUsingKeyFrames>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
-                                    </DataTrigger>
+                                    </DataTrigger>-->
                                 </Style.Triggers>
                             </Style>
-                        </Ellipse.Resources>
+                        </Ellipse.Style>
                     </Ellipse>
-
                     <TextBlock x:Name="ConnectionStatusText" 
-                               Text="" 
-                               Margin="5,0,0,0"
-                               VerticalAlignment="Center"
-                               FontSize="12"/>
+               Text="" 
+               Margin="5,0,0,0"
+               VerticalAlignment="Center"
+               FontSize="12"/>
                 </StackPanel>
             </Grid>
         </Grid>

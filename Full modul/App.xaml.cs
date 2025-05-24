@@ -1,9 +1,12 @@
-﻿using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Windows;
-using Full_modul.Properties;
+﻿using Full_modul.Properties;
 using Microsoft.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Xml;
+using System.Windows;
 
 namespace Full_modul
 {
@@ -15,10 +18,37 @@ namespace Full_modul
         private const string ReportsFolderName = "Отчёты";
         private const string CalculatorFolderName = "Калькулятор";
         private const string ConditionsFolderName = "Условия";
+        private const string AppMutexName = "Global\\Full_modul_HR_Calculator_Mutex";
+
+        private static Mutex _appMutex;
         public static DateTime StartTime { get; private set; }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
         protected override void OnStartup(StartupEventArgs e)
         {
+            bool createdNew;
+            _appMutex = new Mutex(true, AppMutexName, out createdNew);
+
+            if (!createdNew)
+            {
+                Process current = Process.GetCurrentProcess();
+                foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+                {
+                    if (process.Id != current.Id)
+                    {
+                        SetForegroundWindow(process.MainWindowHandle);
+                        break;
+                    }
+                }
+
+                Current.Shutdown();
+                return;
+            }
+
             StartTime = DateTime.Now;
+
             if (string.IsNullOrEmpty(Settings.Default.ConnectionString))
             {
                 string rawConnection = BuildConnectionString(
@@ -40,7 +70,7 @@ namespace Full_modul
             Settings.Default.ConnectionString = SecurityHelper.Encrypt(builder.ToString());
             Settings.Default.Save();
 
-            DatabaseConnection.Instance.Initialize();
+            DatabaseConnection.Instance.InitializeAsync();
             base.OnStartup(e);
             CreateReportFolders();
 
@@ -72,14 +102,19 @@ namespace Full_modul
 
         protected override void OnExit(ExitEventArgs e)
         {
-            Settings.Default.Username = string.Empty;
-            Settings.Default.Password = string.Empty;
-            Settings.Default.RememberMe = false;
-            Settings.Default.Save();
+            UserInfo.ClearTempData();
             DatabaseConnection.Instance.CloseConnection();
+            if (_appMutex != null)
+            {
+                _appMutex.ReleaseMutex();
+                _appMutex.Dispose();
+            }
+
+            KillAllProcesses();
 
             base.OnExit(e);
         }
+
         private void CreateReportFolders()
         {
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -94,6 +129,25 @@ namespace Full_modul
                 Directory.CreateDirectory(conditionsFolderPath);
 
                 MessageBox.Show("При первом запуске программы созданы папки \"Отчёты\\Калькулятор\", \"Отчёты\\Условия\".", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void KillAllProcesses()
+        {
+            try
+            {
+                Process current = Process.GetCurrentProcess();
+                foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+                {
+                    if (process.Id != current.Id)
+                    {
+                        process.Kill();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка при завершении процессов: {ex.Message}");
             }
         }
     }

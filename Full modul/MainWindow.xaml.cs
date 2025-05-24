@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Path = System.IO.Path;
 
 namespace Full_modul
@@ -25,128 +26,273 @@ namespace Full_modul
         private Enterprise_card enterprise_Card;
         private SaveFile saveFile;
         private SaveFileWindowChoise saveFileWindowChoise;
+        private DispatcherTimer _connectionTimer;
+        private bool _isTimerInitialized;
+        private List<WeakReference<BaseWindow>> _childWindows = new();
 
         public MainWindow()
         {
             InitializeComponent();
             this.Icon = new BitmapImage(new Uri("pack://application:,,,/Images/HR.ico"));
             this.Closing += MainWindow_Closing;
-            LoadUserDataAsync();
-            // Устанавливаем начальный статус
-            UpdateUserStatus(GetOfflineStatus());
+
+            UpdateUserStatus("Загрузка...");
             InitializeConnectionStatus();
         }
-
-        private string GetOfflineStatus()
-        {
-            return UserInfo.username == "admin"
-                ? "Администратор (оффлайн режим)"
-                : "Оффлайн режим";
-        }
-
-        private async Task LoadUserDataAsync()
-        {
-            string query = @"SELECT REPLACE(LTRIM(RTRIM(COALESCE(lastname_hr, '') + ' ' + 
-            COALESCE(name_hr, '') + ' ' + COALESCE(midname_hr, ''))), '  ', ' ') 
-            AS FullName FROM [calculator].[dbo].[hr] WHERE login_hr = @login";
-
-            try
-            {
-                if (!IsConnected)
-                {
-                    UpdateUserStatus(GetOfflineStatus());
-                    return;
-                }
-
-                string fullName = await Task.Run(() =>
-                    DatabaseConnection.Instance.ExecuteScalar<string>(
-                        query,
-                        new SqlParameter("@login", UserInfo.username)));
-
-                UpdateUserStatus(!string.IsNullOrEmpty(fullName) ? fullName.Trim() : "Администратор");
-            }
-            catch
-            {
-                if (IsConnected)
-                {
-                    UpdateUserStatus("Не удалось загрузить данные");
-                }
-            }
-        }
-
-        protected override async Task InitializeConnectionElementsAsync()
-        {
-            await base.InitializeConnectionElementsAsync();
-            if (IsConnected)
-            {
-                await LoadUserDataAsync();
-            }
-        }
-
         private void InitializeConnectionStatus()
         {
             Dispatcher.Invoke(() =>
             {
-                if (FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                if (FindVisualChild<Ellipse>("ConnectionIndicator") is Ellipse indicator &&
+                FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
                 {
                     statusText.Text = "Проверка подключения...";
+                    indicator.Fill = Brushes.Gray;
                 }
             });
         }
 
-        private void UpdateUserStatus(string status)
+        private async Task InitializeAsync()
+        {
+            await InitializeConnectionElementsAsync();
+            await LoadUserDataAsync();
+        }
+
+        public void InitializeWithConnectionState(bool initialState)
+        {
+            this.IsConnected = initialState;
+            _connectionInitialized = true;
+            Dispatcher.InvokeAsync(() => UpdateFullStatus());
+        }
+
+        private void InitializeConnectionTimer()
+        {
+            if (_connectionTimer == null)
+            {
+                _connectionTimer = new DispatcherTimer(DispatcherPriority.Background)
+                {
+                    Interval = TimeSpan.FromSeconds(5)
+                };
+
+                _connectionTimer.Tick += ConnectionTimer_Tick;
+            }
+
+            if (!_isTimerInitialized)
+            {
+                _connectionTimer.Start();
+                _isTimerInitialized = true;
+            }
+        }
+
+        private async void ConnectionTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                _connectionTimer.Stop();
+
+                bool newState = await ConnectionCoordinator.GetConnectionStateAsync()
+                    .ConfigureAwait(false);
+
+                if (newState != IsConnected)
+                {
+                    IsConnected = newState;
+                    await Dispatcher.InvokeAsync(async () =>
+                    {
+                        await UpdateFullStatus();
+                        NotifyAllChildren();
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Ошибка в ConnectionTimer_Tick: {ex.Message}");
+            }
+            finally
+            {
+                if (_connectionTimer != null)
+                {
+                    bool isWindowLoaded = false;
+                    Dispatcher.Invoke(() => isWindowLoaded = this.IsLoaded);
+
+                    if (_isTimerInitialized && isWindowLoaded)
+                    {
+                        _connectionTimer.Start();
+                    }
+                }
+            }
+        }
+
+        private void NotifyAllChildren()
+        {
+            foreach (var windowRef in _childWindows.ToList())
+            {
+                if (windowRef.TryGetTarget(out var window))
+                {
+                    window.SetConnectionState(IsConnected);
+                }
+            }
+        }
+
+        public void RegisterChildWindow(BaseWindow window)
+        {
+            _childWindows.Add(new WeakReference<BaseWindow>(window));
+
+            window.SetConnectionState(IsConnected);
+        }
+
+        protected override async Task InitializeConnectionElementsAsync()
         {
             Dispatcher.Invoke(() =>
             {
-                user.Text = status;
+                if (FindVisualChild<Ellipse>("ConnectionIndicator") is Ellipse indicator &&
+                    FindVisualChild<TextBlock>("ConnectionStatusText") is TextBlock statusText)
+                {
+                    statusText.Text = "Загрузка...";
+                    indicator.Fill = Brushes.Gray;
+                }
+
+                UpdateUserStatus(UserInfo.username == "admin"
+                    ? "Администратор (проверка подключения...)"
+                    : "Проверка подключения...");
             });
+
+            if (!_connectionInitialized)
+            {
+                IsConnected = await ConnectionCoordinator.GetConnectionStateAsync();
+                await UpdateFullStatus();
+                _connectionInitialized = true;
+            }
         }
 
         protected override async void OnConnectionStateChanged(bool isConnected)
         {
-            base.OnConnectionStateChanged(isConnected);
-
-            if (isConnected)
+            try
             {
-                await LoadUserDataAsync();
+                base.OnConnectionStateChanged(isConnected);
             }
-            else
+            catch (Exception ex)
             {
-                UpdateUserStatus(GetOfflineStatus());
+                AppLogger.LogError($"Ошибка в OnConnectionStateChanged: {ex.Message}");
             }
         }
 
-        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        public async Task ForceConnectionCheck()
         {
-            MessageBoxResult result = MessageBox.Show("Вы завершили работу с программой? Если вы сейчас продолжите, то все несохраненные данные будут удалены!",
+            ConnectionCoordinator.ResetCache();
+            await CheckConnectionAsync(true);
+        }
+
+        private void ConnectionStatus_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                _ = ForceConnectionCheck();
+            }
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e) //обрати внимание
+        {
+            var openDocuments = CheckForOpenDocuments(TempFileManager.TempFolder);
+            if (openDocuments.Any())
+            {
+                string docList = string.Join("\n", openDocuments.Take(3));
+                if (openDocuments.Count > 3) docList += "\n...";
+
+                var result = MessageBox.Show(
+                    $"Обнаружены открытые документы:\n{docList}\n\nЗакрыть их перед выходом?",
+                    "Открытые документы",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    CloseAllDocuments(openDocuments);
+                }
+            }
+
+            MessageBoxResult exitResult = MessageBox.Show("Вы завершили работу с программой? Если вы сейчас продолжите, то все несохраненные данные будут удалены!",
                                                        "Подтверждение выхода",
                                                        MessageBoxButton.YesNo,
                                                        MessageBoxImage.Warning);
 
-            if (result == MessageBoxResult.No)
+            if (exitResult == MessageBoxResult.No)
             {
                 e.Cancel = true;
             }
             else
             {
-                if (calculatorWindow != null)
+                if (_connectionTimer != null)
                 {
-                    calculatorWindow.Close();
+                    _connectionTimer.Stop();
+                    _connectionTimer.Tick -= ConnectionTimer_Tick;
+                    _connectionTimer = null;
                 }
-                if (organizAndLegalConditWindow != null)
-                {
-                    organizAndLegalConditWindow.Close();
-                }
-                if (saveFile != null)
-                {
-                    saveFile.Close();
-                }
-                if (saveFileWindowChoise != null)
-                {
-                    saveFileWindowChoise.Close();
-                }
+                _isTimerInitialized = false;
+
+                if (calculatorWindow != null) calculatorWindow.Close();
+                if (organizAndLegalConditWindow != null) organizAndLegalConditWindow.Close();
+                if (saveFile != null) saveFile.Close();
+                if (saveFileWindowChoise != null) saveFileWindowChoise.Close();
+
+                TempFileManager.CleanTempFiles();
+
                 AutorizationWindow AutorizationWindow = new AutorizationWindow();
                 AutorizationWindow.Show();
+
+                base.OnClosed(e);
+            }
+        }
+        private List<string> CheckForOpenDocuments(string tempFolder)
+        {
+            var openDocs = new List<string>();
+            try
+            {
+                foreach (var file in Directory.GetFiles(tempFolder))
+                {
+                    try
+                    {
+                        using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
+                        {
+                            // Файл можно открыть - значит не используется
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Файл занят - значит открыт
+                        openDocs.Add(Path.GetFileName(file));
+                    }
+                }
+            }
+            catch { /* Обработка ошибок доступа */ }
+            return openDocs;
+        }
+
+        private void CloseAllDocuments(List<string> documents)
+        {
+            foreach (var doc in documents)
+            {
+                try
+                {
+                    var processes = Process.GetProcessesByName("AcroRd32")
+                        .Where(p => !string.IsNullOrEmpty(p.MainWindowTitle)
+                        && p.MainWindowTitle.Contains(Path.GetFileNameWithoutExtension(doc)));
+
+                    foreach (var process in processes)
+                    {
+                        process.CloseMainWindow();
+                        if (!process.WaitForExit(2000)) // Даем 2 секунды на закрытие
+                        {
+                            process.Kill();
+                        }
+                    }
+                }
+                catch { /* Игнорируем ошибки */ }
             }
         }
 
@@ -216,6 +362,8 @@ namespace Full_modul
             }
         }
 
+        private Dictionary<string, object> _childWindowStates = new Dictionary<string, object>();
+
         private void OpenCalculator_Click(object sender, RoutedEventArgs e)
         {
 
@@ -226,7 +374,17 @@ namespace Full_modul
                     return;
                 }
                 calculatorWindow = new CalculatorWindow();
+
+                if (_childWindowStates.TryGetValue("CalculatorWindow", out var state))
+                {
+                    calculatorWindow.RestoreState(state);
+                } else
+                {
+                    calculatorWindow._isFirstRun = true;
+                }
+                
                 calculatorWindow.Closed += CalculatorWindow_Closed;
+                RegisterChildWindow(calculatorWindow);
                 calculatorWindow.Show();
                 this.WindowState = WindowState.Minimized;
             }
@@ -245,6 +403,10 @@ namespace Full_modul
 
         private void CalculatorWindow_Closed(object sender, EventArgs e)
         {
+            if (calculatorWindow != null)
+            {
+                _childWindowStates["CalculatorWindow"] = calculatorWindow.SaveState();
+            }
             this.Activate();
             this.WindowState = WindowState.Normal;
             calculatorWindow = null;
@@ -254,11 +416,17 @@ namespace Full_modul
         {
             if (organizAndLegalConditWindow == null || !organizAndLegalConditWindow.IsVisible)
             {
-                if (!IsConnected && !EnsureDatabaseConnection(silent: false))
-                {
-                    return;
-                }
+                if (!IsConnected && !EnsureDatabaseConnection(silent: false)) return;
+
                 organizAndLegalConditWindow = new OrganizAndLegalConditWindow();
+
+                RegisterChildWindow(organizAndLegalConditWindow);
+
+                if (_childWindowStates.TryGetValue("OrganizAndLegalConditWindow", out var state))
+                {
+                    organizAndLegalConditWindow.RestoreState(state);
+                }
+
                 organizAndLegalConditWindow.Closed += ConditWindow_Closed;
                 organizAndLegalConditWindow.Show();
                 this.WindowState = WindowState.Minimized;
@@ -266,18 +434,18 @@ namespace Full_modul
             else
             {
                 if (organizAndLegalConditWindow.WindowState == WindowState.Minimized)
-                {
                     organizAndLegalConditWindow.WindowState = WindowState.Normal;
-                }
                 else
-                {
                     organizAndLegalConditWindow.Activate();
-                }
             }
         }
 
         private void ConditWindow_Closed(object sender, EventArgs e)
         {
+            if (organizAndLegalConditWindow != null)
+            {
+                _childWindowStates["OrganizAndLegalConditWindow"] = organizAndLegalConditWindow.SaveState();
+            }
             this.Activate();
             this.WindowState = WindowState.Normal;
             organizAndLegalConditWindow = null;

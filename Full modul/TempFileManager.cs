@@ -8,7 +8,7 @@ namespace Full_modul
 {
     class TempFileManager
     {
-        private static readonly string TempFolder;
+        public static readonly string TempFolder;
 
         private static readonly ConcurrentDictionary<string, string> _fileCache = new ConcurrentDictionary<string, string>();
 
@@ -34,7 +34,6 @@ namespace Full_modul
 
         public static string GetTempFilePath(string serverFilePath)
         {
-            // Генерируем хеш от оригинального пути для постоянного имени
             string fileHash = ComputeFileHash(serverFilePath);
             string extension = Path.GetExtension(serverFilePath);
             string tempFileName = $"{fileHash}{extension}";

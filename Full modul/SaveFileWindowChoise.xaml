@@ -67,16 +67,15 @@
          MouseLeftButtonDown="Border_MouseLeftButtonDown" VerticalAlignment="Top">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="40"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="40"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Center"
-MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
+                <Image Source="Images/HR.ico" Width="35" VerticalAlignment="Center" HorizontalAlignment="Left"
+MouseRightButtonDown="Image_MouseRightButtonDown" Margin="5,0,0,0">
                     <Image.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Свернуть" Click="MinimizeButton_Click"/>
                             <MenuItem Header="Закрыть" Click="CloseButton_Click"/>
                         </ContextMenu>
                     </Image.ContextMenu>
@@ -87,28 +86,27 @@ MouseRightButtonDown="Image_MouseRightButtonDown" Margin="8,0,0,0">
                     Margin="17,0,0,0" FontFamily="Ubuntu" FontSize="16" FontWeight="Bold"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource MinimizeButtonStyle}" Click="MinimizeButton_Click">
-                        <TextBlock Text="🗕"/>
-                    </Button>
                     <Button Style="{StaticResource CloseButtonStyle}" Click="CloseButton_Click">
-                        <TextBlock Text="X"/>
+                        <TextBlock Text="X" Margin="0,0,0,2"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
         <Grid Margin="0,30,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="11*"/>
+                <RowDefinition Height="6*"/>
                 <RowDefinition Height="4*"/>
+                <RowDefinition Height="6*"/>
                 <RowDefinition Height="5*"/>
             </Grid.RowDefinitions>
             <TextBlock x:Name="MessageTextBlock" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
-                       TextWrapping="Wrap" Grid.Row="0" FontSize="14" />
+                       TextWrapping="Wrap" Grid.Row="0" FontSize="16" FontWeight="DemiBold" />
             <TextBox x:Name="FileNameTextBox" Margin="10,0,10,0" Height="25" Grid.Row="1"
                      FontSize="15" VerticalAlignment="Center" Padding="1,4" FontFamily="Ubuntu" KeyDown="TextBox_KeyDown" />
-
-            <Button Content="Сохранить" Margin="10,0,10,12" Click="SaveButton_Click" Grid.Row="2"
-                    FontSize="18" FontFamily="Ubuntu" FontWeight="Medium">
+            <TextBlock Text="Файл будет сохранён в папку данного приложения. Для её открытия нажмите 'Отчёты'" Margin="10,0,10,0" Height="Auto" VerticalAlignment="Center"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" Grid.Row="2" FontSize="13" FontStyle="Italic" />
+            <Button Content="Сохранить" Margin="0,0,0,5" Click="SaveButton_Click" Grid.Row="3"
+                    FontSize="18" FontFamily="Ubuntu" FontWeight="Medium" VerticalAlignment="Center">
 
                 <Button.Style>
                     <Style TargetType="Button">

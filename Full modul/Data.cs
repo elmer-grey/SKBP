@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Full_modul.Properties;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,28 @@ namespace Full_modul
 
     public static class UserInfo
     {
-        public static string username = "";
-        public static string password = "";
+        private static string _username = "";
+        private static string _password = "";
+
+        public static string username
+        {
+            get => _username;
+            set => _username = value ?? "";
+        }
+
+        public static string password
+        {
+            get => _password;
+            set => _password = value ?? "";
+        }
+
+        public static void ClearTempData()
+        {
+            if (!Settings.Default.RememberMe)
+            {
+                _username = "";
+                _password = "";
+            }
+        }
     }
 }

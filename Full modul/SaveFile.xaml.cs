@@ -22,6 +22,15 @@ namespace Full_modul
         public SaveFile()
         {
             InitializeComponent();
+            ResetCheckboxes();
+        }
+
+        private void ResetCheckboxes()
+        {
+            CheckBox0.IsChecked = CheckBox1.IsChecked =
+            CheckBox2.IsChecked = CheckBox3.IsChecked = false;
+
+            Data.Check0 = Data.Check1 = Data.Check2 = Data.Check3 = false;
         }
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -32,26 +41,39 @@ namespace Full_modul
             }
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
         private void AcceptButton_Click(object sender, EventArgs e)
         {
+            if (!(CheckBox0.IsChecked == true || CheckBox1.IsChecked == true ||
+                  CheckBox2.IsChecked == true || CheckBox3.IsChecked == true))
+            {
+                var errorDialog = new CustomMessage(
+                    "Не выбрано ни одного вычисления для сохранения. Пожалуйста, сделайте выбор.",
+                    "Ошибка",
+                    new List<string> { "OK" });
+                errorDialog.Owner = this;
+                errorDialog.ShowDialog();
+                return;
+            }
+
             Data.Check0 = CheckBox0.IsChecked == true;
             Data.Check1 = CheckBox1.IsChecked == true;
             Data.Check2 = CheckBox2.IsChecked == true;
             Data.Check3 = CheckBox3.IsChecked == true;
+
+            this.DialogResult = true;
             this.Close();
         }
 
         private void ReturnButton_Click(object sender, EventArgs e)
         {
-            CheckBox0.IsChecked = false;
-            CheckBox1.IsChecked = false;
-            CheckBox2.IsChecked = false;
-            CheckBox3.IsChecked = false;
+            var infoDialog = new CustomMessage(
+                "Сохранение файла было отменено.",
+                "Информация",
+                new List<string> { "OK" });
+            infoDialog.Owner = this;
+            infoDialog.ShowDialog();
+
+            this.DialogResult = false;
             this.Close();
         }
     }
