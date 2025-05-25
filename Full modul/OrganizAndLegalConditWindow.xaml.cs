@@ -442,7 +442,7 @@ namespace Full_modul
                 {
                     Name = $"DocIcon{item.Id}",
                     Height = 30,
-                    Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png")),
+                    Source = new BitmapImage(new Uri("pack://application:,,,/Images/File.png")),
                     Visibility = Visibility.Collapsed,
                     Tag = item.Id,
                     Cursor = Cursors.Hand,
@@ -693,7 +693,7 @@ namespace Full_modul
                 if (fileExists)
                 {
                     StopLoadingGif(docIcon);
-                    docIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png"));
+                    docIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Images/File.png"));
                     docIcon.Opacity = 1;
                     document.HasDocument = true;
                 }
@@ -731,7 +731,7 @@ namespace Full_modul
             catch (Exception ex)
             {
                 AppLogger.LogError($"Ошибка загрузки GIF: {ex.Message}");
-                image.Source = new BitmapImage(new Uri("pack://application:,,,/Images/Reports.png"));
+                image.Source = new BitmapImage(new Uri("pack://application:,,,/Images/File.png"));
             }
         }
 
